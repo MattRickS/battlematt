@@ -15,27 +15,13 @@ struct Vertex
     glm::vec2 TexCoords;
 };
 
-enum TextureType
-{
-    diffuse,
-    specular
-};
-
-struct TextureID
-{
-    Texture &texture;
-    TextureType type;
-};
-
 class Mesh
 {
 public:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<TextureID> textures;
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureID> textures);
     void Draw(Shader &shader);
 
 private:
@@ -44,12 +30,6 @@ private:
 };
 
 
-
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureID> textures) : vertices(vertices), indices(indices), textures(textures)
-{
-    setupMesh();
-}
-
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) : vertices(vertices), indices(indices)
 {
     setupMesh();
@@ -57,26 +37,6 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) : ve
 
 void Mesh::Draw(Shader &shader)
 {
-    // TODO: Assess alternative options
-    // Bind textures by assuming shader sampler naming convention of material.texture_{type}{N}
-    unsigned int diffuseNum = 1;
-    unsigned int specularNum = 1;
-
-    for (unsigned int i = 0; i < textures.size(); i++)
-    {
-        glActiveTexture(GL_TEXTURE0 + i);
-        std::string name;
-        TextureType texureType = textures[i].type;
-        if (texureType == TextureType::diffuse)
-            name = "material.diffuse" + std::to_string(diffuseNum++);
-        else if (texureType == TextureType::specular)
-            name = "material.specular" + std::to_string(specularNum++);
-        else
-            throw "Unknown texture type";
-        
-        shader.setInt(name.c_str(), i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].texture.ID);
-    }
     glActiveTexture(GL_TEXTURE0);
 
     // Draw mesh

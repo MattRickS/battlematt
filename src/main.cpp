@@ -14,6 +14,8 @@
 
 unsigned int windowWidth = 1280;
 unsigned int windowHeight = 720;
+bool firstMouse = true;
+float lastMouseX, lastMouseY;
 float deltaTime, lastFrame = 0.0f;
 Camera mainCamera = Camera();
 
@@ -22,11 +24,30 @@ Camera mainCamera = Camera();
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+    // TODO: Reposition camera
     glViewport(0, 0, width, height);
 }
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse)
+        return;
 
-// void mouse_callback(GLFWwindow* window, double xpos, double ypos) {}
+    if (firstMouse)
+    {
+        lastMouseX = xpos;
+        lastMouseX = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastMouseX;
+    float yoffset = lastMouseY - ypos; // reversed since y-coordinates range from bottom to top
+    lastMouseX = xpos;
+    lastMouseY = ypos;
+
+    mainCamera.ProcessMouseMovement(xoffset, yoffset);
+}
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
@@ -209,10 +230,14 @@ int main(int, char**)
     ImVec4 cube_color = ImVec4(1.0f, 0.5f, 0.2f, 1.0f);
 
     // Scene
+    stbi_set_flip_vertically_on_load(true);
+    Texture map = Texture("resources/images/CaveMap.jpg");
     Shader basicShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Simple.fs");
+    glBindTexture(GL_TEXTURE_2D, map.ID);
     basicShader.use();
-    basicShader.setFloat4("color", cube_color.x, cube_color.y, cube_color.z, cube_color.w);
-    Cube cube;
+    basicShader.setInt("diffuse", 0);
+    // basicShader.setFloat4("color", cube_color.x, cube_color.y, cube_color.z, cube_color.w);
+    Quad quad;
     glm::mat4 view;
     glm::mat4 projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
     glm::mat4 model = glm::mat4(1.0f);
@@ -284,7 +309,8 @@ int main(int, char**)
         basicShader.setMat4("model", model);
         basicShader.setMat4("view", view);
         basicShader.setMat4("projection", projection);
-        cube.Draw(basicShader);
+        map.activate(GL_TEXTURE0);
+        quad.Draw(basicShader);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

@@ -31,7 +31,7 @@ public:
 
             glBindTexture(GL_TEXTURE_2D, ID);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-            // TODO: glGenerateMipmap(GL_TEXTURE_2D);
+            glGenerateMipmap(GL_TEXTURE_2D);
 
             // set the texture wrapping parameters
             // TODO: Might want different modes, eg, GL_CLAMP_TO_EDGE
