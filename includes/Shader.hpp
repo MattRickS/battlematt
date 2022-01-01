@@ -49,7 +49,7 @@ std::string LoadFile(const char* filename)
 		stream.close();
 		code = sstr.str();
 	}
-	catch(std::ifstream::failure e)
+	catch(std::ifstream::failure const&)
 	{
 		std::cout << "Unable to open " << filename << std::endl;
 	}
@@ -118,7 +118,7 @@ void Shader::use()
 // Utility uniform functions
 GLuint Shader::getLocation(const std::string& name) const
 {
-	GLuint location = glGetUniformLocation(ID, name.c_str());
+	int location = glGetUniformLocation(ID, name.c_str());
 	if (location == -1)
 	{
 		std::cout << "Shader uniform not found: " << name << std::endl;

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <stdio.h>
+#include <chrono>
+#include <thread>
 
 #include <glad/glad.h>
 #include "imgui.h"
@@ -16,8 +18,9 @@ unsigned int windowWidth = 1280;
 unsigned int windowHeight = 720;
 bool firstMouse = true;
 float lastMouseX, lastMouseY;
+bool middleMouseHeld = false;
 float deltaTime, lastFrame = 0.0f;
-Camera mainCamera = Camera();
+Camera mainCamera = Camera(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), true, 10.0f, windowWidth / windowHeight);
 
 // =============================================================================
 // Callbacks
@@ -46,14 +49,26 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastMouseX = xpos;
     lastMouseY = ypos;
 
-    mainCamera.ProcessMouseMovement(xoffset, yoffset);
+    if (middleMouseHeld)
+        mainCamera.Pan(-xoffset / windowWidth, -yoffset / windowHeight);
+    // else
+    //     mainCamera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+        middleMouseHeld = action == GLFW_PRESS;
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse)
+    {
+        std::cout << "Captured" << std::endl;
         return;
+    }
 
     mainCamera.ProcessMouseScroll(yoffset);
 }
@@ -75,7 +90,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void setCallbacks(GLFWwindow* window)
 {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    // glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, key_callback);
 }
@@ -238,9 +254,11 @@ int main(int, char**)
     basicShader.setInt("diffuse", 0);
     // basicShader.setFloat4("color", cube_color.x, cube_color.y, cube_color.z, cube_color.w);
     Quad quad;
-    glm::mat4 view;
-    glm::mat4 projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
+    glm::mat4 view, projection;
+    // glm::mat4 projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
+    // glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
     glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
 
     // Main loop
     while (!glfwWindowShouldClose(glGuard.window))
@@ -304,6 +322,7 @@ int main(int, char**)
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Draw Scene
+        projection = mainCamera.projectionMatrix;
         view = mainCamera.GetViewMatrix();
         basicShader.use();
         basicShader.setMat4("model", model);
@@ -315,6 +334,9 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(glGuard.window);
+
+        // Lazy hack to limit frame rate for now
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     return 0;

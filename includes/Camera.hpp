@@ -23,7 +23,7 @@ const float YAW         = -90.0f;
 const float PITCH       =  0.0f;
 const float SPEED       =  2.5f;
 const float SENSITIVITY =  0.1f;
-const float ZOOM        =  45.0f;
+const float FOCAL       =  45.0f;
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -35,38 +35,56 @@ public:
     glm::vec3 Front;
     glm::vec3 Up;
     glm::vec3 Right;
-    glm::vec3 WorldUp;
+    glm::vec3 WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
     // euler Angles
-    float Yaw;
-    float Pitch;
+    float Yaw = YAW;
+    float Pitch = PITCH;
     // camera options
-    float MovementSpeed;
-    float MouseSensitivity;
-    float Zoom;
+    float MovementSpeed = SPEED;
+    float MouseSensitivity = SENSITIVITY;
+    float Focal = FOCAL;
 
-    // constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    float hAperture = 1.77f;
+    float vAperture = 1.0f;
+    float near = 0.1f;
+    float far = 100.0f;
+
+    bool isOrtho = false;
+    glm::mat4 projectionMatrix;
+
+    Camera(
+        glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3 direction = glm::vec3(0.0f, .0f, -1.0f),
+        bool isOrtho = false,
+        float focal = 35.0f,
+        float haperture = 1.77f,
+        float vaperture = 1.0f,
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f)
+    )
+        : Front(direction), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Focal(focal), isOrtho(isOrtho)
     {
         Position = position;
         WorldUp = up;
-        Yaw = yaw;
-        Pitch = pitch;
+
+        // Convert forward direction to euler angles
+        float pitchRadians = asin(Front.y);
+        float yawRadians = acos(Front.x / cos(pitchRadians));
+        Yaw = glm::degrees(yawRadians);
+        Pitch = glm::degrees(pitchRadians);
+
         updateCameraVectors();
-    }
-    // constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
-    {
-        Position = glm::vec3(posX, posY, posZ);
-        WorldUp = glm::vec3(upX, upY, upZ);
-        Yaw = yaw;
-        Pitch = pitch;
-        updateCameraVectors();
+        updateProjectionMatrix();
     }
 
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix()
     {
         return glm::lookAt(Position, Position + Front, Up);
+    }
+
+    void Pan(float xoffset, float yoffset)
+    {
+        Position = glm::vec3(Position.x + xoffset, Position.y, Position.z + yoffset);
     }
 
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
@@ -112,11 +130,12 @@ public:
     // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void ProcessMouseScroll(float yoffset)
     {
-        Zoom -= (float)yoffset;
-        if (Zoom < 1.0f)
-            Zoom = 1.0f;
-        if (Zoom > 45.0f)
-            Zoom = 45.0f; 
+        Focal -= (float)yoffset;
+        if (Focal < 1.0f)
+            Focal = 1.0f;
+        if (Focal > 45.0f)
+            Focal = 45.0f;
+        updateProjectionMatrix();
     }
 
 private:
@@ -128,10 +147,19 @@ private:
         front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
         front.y = sin(glm::radians(Pitch));
         front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+
         Front = glm::normalize(front);
         // also re-calculate the Right and Up vector
         Right = glm::normalize(glm::cross(Front, WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
         Up    = glm::normalize(glm::cross(Right, Front));
+    }
+
+    void updateProjectionMatrix()
+    {
+        if (isOrtho)
+            projectionMatrix = glm::ortho(-hAperture * Focal, hAperture * Focal, -vAperture * Focal, vAperture * Focal, near, far);
+        else
+            projectionMatrix = glm::perspective(2 * glm::atan(hAperture / Focal), hAperture/vAperture, near, far);
     }
 };
 #endif
