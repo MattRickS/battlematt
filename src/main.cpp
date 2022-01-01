@@ -206,14 +206,16 @@ int main(int, char**)
     // Our state
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 cube_color = ImVec4(1.0f, 0.5f, 0.2f, 1.0f);
 
     // Scene
+    Shader basicShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Simple.fs");
+    basicShader.use();
+    basicShader.setFloat4("color", cube_color.x, cube_color.y, cube_color.z, cube_color.w);
     Cube cube;
     glm::mat4 view;
     glm::mat4 projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
     glm::mat4 model = glm::mat4(1.0f);
-    
-    Shader basicShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Simple.fs");
 
     // Main loop
     while (!glfwWindowShouldClose(glGuard.window))
@@ -253,6 +255,9 @@ int main(int, char**)
                 counter++;
             ImGui::SameLine();
             ImGui::Text("counter = %d", counter);
+
+            if (ImGui::ColorEdit3("Cube Color", (float*)&cube_color))
+                basicShader.setFloat4("color", cube_color.x, cube_color.y, cube_color.z, cube_color.w);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
