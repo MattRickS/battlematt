@@ -20,7 +20,7 @@ bool firstMouse = true;
 float lastMouseX, lastMouseY;
 bool middleMouseHeld = false;
 float deltaTime, lastFrame = 0.0f;
-Camera mainCamera = Camera(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), true, 10.0f, windowWidth / windowHeight);
+Camera mainCamera = Camera(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), true, 1.0f, windowWidth / windowHeight);
 
 // =============================================================================
 // Callbacks
@@ -247,18 +247,36 @@ int main(int, char**)
 
     // Scene
     stbi_set_flip_vertically_on_load(true);
+
     Texture map = Texture("resources/images/CaveMap.jpg");
-    Shader basicShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Simple.fs");
+    Shader imageShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Simple.fs");
+    imageShader.use();
     glBindTexture(GL_TEXTURE_2D, map.ID);
-    basicShader.use();
-    basicShader.setInt("diffuse", 0);
-    // basicShader.setFloat4("color", cube_color.x, cube_color.y, cube_color.z, cube_color.w);
+    imageShader.setInt("diffuse", 0);
+
+    Texture dragon = Texture("resources/images/Dragon.jpeg");
+    Shader tokenShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Token.fs");
+    tokenShader.use();
+    glBindTexture(GL_TEXTURE_2D, dragon.ID);
+    tokenShader.setInt("diffuse", 0);
+    tokenShader.setFloat4("borderColor", 1.0f, 0.0f, 0.0f, 1.0f);
+
     Quad quad;
     glm::mat4 view, projection;
     // glm::mat4 projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
     // glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+
+    // A Token's mesh is always a Quad
+    // A Token's UVs should be updated to centralise the image where desired
+    glm::mat4 tokenModel = glm::mat4(1.0f);
+    tokenModel = glm::rotate(tokenModel, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+    tokenModel = glm::scale(tokenModel, glm::vec3(0.2f, 0.2f, 1.0f));
+    tokenModel = glm::translate(tokenModel, glm::vec3(0.0f, 0.1f, 0.0f));
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable( GL_BLEND );
 
     // Main loop
     while (!glfwWindowShouldClose(glGuard.window))
@@ -300,7 +318,7 @@ int main(int, char**)
             ImGui::Text("counter = %d", counter);
 
             if (ImGui::ColorEdit3("Cube Color", (float*)&cube_color))
-                basicShader.setFloat4("color", cube_color.x, cube_color.y, cube_color.z, cube_color.w);
+                imageShader.setFloat4("color", cube_color.x, cube_color.y, cube_color.z, cube_color.w);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
@@ -324,12 +342,19 @@ int main(int, char**)
         // Draw Scene
         projection = mainCamera.projectionMatrix;
         view = mainCamera.GetViewMatrix();
-        basicShader.use();
-        basicShader.setMat4("model", model);
-        basicShader.setMat4("view", view);
-        basicShader.setMat4("projection", projection);
+        imageShader.use();
+        imageShader.setMat4("model", model);
+        imageShader.setMat4("view", view);
+        imageShader.setMat4("projection", projection);
         map.activate(GL_TEXTURE0);
-        quad.Draw(basicShader);
+        quad.Draw(imageShader);
+
+        tokenShader.use();
+        tokenShader.setMat4("model", tokenModel);
+        tokenShader.setMat4("view", view);
+        tokenShader.setMat4("projection", projection);
+        dragon.activate(GL_TEXTURE0);
+        quad.Draw(tokenShader);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
