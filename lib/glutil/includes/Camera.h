@@ -65,6 +65,7 @@ public:
         float vaperture = 1.0f,
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f)
     );
+    void Pan(glm::vec2 offset);
     void Pan(float xoffset, float yoffset);
     void ProcessKeyboard(Camera_Movement direction, float deltaTime);
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);

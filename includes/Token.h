@@ -20,6 +20,8 @@ public:
     void SetUVOffset(glm::vec2 offset);
     void SetSize(float size);
     void SetPos(glm::vec3 pos);
+    void Move(glm::vec2 offset);
+    void Move(float xoffset, float yoffset);
     const glm::mat4* GetModel() const;
     void Draw(Shader &shader);
     bool Contains(glm::vec2 pt) const;

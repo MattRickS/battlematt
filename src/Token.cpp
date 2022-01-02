@@ -39,6 +39,17 @@ void Token::SetPos(glm::vec3 pos)
     RebuildModel();
 }
 
+void Token::Move(glm::vec2 offset)
+{
+    Move(offset.x, offset.y);
+}
+
+void Token::Move(float xoffset, float yoffset)
+{
+    m_pos += glm::vec3(xoffset, yoffset, 0);
+    RebuildModel();
+}
+
 const glm::mat4* Token::GetModel() const { return &model; }
 
 void Token::Draw(Shader &shader)

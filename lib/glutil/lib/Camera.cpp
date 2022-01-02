@@ -25,6 +25,12 @@ Camera::Camera(glm::vec3 position, glm::vec3 direction, bool isOrtho, float foca
 }
 
 
+void Camera::Pan(glm::vec2 offset)
+{
+    Pan(offset.x, offset.y);
+}
+
+
 void Camera::Pan(float xoffset, float yoffset)
 {
     Position -= Right * xoffset + Up * yoffset;

@@ -19,8 +19,10 @@ unsigned int windowHeight = 720;
 bool firstMouse = true;
 float lastMouseX, lastMouseY;
 bool middleMouseHeld = false;
+bool leftMouseHeld = false;
 float deltaTime, lastFrame = 0.0f;
 Scene* scene;
+std::vector<Token*> selectedTokens;
 
 glm::vec2 ScreenToWorldPos(float x, float y)
 {
@@ -30,6 +32,14 @@ glm::vec2 ScreenToWorldPos(float x, float y)
     //       Might also need to divide by w at the end, can't remember if that's needed with persp
     glm::vec4 screenSpace = glm::vec4(2 * x / windowWidth - 1, 2 * (1 - y / windowHeight) - 1, 0, 1.0f);
     return glm::vec2(screenSpace * scene->camera->invProjectionMatrix * scene->camera->invViewMatrix);
+}
+
+glm::vec2 ScreenToWorldOffset(float x, float y)
+{
+    return glm::vec2(
+        (x / windowWidth) * (scene->camera->hAperture * 2 * scene->camera->Focal),
+        (y / windowHeight) * (scene->camera->vAperture * 2 * scene->camera->Focal)
+    );
 }
 
 // =============================================================================
@@ -67,7 +77,14 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
     // 1:1 with Orthographic world space
     if (middleMouseHeld)
-        scene->camera->Pan((xoffset / windowWidth) * (scene->camera->hAperture * 2 * scene->camera->Focal), (yoffset / windowHeight) * (scene->camera->vAperture * 2 * scene->camera->Focal));
+        scene->camera->Pan(ScreenToWorldOffset(xoffset, yoffset));
+    else if (leftMouseHeld)
+    {
+        glm::vec2 offset = ScreenToWorldOffset(xoffset, yoffset);
+        for (Token* token : selectedTokens)
+            token->Move(offset);
+    }
+        
     // else
     //     scene->camera->ProcessMouseMovement(xoffset, yoffset);
 }
@@ -76,6 +93,28 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_MIDDLE)
         middleMouseHeld = action == GLFW_PRESS;
+    if (button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        if (action == GLFW_PRESS)
+        {
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            glm::vec2 worldPos = ScreenToWorldPos(xpos, ypos);
+            for (Token& token : scene->tokens)
+            {
+                token.isSelected = token.Contains(worldPos);
+                if (token.isSelected)
+                    selectedTokens.push_back(&token);
+            }
+        }
+        else
+        {
+            for (Token* token : selectedTokens)
+                token->isSelected = false;
+            selectedTokens.clear();
+        }
+        leftMouseHeld = action == GLFW_PRESS;
+    }
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
