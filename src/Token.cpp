@@ -12,14 +12,6 @@ Token::Token(std::string iconPath) : Token(iconPath, std::filesystem::path(iconP
 
 Token::Token(std::string iconPath, std::string name) : Quad(), iconPath(iconPath), name(name), tex(TextureCache::GetTexture(iconPath))
 {
-    // TODO: This isn't working
-    if (tex.width != tex.height)
-    {
-        float xoff = std::max(1.0f, tex.height / (float)tex.width);
-        float yoff = std::max(1.0f, tex.width / (float)tex.height);
-        for (Vertex& vert : vertices)
-            vert.TexCoords = glm::vec2((vert.TexCoords.x - 0.5f) * xoff, (vert.TexCoords.y - 0.5f) * yoff);
-    }
     RebuildModel();
 }
 
