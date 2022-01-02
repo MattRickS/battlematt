@@ -53,8 +53,6 @@ public:
     bool isOrtho = false;
     glm::mat4 projectionMatrix;
     glm::mat4 viewMatrix;
-    glm::mat4 invProjectionMatrix;
-    glm::mat4 invViewMatrix;
 
     Camera(
         glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),

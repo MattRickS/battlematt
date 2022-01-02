@@ -24,14 +24,14 @@ float deltaTime, lastFrame = 0.0f;
 Scene* scene;
 std::vector<Token*> selectedTokens;
 
+
+// Orthographic operations (Matrices aren't working correctly if camera position is changed)
 glm::vec2 ScreenToWorldPos(float x, float y)
 {
-    // TODO: Somehow this isn't working with camera translation... Should be in the view matrix though
-    // Orthographic, so the z-depth doesn't matter
-    // TODO: Should make func check if camera is ortho and use the correct z depth where needed.
-    //       Might also need to divide by w at the end, can't remember if that's needed with persp
-    glm::vec4 screenSpace = glm::vec4(2 * x / windowWidth - 1, 2 * (1 - y / windowHeight) - 1, 0, 1.0f);
-    return glm::vec2(screenSpace * scene->camera->invProjectionMatrix * scene->camera->invViewMatrix);
+    return glm::vec2(
+        scene->camera->Position.x + (2 * x / windowWidth - 1) * (scene->camera->hAperture * scene->camera->Focal),
+        scene->camera->Position.y + (2 * (1 - y / windowHeight) - 1) * (scene->camera->vAperture * scene->camera->Focal)
+    );
 }
 
 glm::vec2 ScreenToWorldOffset(float x, float y)
@@ -75,16 +75,14 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     for (Token& token : scene->tokens)
         token.isHighlighted = token.Contains(worldPos);
 
-    // 1:1 with Orthographic world space
     if (middleMouseHeld)
         scene->camera->Pan(ScreenToWorldOffset(xoffset, yoffset));
-    else if (leftMouseHeld)
+    else if (leftMouseHeld && selectedTokens.size() > 0)
     {
         glm::vec2 offset = ScreenToWorldOffset(xoffset, yoffset);
         for (Token* token : selectedTokens)
             token->Move(offset);
     }
-        
     // else
     //     scene->camera->ProcessMouseMovement(xoffset, yoffset);
 }
@@ -326,8 +324,6 @@ int main(int, char**)
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        processInput(glGuard.window);
-
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -341,7 +337,7 @@ int main(int, char**)
             ImGui::Text("Num selected tokens : %ld", selectedTokens.size());
             for (Token* token : selectedTokens)
             {
-                ImGui::Text(token->name.c_str());
+                ImGui::TextUnformatted(token->name.c_str());
                 float size;
                 if (ImGui::SliderFloat("Size", &size, 0, 1))
                     token->SetSize(size);
