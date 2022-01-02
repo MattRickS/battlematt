@@ -11,8 +11,7 @@
 
 #include <Texture.h>
 #include <Camera.h>
-#include <Token.h>
-#include <BGImage.h>
+#include <Scene.h>
 
 
 unsigned int windowWidth = 1280;
@@ -244,21 +243,14 @@ int main(int, char**)
 
     // Our state
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    ImVec4 cube_color = ImVec4(1.0f, 0.5f, 0.2f, 1.0f);
 
     // Scene
     stbi_set_flip_vertically_on_load(true);
 
-    Shader imageShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Simple.fs");
-    Shader tokenShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Token.fs");
-
-    glm::mat4 view, projection;
-
-    BGImage background = BGImage("resources/images/CaveMap.jpg");
-    Token dragonToken = Token("resources/images/Dragon.jpeg");
-    dragonToken.SetPos(glm::vec3(1, 0.5, 0));
-    dragonToken.SetSize(0.5);
+    Scene scene = Scene(&mainCamera, "resources/images/CaveMap.jpg");
+    scene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0, 0), 0.1f);
+    scene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0.3f, 0), 0.1f);
+    scene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0, 0.3f, 0), 0.1f);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_BLEND );
@@ -295,15 +287,12 @@ int main(int, char**)
             ImGui::Checkbox("Another Window", &show_another_window);
 
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+            ImGui::ColorEdit3("clear color", (float*)&scene.bgColor); // Edit 3 floats representing a color
 
             if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
                 counter++;
             ImGui::SameLine();
             ImGui::Text("counter = %d", counter);
-
-            if (ImGui::ColorEdit3("Cube Color", (float*)&cube_color))
-                imageShader.setFloat4("color", cube_color.x, cube_color.y, cube_color.z, cube_color.w);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
@@ -321,22 +310,7 @@ int main(int, char**)
 
         // Rendering
         ImGui::Render();
-        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // Draw Scene
-        projection = mainCamera.projectionMatrix;
-        view = mainCamera.GetViewMatrix();
-
-        imageShader.use();
-        imageShader.setMat4("view", view);
-        imageShader.setMat4("projection", projection);
-        background.Draw(imageShader);
-
-        tokenShader.use();
-        tokenShader.setMat4("view", view);
-        tokenShader.setMat4("projection", projection);
-        dragonToken.Draw(tokenShader);
+        scene.Draw();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
