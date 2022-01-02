@@ -10,18 +10,15 @@
 
 Token::Token(std::string iconPath) : Token(iconPath, std::filesystem::path(iconPath).stem()) {}
 
-Token::Token(std::string iconPath, std::string name) : Quad(), iconPath(iconPath), name(name), tex(TextureCache::GetTexture(iconPath))
+Token::Token(std::string iconPath, std::string name) : Quad(), name(name), iconPath(iconPath), tex(TextureCache::GetTexture(iconPath))
 {
     RebuildModel();
 }
 
-void Token::SetUVOffset(glm::vec2 offset)
+void Token::SetIcon(std::string path)
 {
-    // Undo the previous offset before adding the new one
-    for (Vertex& vert : vertices)
-        vert.TexCoords -= iconOffset + offset;
-
-    iconOffset = offset;
+    iconPath = path;
+    tex = TextureCache::GetTexture(path);
 }
 
 void Token::SetSize(float size)

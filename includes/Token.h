@@ -13,7 +13,6 @@ const glm::vec4 highlightColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
 class Token : public Quad
 {
 public:
-    std::string iconPath;
     std::string name;
     glm::vec4 borderColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
     float borderWidth = 0.15f;
@@ -22,9 +21,11 @@ public:
 
     Token(std::string iconPath);
     Token(std::string iconPath, std::string name);
-    void SetUVOffset(glm::vec2 offset);
+    void SetIcon(std::string path);
     void SetSize(float size);
     void SetPos(glm::vec3 pos);
+    float GetSize() { return m_scale; }
+    std::string GetIcon() { return iconPath; }
     void Move(glm::vec2 offset);
     void Move(float xoffset, float yoffset);
     const glm::mat4* GetModel() const;
@@ -33,8 +34,8 @@ public:
     bool Contains(float x, float y) const;
 
 private:
+    std::string iconPath;
     Texture& tex;
-    glm::vec2 iconOffset =glm::vec2(0.0f, 0.0f); // Defaults to centered on the given image
     glm::mat4 model = glm::mat4(1.0f);
     float m_scale = 1.0f;
     glm::vec3 m_pos =  glm::vec3(0.0f, 0.0f, 0.0f);

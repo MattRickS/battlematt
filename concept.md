@@ -140,3 +140,5 @@ Great resource for how makefiles work (multiple pages): https://web.mit.edu/gnu/
 Using imgui for UI: https://github.com/ocornut/imgui
 with filesystem dialog: https://github.com/dfranx/ImFileDialog
     (simplified alternative: https://github.com/aiekick/ImGuiFileDialog)
+
+Might consider switching to TinyEngine if more features are needed: https://github.com/weigert/TinyEngine

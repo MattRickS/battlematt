@@ -8,6 +8,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
+#include <ImGuiFileDialog.h>
 
 #include <Texture.h>
 #include <Camera.h>
@@ -287,7 +288,46 @@ void processInput(GLFWwindow *window)
 }
 
 
-void DrawUI()
+namespace ImGui
+{
+    // ImGui::InputText() with std::string
+    // Because text input needs dynamic resizing, we need to setup a callback to grow the capacity
+    IMGUI_API bool  InputText(const char* label, std::string* str, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
+    IMGUI_API bool  InputTextMultiline(const char* label, std::string* str, const ImVec2& size = ImVec2(0, 0), ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
+    IMGUI_API bool  InputTextWithHint(const char* label, const char* hint, std::string* str, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
+}
+
+bool FileLine(std::string label, std::string& path)
+{
+    bool success = false;
+    if (ImGui::InputText(label.c_str(), &path))
+        return true;
+    // ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".cpp,.h,.hpp", ".");
+
+    // TODO: 
+    //   1. Affecting all instances of the texture. Useful feature, shouldn't be default
+    //   2. Text line is not updating.
+    //   3. Modifying text line is operating per character change, should be on enter
+    //        Is that even possible with immediate mode?
+    ImGui::SameLine();
+    if (ImGui::Button("Open File Dialog")) 
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", "Images{.png,.jpg,.jpeg}", path);
+
+    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey"))
+    {
+        if (ImGuiFileDialog::Instance()->IsOk())
+        {
+            path = ImGuiFileDialog::Instance()->GetFilePathName();
+            success = true;
+        }
+        
+        ImGuiFileDialog::Instance()->Close();
+    }
+    return success;
+}
+
+
+void DrawUI(float* bgSize)
 {
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -299,17 +339,20 @@ void DrawUI()
         ImGui::Begin("Mapmaker UI");
 
         ImGui::ColorEdit3("Background Color", (float*)&scene->bgColor);
-        float bgSize;
-        if (ImGui::SliderFloat("Background Size", &bgSize, 1, 100))
-            scene->background.SetScale(bgSize);
+        if (ImGui::SliderFloat("Background Size", bgSize, 1, 100))
+            scene->background.SetScale(*bgSize);
 
         ImGui::Text("Num selected tokens : %ld", selectedTokens.size());
-        for (Token* token : selectedTokens)
+        if (selectedTokens.size() > 0)
         {
+            Token* token = selectedTokens[0];
             ImGui::TextUnformatted(token->name.c_str());
-            float size;
-            if (ImGui::SliderFloat("Size", &size, 0, 1))
-                token->SetSize(size);
+            std::string iconPath = token->GetIcon();
+            if (FileLine("Icon", iconPath))
+                token->SetIcon(iconPath);
+            float iconSize = token->GetSize();
+            if (ImGui::SliderFloat("Size", &iconSize, 0, 1))
+                token->SetSize(iconSize);
             ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1);
             ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor);
         }
@@ -347,6 +390,9 @@ int main(int, char**)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_BLEND );
 
+    // TODO: Initialise
+    float bgSize;
+
     // Main loop
     while (!glfwWindowShouldClose(glGuard.window))
     {
@@ -357,7 +403,7 @@ int main(int, char**)
         lastFrame = currentFrame;
 
         scene->Draw();
-        DrawUI();
+        DrawUI(&bgSize);
 
         glfwSwapBuffers(glGuard.window);
 
