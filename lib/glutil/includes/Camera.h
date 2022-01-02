@@ -52,6 +52,9 @@ public:
 
     bool isOrtho = false;
     glm::mat4 projectionMatrix;
+    glm::mat4 viewMatrix;
+    glm::mat4 invProjectionMatrix;
+    glm::mat4 invViewMatrix;
 
     Camera(
         glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
@@ -62,7 +65,6 @@ public:
         float vaperture = 1.0f,
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    glm::mat4 GetViewMatrix();
     void Pan(float xoffset, float yoffset);
     void ProcessKeyboard(Camera_Movement direction, float deltaTime);
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
@@ -72,6 +74,7 @@ public:
 private:
     void updateCameraVectors();
     void updateProjectionMatrix();
+    void updateViewMatrix();
 };
 #endif
 

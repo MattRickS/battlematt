@@ -13,13 +13,17 @@ public:
     std::string iconPath;
     glm::vec4 borderColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
     float borderWidth = 0.1f;
+    bool isHighlighted = false;
+    bool isSelected = false;
 
     Token(std::string iconPath);
     void SetUVOffset(glm::vec2 offset);
     void SetSize(float size);
     void SetPos(glm::vec3 pos);
-    glm::mat4& GetModel();
+    const glm::mat4* GetModel() const;
     void Draw(Shader &shader);
+    bool Contains(glm::vec2 pt) const;
+    bool Contains(float x, float y) const;
 
 private:
     Texture& tex;

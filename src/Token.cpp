@@ -15,7 +15,7 @@ Token::Token(std::string iconPath) : Quad(), iconPath(iconPath), tex(TextureCach
         for (Vertex& vert : vertices)
             vert.TexCoords = glm::vec2((vert.TexCoords.x - 0.5f) * xoff, (vert.TexCoords.y - 0.5f) * yoff);
     }
-    model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+    RebuildModel();
 }
 
 void Token::SetUVOffset(glm::vec2 offset)
@@ -39,17 +39,36 @@ void Token::SetPos(glm::vec3 pos)
     RebuildModel();
 }
 
-glm::mat4& Token::GetModel() { return model; }
+const glm::mat4* Token::GetModel() const { return &model; }
 
 void Token::Draw(Shader &shader)
 {
-    shader.setMat4("model", GetModel());
+    shader.setMat4("model", *GetModel());
+
+    glm::vec4 border;
+    if (isSelected)
+        border = 1.0f - borderColor;
+    else if (isHighlighted)
+        border = borderColor * 0.8f;
+    else
+        border = borderColor;
 
     tex.activate(GL_TEXTURE0);
     shader.setInt("diffuse", 0);
-    shader.setFloat4("borderColor", borderColor.x, borderColor.y, borderColor.z, borderColor.w);
+    shader.setFloat4("borderColor", border.x, border.y, border.z, border.w);
     glBindTexture(GL_TEXTURE_2D, tex.ID);
-    Mesh::Draw(shader);
+    Quad::Draw(shader);
+}
+
+bool Token::Contains(float x, float y) const
+{
+    return Contains(glm::vec2(x, y));
+}
+
+
+bool Token::Contains(glm::vec2 pt) const
+{
+    return glm::length(glm::vec2(m_pos) - pt) < m_scale;
 }
 
 

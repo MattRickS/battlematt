@@ -20,15 +20,27 @@ bool firstMouse = true;
 float lastMouseX, lastMouseY;
 bool middleMouseHeld = false;
 float deltaTime, lastFrame = 0.0f;
-Camera mainCamera = Camera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 1.0f, windowWidth / windowHeight);
+Scene* scene;
+
+glm::vec2 ScreenToWorldPos(float x, float y)
+{
+    // TODO: Somehow this isn't working with camera translation... Should be in the view matrix though
+    // Orthographic, so the z-depth doesn't matter
+    // TODO: Should make func check if camera is ortho and use the correct z depth where needed.
+    //       Might also need to divide by w at the end, can't remember if that's needed with persp
+    glm::vec4 screenSpace = glm::vec4(2 * x / windowWidth - 1, 2 * (1 - y / windowHeight) - 1, 0, 1.0f);
+    return glm::vec2(screenSpace * scene->camera->invProjectionMatrix * scene->camera->invViewMatrix);
+}
 
 // =============================================================================
 // Callbacks
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    mainCamera.SetAperture((float)width / (float)height);
+    scene->camera->SetAperture((float)width / (float)height);
     glViewport(0, 0, width, height);
+    windowWidth = width;
+    windowHeight = height;
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -49,11 +61,15 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastMouseX = xpos;
     lastMouseY = ypos;
 
+    glm::vec2 worldPos = ScreenToWorldPos(xpos, ypos);
+    for (Token& token : scene->tokens)
+        token.isHighlighted = token.Contains(worldPos);
+
     // 1:1 with Orthographic world space
     if (middleMouseHeld)
-        mainCamera.Pan((xoffset / windowWidth) * (mainCamera.hAperture * 2 * mainCamera.Focal), (yoffset / windowHeight) * (mainCamera.vAperture * 2 * mainCamera.Focal));
+        scene->camera->Pan((xoffset / windowWidth) * (scene->camera->hAperture * 2 * scene->camera->Focal), (yoffset / windowHeight) * (scene->camera->vAperture * 2 * scene->camera->Focal));
     // else
-    //     mainCamera.ProcessMouseMovement(xoffset, yoffset);
+    //     scene->camera->ProcessMouseMovement(xoffset, yoffset);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -71,7 +87,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
         return;
     }
 
-    mainCamera.ProcessMouseScroll(yoffset);
+    scene->camera->ProcessMouseScroll(yoffset);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -83,9 +99,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS)
-        mainCamera.MovementSpeed *= 5;
+        scene->camera->MovementSpeed *= 5;
     if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE)
-        mainCamera.MovementSpeed /= 5;
+        scene->camera->MovementSpeed /= 5;
 }
 
 void setCallbacks(GLFWwindow* window)
@@ -218,17 +234,17 @@ void processInput(GLFWwindow *window)
         return;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        mainCamera.ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
+        scene->camera->ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        mainCamera.ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
+        scene->camera->ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        mainCamera.ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
+        scene->camera->ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        mainCamera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
+        scene->camera->ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-        mainCamera.ProcessKeyboard(Camera_Movement::DOWN, deltaTime);
+        scene->camera->ProcessKeyboard(Camera_Movement::DOWN, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-        mainCamera.ProcessKeyboard(Camera_Movement::UP, deltaTime);
+        scene->camera->ProcessKeyboard(Camera_Movement::UP, deltaTime);
 }
 
 
@@ -247,10 +263,13 @@ int main(int, char**)
     // Scene
     stbi_set_flip_vertically_on_load(true);
 
-    Scene scene = Scene(&mainCamera, "resources/images/CaveMap.jpg");
-    scene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0, 0), 0.1f);
-    scene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0.3f, 0), 0.1f);
-    scene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0, 0.3f, 0), 0.1f);
+    Camera camera = Camera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 1.0f, windowWidth / windowHeight);
+    Scene theScene = Scene(&camera, "resources/images/CaveMap.jpg");
+    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0, 0), 0.1f);
+    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0.3f, 0), 0.1f);
+    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0, 0.3f, 0), 0.1f);
+
+    scene = &theScene;
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_BLEND );
@@ -287,7 +306,7 @@ int main(int, char**)
             ImGui::Checkbox("Another Window", &show_another_window);
 
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&scene.bgColor); // Edit 3 floats representing a color
+            ImGui::ColorEdit3("clear color", (float*)&scene->bgColor); // Edit 3 floats representing a color
 
             if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
                 counter++;
@@ -310,7 +329,7 @@ int main(int, char**)
 
         // Rendering
         ImGui::Render();
-        scene.Draw();
+        scene->Draw();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

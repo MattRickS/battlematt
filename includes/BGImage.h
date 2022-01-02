@@ -15,7 +15,7 @@ public:
     void SetPos(glm::vec3 pos);
     void SetScale(float scale);
     void SetScale(glm::vec3 scale);
-    glm::mat4& GetModel() { return m_model; }
+    const glm::mat4* GetModel() const { return &m_model; }
     void Draw(Shader &shader);
 
 private:

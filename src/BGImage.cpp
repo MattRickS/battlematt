@@ -32,7 +32,7 @@ void BGImage::SetScale(float scale)
 
 void BGImage::Draw(Shader &shader)
 {
-    shader.setMat4("model", GetModel());
+    shader.setMat4("model", *GetModel());
 
     tex.activate(GL_TEXTURE0);
     shader.setInt("diffuse", 0);

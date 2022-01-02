@@ -39,7 +39,7 @@ public:
         glClear(GL_COLOR_BUFFER_BIT);
 
         glm::mat4 projection = camera->projectionMatrix;
-        glm::mat4 view = camera->GetViewMatrix();
+        glm::mat4 view = camera->viewMatrix;
 
         imageShader.use();
         imageShader.setMat4("view", view);
