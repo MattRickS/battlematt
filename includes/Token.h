@@ -8,6 +8,8 @@
 #include <Shader.h>
 
 
+const glm::vec4 highlightColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+
 class Token : public Quad
 {
 public:

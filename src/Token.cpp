@@ -61,15 +61,18 @@ void Token::Draw(Shader &shader)
 {
     shader.setMat4("model", *GetModel());
 
-    glm::vec4 border = borderColor;
+    glm::vec4 highlight;
     if (isSelected)
-        border = glm::vec4(glm::vec3(1.0f - border), 1.0f);
+        highlight = highlightColor;
     else if (isHighlighted)
-        border *= 0.9f;
+        highlight = highlightColor * 0.75f;
+    else
+        highlight = glm::vec4(0);
 
     tex.activate(GL_TEXTURE0);
     shader.setInt("diffuse", 0);
-    shader.setFloat4("borderColor", border.x, border.y, border.z, border.w);
+    shader.setFloat4("highlightColor", highlight.x, highlight.y, highlight.z, highlight.w);
+    shader.setFloat4("borderColor", borderColor.x, borderColor.y, borderColor.z, borderColor.w);
     shader.setFloat("borderWidth", borderWidth);
     glBindTexture(GL_TEXTURE_2D, tex.ID);
     Quad::Draw(shader);
