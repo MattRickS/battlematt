@@ -51,6 +51,8 @@ void TextureCache::Clear()
 
 Texture& TextureCache::GetTexture(const std::string path)
 {
+    if (!HasTexture(path))
+        LoadTexture(path);
     return loadedTextures[path];
 }
 

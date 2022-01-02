@@ -12,6 +12,7 @@
 #include <Texture.hpp>
 #include <Camera.hpp>
 #include <Primitives.hpp>
+#include <Token.hpp>
 
 
 unsigned int windowWidth = 1280;
@@ -255,12 +256,8 @@ int main(int, char**)
     glBindTexture(GL_TEXTURE_2D, map.ID);
     imageShader.setInt("diffuse", 0);
 
-    Texture dragon = Texture("resources/images/Dragon.jpeg");
     Shader tokenShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Token.fs");
-    tokenShader.use();
-    glBindTexture(GL_TEXTURE_2D, dragon.ID);
-    tokenShader.setInt("diffuse", 0);
-    tokenShader.setFloat4("borderColor", 1.0f, 0.0f, 0.0f, 1.0f);
+
 
     Quad quad;
     glm::mat4 view, projection;
@@ -269,12 +266,9 @@ int main(int, char**)
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
 
-    // A Token's mesh is always a Quad
-    // A Token's UVs should be updated to centralise the image where desired
-    glm::mat4 tokenModel = glm::mat4(1.0f);
-    tokenModel = glm::rotate(tokenModel, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
-    tokenModel = glm::scale(tokenModel, glm::vec3(0.2f, 0.2f, 1.0f));
-    tokenModel = glm::translate(tokenModel, glm::vec3(0.0f, 0.1f, 0.0f));
+    Token dragon = Token("resources/images/Dragon.jpeg");
+    dragon.SetPos(glm::vec3(1));
+    dragon.SetSize(0.5);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_BLEND );
@@ -351,11 +345,9 @@ int main(int, char**)
         quad.Draw(imageShader);
 
         tokenShader.use();
-        tokenShader.setMat4("model", tokenModel);
         tokenShader.setMat4("view", view);
         tokenShader.setMat4("projection", projection);
-        dragon.activate(GL_TEXTURE0);
-        quad.Draw(tokenShader);
+        dragon.Draw(tokenShader);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
