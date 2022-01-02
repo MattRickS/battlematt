@@ -49,8 +49,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastMouseX = xpos;
     lastMouseY = ypos;
 
+    // 1:1 with Orthographic world space
     if (middleMouseHeld)
-        mainCamera.Pan(-xoffset / windowWidth, -yoffset / windowHeight);
+        mainCamera.Pan((-xoffset / windowWidth) * (mainCamera.hAperture * 2 * mainCamera.Focal), (yoffset / windowHeight) * (mainCamera.vAperture * 2 * mainCamera.Focal));
     // else
     //     mainCamera.ProcessMouseMovement(xoffset, yoffset);
 }

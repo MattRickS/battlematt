@@ -130,9 +130,9 @@ public:
     // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void ProcessMouseScroll(float yoffset)
     {
-        Focal -= (float)yoffset;
-        if (Focal < 1.0f)
-            Focal = 1.0f;
+        Focal *= (1.0f - yoffset * 0.1f);
+        if (Focal < 0.01f)
+            Focal = 0.01f;
         if (Focal > 45.0f)
             Focal = 45.0f;
         updateProjectionMatrix();
