@@ -1,4 +1,5 @@
 #include <string>
+
 #include <glm/glm.hpp>
 
 #include <Token.h>
@@ -58,9 +59,9 @@ void Token::Draw(Shader &shader)
 
     glm::vec4 border;
     if (isSelected)
-        border = 1.0f - borderColor;
+        border = glm::vec4(glm::vec3(1.0f - borderColor), 1.0f);
     else if (isHighlighted)
-        border = borderColor * 0.8f;
+        border = borderColor * 0.9f;
     else
         border = borderColor;
 
