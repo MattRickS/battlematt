@@ -342,6 +342,7 @@ int main(int, char**)
             for (Token* token : selectedTokens)
             {
                 ImGui::Text(token->name.c_str());
+                ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1);
                 ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor);
             }
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);

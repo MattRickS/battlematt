@@ -12,6 +12,7 @@ Token::Token(std::string iconPath) : Token(iconPath, std::filesystem::path(iconP
 
 Token::Token(std::string iconPath, std::string name) : Quad(), iconPath(iconPath), name(name), tex(TextureCache::GetTexture(iconPath))
 {
+    // TODO: This isn't working
     if (tex.width != tex.height)
     {
         float xoff = std::max(1.0f, tex.height / (float)tex.width);
@@ -69,6 +70,7 @@ void Token::Draw(Shader &shader)
     tex.activate(GL_TEXTURE0);
     shader.setInt("diffuse", 0);
     shader.setFloat4("borderColor", border.x, border.y, border.z, border.w);
+    shader.setFloat("borderWidth", borderWidth);
     glBindTexture(GL_TEXTURE_2D, tex.ID);
     Quad::Draw(shader);
 }

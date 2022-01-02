@@ -14,7 +14,7 @@ public:
     std::string iconPath;
     std::string name;
     glm::vec4 borderColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    float borderWidth = 0.1f;
+    float borderWidth = 0.15f;
     bool isHighlighted = false;
     bool isSelected = false;
 
