@@ -11,8 +11,8 @@
 
 #include <Texture.h>
 #include <Camera.h>
-#include <Primitives.h>
 #include <Token.h>
+#include <BGImage.h>
 
 
 unsigned int windowWidth = 1280;
@@ -250,18 +250,12 @@ int main(int, char**)
     // Scene
     stbi_set_flip_vertically_on_load(true);
 
-    Texture bgTexture = Texture("resources/images/CaveMap.jpg");
     Shader imageShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Simple.fs");
-    imageShader.use();
-    glBindTexture(GL_TEXTURE_2D, bgTexture.ID);
-    imageShader.setInt("diffuse", 0);
-
     Shader tokenShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Token.fs");
 
     glm::mat4 view, projection;
-    glm::mat4 model = glm::mat4(1.0f);
 
-    Quad bgMesh;
+    BGImage background = BGImage("resources/images/CaveMap.jpg");
     Token dragonToken = Token("resources/images/Dragon.jpeg");
     dragonToken.SetPos(glm::vec3(1, 0.5, 0));
     dragonToken.SetSize(0.5);
@@ -333,12 +327,11 @@ int main(int, char**)
         // Draw Scene
         projection = mainCamera.projectionMatrix;
         view = mainCamera.GetViewMatrix();
+
         imageShader.use();
-        imageShader.setMat4("model", model);
         imageShader.setMat4("view", view);
         imageShader.setMat4("projection", projection);
-        bgTexture.activate(GL_TEXTURE0);
-        bgMesh.Draw(imageShader);
+        background.Draw(imageShader);
 
         tokenShader.use();
         tokenShader.setMat4("view", view);
