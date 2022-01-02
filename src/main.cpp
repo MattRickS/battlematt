@@ -287,6 +287,39 @@ void processInput(GLFWwindow *window)
 }
 
 
+void DrawUI()
+{
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // UI window
+    {
+        ImGui::Begin("Mapmaker UI");
+
+        ImGui::ColorEdit3("Background Color", (float*)&scene->bgColor);
+        ImGui::Text("Num selected tokens : %ld", selectedTokens.size());
+        for (Token* token : selectedTokens)
+        {
+            ImGui::TextUnformatted(token->name.c_str());
+            float size;
+            if (ImGui::SliderFloat("Size", &size, 0, 1))
+                token->SetSize(size);
+            ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1);
+            ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor);
+        }
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+        ImGui::End();
+    }
+
+    // Rendering
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+
 int main(int, char**)
 {
     // Context guards initialise and teardown the GL and ImGui contexts
@@ -313,47 +346,14 @@ int main(int, char**)
     // Main loop
     while (!glfwWindowShouldClose(glGuard.window))
     {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        // UI window
-        {
-            ImGui::Begin("Mapmaker UI");
-
-            ImGui::ColorEdit3("Background Color", (float*)&scene->bgColor);
-            ImGui::Text("Num selected tokens : %ld", selectedTokens.size());
-            for (Token* token : selectedTokens)
-            {
-                ImGui::TextUnformatted(token->name.c_str());
-                float size;
-                if (ImGui::SliderFloat("Size", &size, 0, 1))
-                    token->SetSize(size);
-                ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1);
-                ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor);
-            }
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-            ImGui::End();
-        }
-
-        // Rendering
-        ImGui::Render();
         scene->Draw();
-
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        DrawUI();
 
         glfwSwapBuffers(glGuard.window);
 
