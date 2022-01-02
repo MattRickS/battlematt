@@ -342,6 +342,9 @@ int main(int, char**)
             for (Token* token : selectedTokens)
             {
                 ImGui::Text(token->name.c_str());
+                float size;
+                if (ImGui::SliderFloat("Size", &size, 0, 1))
+                    token->SetSize(size);
                 ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1);
                 ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor);
             }
