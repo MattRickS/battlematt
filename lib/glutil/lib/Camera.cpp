@@ -8,14 +8,15 @@
 
 
 Camera::Camera(glm::vec3 position, glm::vec3 direction, bool isOrtho, float focal, float haperture, float vaperture, glm::vec3 up)
-    : Front(direction), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Focal(focal), isOrtho(isOrtho)
+    : Position(position), Front(direction), WorldUp(up), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Focal(focal), isOrtho(isOrtho)
 {
-    Position = position;
-    WorldUp = up;
-
     // Convert forward direction to euler angles
-    float pitchRadians = asin(Front.y);
-    float yawRadians = acos(Front.x / cos(pitchRadians));
+    float pitchRadians = asin(direction.y);
+    float yawRadians;
+    if (direction.z == 0)
+        yawRadians = acos(direction.x / cos(pitchRadians));
+    else
+        yawRadians = asin(direction.z / cos(pitchRadians));
     Yaw = glm::degrees(yawRadians);
     Pitch = glm::degrees(pitchRadians);
 
@@ -31,7 +32,7 @@ glm::mat4 Camera::GetViewMatrix()
 
 void Camera::Pan(float xoffset, float yoffset)
 {
-    Position = glm::vec3(Position.x + xoffset, Position.y, Position.z + yoffset);
+    Position -= Right * xoffset + Up * yoffset;
 }
 
 // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
@@ -82,6 +83,12 @@ void Camera::ProcessMouseScroll(float yoffset)
         Focal = 0.01f;
     if (Focal > 45.0f)
         Focal = 45.0f;
+    updateProjectionMatrix();
+}
+
+void Camera::SetAperture(float haperture)
+{
+    hAperture = haperture;
     updateProjectionMatrix();
 }
 

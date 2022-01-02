@@ -41,7 +41,6 @@ void Token::SetPos(glm::vec3 pos)
 
 glm::mat4& Token::GetModel() { return model; }
 
-// override Draw to activate image/set border settings for shader
 void Token::Draw(Shader &shader)
 {
     shader.setMat4("model", GetModel());
@@ -56,9 +55,9 @@ void Token::Draw(Shader &shader)
 
 void Token::RebuildModel()
 {
-    // TODO: Pretty sure this is scaling the translation, but changing order makes it disappear entirely
     // TODO: Model should be separated from the rest of the token properties so that it can be drawn as multiple instances
-    model = glm::scale(model, glm::vec3(m_scale));
+    model = glm::mat4(1.0f);
     model = glm::translate(model, m_pos);
-    model = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = glm::scale(model, glm::vec3(m_scale));
+    // model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
 }

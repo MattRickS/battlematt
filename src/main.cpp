@@ -21,14 +21,14 @@ bool firstMouse = true;
 float lastMouseX, lastMouseY;
 bool middleMouseHeld = false;
 float deltaTime, lastFrame = 0.0f;
-Camera mainCamera = Camera(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), true, 1.0f, windowWidth / windowHeight);
+Camera mainCamera = Camera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 1.0f, windowWidth / windowHeight);
 
 // =============================================================================
 // Callbacks
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    // TODO: Reposition camera
+    mainCamera.SetAperture((float)width / (float)height);
     glViewport(0, 0, width, height);
 }
 
@@ -52,7 +52,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
     // 1:1 with Orthographic world space
     if (middleMouseHeld)
-        mainCamera.Pan((-xoffset / windowWidth) * (mainCamera.hAperture * 2 * mainCamera.Focal), (yoffset / windowHeight) * (mainCamera.vAperture * 2 * mainCamera.Focal));
+        mainCamera.Pan((xoffset / windowWidth) * (mainCamera.hAperture * 2 * mainCamera.Focal), (yoffset / windowHeight) * (mainCamera.vAperture * 2 * mainCamera.Focal));
     // else
     //     mainCamera.ProcessMouseMovement(xoffset, yoffset);
 }
@@ -250,25 +250,21 @@ int main(int, char**)
     // Scene
     stbi_set_flip_vertically_on_load(true);
 
-    Texture map = Texture("resources/images/CaveMap.jpg");
+    Texture bgTexture = Texture("resources/images/CaveMap.jpg");
     Shader imageShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Simple.fs");
     imageShader.use();
-    glBindTexture(GL_TEXTURE_2D, map.ID);
+    glBindTexture(GL_TEXTURE_2D, bgTexture.ID);
     imageShader.setInt("diffuse", 0);
 
     Shader tokenShader = Shader("resources/shaders/Simple.vs", "resources/shaders/Token.fs");
 
-
-    Quad quad;
     glm::mat4 view, projection;
-    // glm::mat4 projection = glm::perspective(glm::radians(mainCamera.Zoom), (float)windowWidth/(float)windowHeight, 0.1f, 100.0f);
-    // glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
 
-    Token dragon = Token("resources/images/Dragon.jpeg");
-    dragon.SetPos(glm::vec3(1));
-    dragon.SetSize(0.5);
+    Quad bgMesh;
+    Token dragonToken = Token("resources/images/Dragon.jpeg");
+    dragonToken.SetPos(glm::vec3(1, 0.5, 0));
+    dragonToken.SetSize(0.5);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_BLEND );
@@ -341,13 +337,13 @@ int main(int, char**)
         imageShader.setMat4("model", model);
         imageShader.setMat4("view", view);
         imageShader.setMat4("projection", projection);
-        map.activate(GL_TEXTURE0);
-        quad.Draw(imageShader);
+        bgTexture.activate(GL_TEXTURE0);
+        bgMesh.Draw(imageShader);
 
         tokenShader.use();
         tokenShader.setMat4("view", view);
         tokenShader.setMat4("projection", projection);
-        dragon.Draw(tokenShader);
+        dragonToken.Draw(tokenShader);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
