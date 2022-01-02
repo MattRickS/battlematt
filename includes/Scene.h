@@ -2,7 +2,6 @@
 #include <vector>
 
 #include <glm/glm.hpp>
-#include "imgui.h"
 
 #include <BGImage.h>
 #include <Camera.h>
@@ -12,7 +11,7 @@
 class Scene
 {
 public:
-    ImVec4 bgColor = ImVec4(0, 0, 0, 1);
+    glm::vec4 bgColor = glm::vec4(0, 0, 0, 1);
     BGImage background;
     Camera* camera;
     std::vector<Token> tokens;

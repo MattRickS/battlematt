@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+
 #include <glm/glm.hpp>
 
 #include <Primitives.h>
@@ -11,12 +12,14 @@ class Token : public Quad
 {
 public:
     std::string iconPath;
+    std::string name;
     glm::vec4 borderColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
     float borderWidth = 0.1f;
     bool isHighlighted = false;
     bool isSelected = false;
 
     Token(std::string iconPath);
+    Token(std::string iconPath, std::string name);
     void SetUVOffset(glm::vec2 offset);
     void SetSize(float size);
     void SetPos(glm::vec3 pos);

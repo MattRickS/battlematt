@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <string>
 
 #include <glm/glm.hpp>
@@ -7,7 +8,9 @@
 #include <TextureCache.h>
 
 
-Token::Token(std::string iconPath) : Quad(), iconPath(iconPath), tex(TextureCache::GetTexture(iconPath))
+Token::Token(std::string iconPath) : Token(iconPath, std::filesystem::path(iconPath).stem()) {}
+
+Token::Token(std::string iconPath, std::string name) : Quad(), iconPath(iconPath), name(name), tex(TextureCache::GetTexture(iconPath))
 {
     if (tex.width != tex.height)
     {
@@ -57,13 +60,11 @@ void Token::Draw(Shader &shader)
 {
     shader.setMat4("model", *GetModel());
 
-    glm::vec4 border;
+    glm::vec4 border = borderColor;
     if (isSelected)
-        border = glm::vec4(glm::vec3(1.0f - borderColor), 1.0f);
+        border = glm::vec4(glm::vec3(1.0f - border), 1.0f);
     else if (isHighlighted)
-        border = borderColor * 0.9f;
-    else
-        border = borderColor;
+        border *= 0.9f;
 
     tex.activate(GL_TEXTURE0);
     shader.setInt("diffuse", 0);

@@ -12,7 +12,8 @@ OBJS = $(addprefix $(BUILD_DIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCES)
 
 LIBS = -lGL -pthread
 LIBS += `pkg-config --static --libs glfw3`
-CXXFLAGS = --std=c++17 -I$(IMGUI_DIR) -I$(GLUTIL_DIR)/includes -Iincludes
+CXXFLAGS = --std=c++17 -lstdc++fs
+CXXFLAGS += -I$(IMGUI_DIR) -I$(GLUTIL_DIR)/includes -Iincludes
 CXXFLAGS += -g -Wall -Wformat
 CXXFLAGS += `pkg-config --cflags glfw3`
 
