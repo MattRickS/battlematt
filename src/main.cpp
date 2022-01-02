@@ -299,6 +299,10 @@ void DrawUI()
         ImGui::Begin("Mapmaker UI");
 
         ImGui::ColorEdit3("Background Color", (float*)&scene->bgColor);
+        float bgSize;
+        if (ImGui::SliderFloat("Background Size", &bgSize, 1, 100))
+            scene->background.SetScale(bgSize);
+
         ImGui::Text("Num selected tokens : %ld", selectedTokens.size());
         for (Token* token : selectedTokens)
         {

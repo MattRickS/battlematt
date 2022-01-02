@@ -14,19 +14,19 @@ BGImage::BGImage(std::string texturePath) : Quad(), tex(TextureCache::GetTexture
 
 void BGImage::SetPos(glm::vec3 pos)
 {
-    this->m_pos = pos;
+    m_pos = pos;
     RebuildModel();
 }
 
 void BGImage::SetScale(glm::vec3 scale)
 {
-    this->m_scale = scale;
+    m_scale = scale;
     RebuildModel();
 }
 
 void BGImage::SetScale(float scale)
 {
-    this->m_scale = glm::vec3(scale);
+    m_scale = glm::vec3(scale);
     RebuildModel();
 }
 
