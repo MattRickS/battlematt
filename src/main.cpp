@@ -9,10 +9,10 @@
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
 
-#include <Texture.hpp>
-#include <Camera.hpp>
-#include <Primitives.hpp>
-#include <Token.hpp>
+#include <Texture.h>
+#include <Camera.h>
+#include <Primitives.h>
+#include <Token.h>
 
 
 unsigned int windowWidth = 1280;
