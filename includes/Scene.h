@@ -21,8 +21,8 @@ public:
     Scene(Camera* camera, std::string bgPath):
         background(bgPath),
         camera(camera),
-        imageShader("resources/shaders/Simple.vs", "resources/shaders/Simple.fs"),
-        tokenShader("resources/shaders/Simple.vs", "resources/shaders/Token.fs")
+        imageShader("resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs"),
+        tokenShader("resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs")
     {}
 
     void AddToken(std::string iconPath, glm::vec3 pos=glm::vec3(0), float size=1.0f)

@@ -117,10 +117,13 @@ void Camera::updateProjectionMatrix()
         projectionMatrix = glm::ortho(-hAperture * Focal, hAperture * Focal, -vAperture * Focal, vAperture * Focal, near, far);
     else
         projectionMatrix = glm::perspective(2 * glm::atan(hAperture / Focal), hAperture/vAperture, near, far);
+    
+    invProjectionMatrix = glm::inverse(projectionMatrix);
 }
 
 
 void Camera::updateViewMatrix()
 {
     viewMatrix = glm::lookAt(Position, Position + Front, Up);
+    invViewMatrix = glm::inverse(viewMatrix);
 }

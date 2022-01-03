@@ -5,7 +5,9 @@ layout (location = 2) in vec2 aUV;
 layout(std140, binding=0) uniform Camera
 {
     mat4 projection;
+    mat4 projectionInv;
     mat4 view;
+    mat4 viewInv;
 } camera;
 
 // out vec3 FragPos;

@@ -12,6 +12,8 @@
 
 #include <Buffers.h>
 #include <Camera.h>
+#include <Primitives.h>
+#include <Shader.h>
 #include <Scene.h>
 #include <Texture.h>
 
@@ -390,6 +392,8 @@ int main(int, char**)
     // TODO: Initialise
     float bgSize;
 
+    Shader gridShader = Shader("resources/shaders/Grid.vs", "resources/shaders/Grid.fs");
+    Quad grid = Quad();
     CameraBuffer cameraBuffer = CameraBuffer(scene->camera);
 
     // Main loop
@@ -406,6 +410,8 @@ int main(int, char**)
         lastFrame = currentFrame;
 
         scene->Draw();
+        gridShader.use();
+        grid.Draw(gridShader);
         DrawUI(&bgSize);
 
         glfwSwapBuffers(glGuard.window);

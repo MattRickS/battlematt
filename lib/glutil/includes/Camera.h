@@ -52,13 +52,15 @@ public:
 
     bool isOrtho = false;
     glm::mat4 projectionMatrix;
+    glm::mat4 invProjectionMatrix;
     glm::mat4 viewMatrix;
+    glm::mat4 invViewMatrix;
 
     Camera(
         glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3 direction = glm::vec3(0.0f, .0f, -1.0f),
+        glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f),
         bool isOrtho = false,
-        float focal = 35.0f,
+        float focal = 3.5f,
         float haperture = 1.77f,
         float vaperture = 1.0f,
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f)

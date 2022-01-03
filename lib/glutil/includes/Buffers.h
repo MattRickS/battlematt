@@ -32,29 +32,44 @@ public:
 };
 
 
+const size_t STD140_MATRIX_SIZE = sizeof(glm::mat4);
+
+/*
+Provides a uniform buffer matching the following layout
+
+layout(std140, binding=0) uniform Camera
+{
+    mat4 projection;
+    mat4 projectionInv;
+    mat4 view;
+    mat4 viewInv;
+} camera;
+*/
 class CameraBuffer : public UniformBuffer
 {
 public:
-    CameraBuffer(Camera* camera) : UniformBuffer(2 * sizeof(glm::mat4))
+    CameraBuffer(Camera* camera) : UniformBuffer(4 * STD140_MATRIX_SIZE)
     {
         SetCamera(camera);
     }
 
-    void UpdateView()
-    {
-        bind(glm::value_ptr(camera->viewMatrix), sizeof(glm::mat4), sizeof(glm::mat4));
-    }
-
     void UpdateProjection()
     {
-        bind(glm::value_ptr(camera->projectionMatrix), sizeof(glm::mat4));
+        bind(glm::value_ptr(camera->projectionMatrix), STD140_MATRIX_SIZE);
+        bind(glm::value_ptr(camera->invProjectionMatrix), STD140_MATRIX_SIZE, STD140_MATRIX_SIZE);
+    }
+
+    void UpdateView()
+    {
+        bind(glm::value_ptr(camera->viewMatrix), STD140_MATRIX_SIZE, 2 * STD140_MATRIX_SIZE);
+        bind(glm::value_ptr(camera->invViewMatrix), STD140_MATRIX_SIZE, 3 * STD140_MATRIX_SIZE);
     }
 
     void SetCamera(Camera* camera)
     {
         this->camera = camera;
-        UpdateView();
         UpdateProjection();
+        UpdateView();
     }
 
 private:
