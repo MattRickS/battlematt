@@ -21,6 +21,13 @@ namespace ImGui
 }
 
 
+// struct UIState
+// {
+//     bool snapToGrid = false;
+//     std::vector<Token*> selectedTokens;
+// };
+
+
 ImGuiContextGuard::ImGuiContextGuard(GLFWwindow* window, const char* glsl_version)
 {
     // Setup Dear ImGui context
@@ -100,11 +107,11 @@ void DrawUI(Scene* scene, std::vector<Token*> selectedTokens)
 
         ImGui::ColorEdit3("Background Color", (float*)&scene->bgColor);
         float bgSize = scene->background.GetScale();
-        if (ImGui::SliderFloat("Background Size", &bgSize, 1, 100))
+        if (ImGui::SliderFloat("Background Size", &bgSize, 1, 10))
             scene->background.SetScale(bgSize);
       
         float gridSize = scene->grid.GetScale();
-        if (ImGui::SliderFloat("Grid Size", &gridSize, 1, 100))
+        if (ImGui::SliderFloat("Grid Size", &gridSize, 0.1, 50))
             scene->grid.SetScale(gridSize);
         
         glm::vec3 gridColour = scene->grid.GetColour();

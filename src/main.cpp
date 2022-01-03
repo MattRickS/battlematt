@@ -26,6 +26,7 @@ float lastMouseX, lastMouseY;
 bool middleMouseHeld = false;
 bool leftMouseHeld = false;
 float deltaTime, lastFrame = 0.0f;
+bool snapToGrid = false;
 Scene* scene;
 std::vector<Token*> selectedTokens;
 
@@ -36,6 +37,16 @@ glm::vec2 ScreenToWorldPos(float x, float y)
     return glm::vec2(
         scene->camera->Position.x + (2 * x / windowWidth - 1) * (scene->camera->hAperture * scene->camera->Focal),
         scene->camera->Position.y + (2 * (1 - y / windowHeight) - 1) * (scene->camera->vAperture * scene->camera->Focal)
+    );
+}
+
+glm::vec2 NearestGridCenter(glm::vec2 pos)
+{
+    float scale = scene->grid.GetScale();
+    float halfScale = scale * 0.5f;
+    return glm::vec2(
+        int(pos.x / scale) * scale + (pos.x > 0 ? halfScale : -halfScale),
+        int(pos.y / scale) * scale + (pos.y > 0 ? halfScale : -halfScale)
     );
 }
 
@@ -91,9 +102,18 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         scene->camera->Pan(ScreenToWorldOffset(xoffset, yoffset));
     else if (leftMouseHeld && selectedTokens.size() > 0)
     {
-        glm::vec2 offset = ScreenToWorldOffset(xoffset, yoffset);
-        for (Token* token : selectedTokens)
-            token->Move(offset);
+        if (snapToGrid)
+        {
+            glm::vec2 center = NearestGridCenter(ScreenToWorldPos(xpos, ypos));
+            for (Token* token : selectedTokens)
+                token->SetPos(glm::vec3(center.x, center.y, token->GetPos().z));
+        }
+        else
+        {
+            glm::vec2 offset = ScreenToWorldOffset(xoffset, yoffset);
+            for (Token* token : selectedTokens)
+                token->Move(offset);
+        }
     }
     // else
     //     scene->camera->ProcessMouseMovement(xoffset, yoffset);

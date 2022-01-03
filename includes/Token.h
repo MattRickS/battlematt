@@ -24,6 +24,7 @@ public:
     void SetIcon(std::string path);
     void SetSize(float size);
     void SetPos(glm::vec3 pos);
+    glm::vec3 GetPos() { return m_pos; }
     float GetSize() { return m_scale; }
     std::string GetIcon() { return iconPath; }
     void Move(glm::vec2 offset);
