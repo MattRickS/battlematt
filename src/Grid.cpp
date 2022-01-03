@@ -5,7 +5,8 @@
 #include <Grid.h>
 
 
-Grid::Grid(): shader("resources/shaders/Grid.vs", "resources/shaders/Grid.fs"), mesh()
+// Default quad is (-0.5 -> 0.5), we want (-1 -> 1) to fill the screen
+Grid::Grid(): shader("resources/shaders/Grid.vs", "resources/shaders/Grid.fs"), mesh(2)
 {
     shader.use();
     shader.setFloat("gridScale", m_scale);

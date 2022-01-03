@@ -5,7 +5,7 @@
 class Quad : public Mesh
 {
 public:
-    Quad();
+    Quad(int size = 1);
 };
 
 

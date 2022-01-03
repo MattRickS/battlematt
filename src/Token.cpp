@@ -83,7 +83,8 @@ bool Token::Contains(float x, float y) const
 
 bool Token::Contains(glm::vec2 pt) const
 {
-    return glm::length(glm::vec2(m_pos) - pt) < m_scale;
+    // Scale is the diameter, use radius for comparison
+    return glm::length(glm::vec2(m_pos) - pt) < (m_scale * 0.5f);
 }
 
 

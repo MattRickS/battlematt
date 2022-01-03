@@ -2,12 +2,12 @@
 #include <Primitives.h>
 
 
-Quad::Quad() :
+Quad::Quad(int size) :
     Mesh(std::vector<Vertex>{
-        {{-1.0f, -1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
-        {{-1.0f,  1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
+        {{-0.5f * size, -0.5f * size,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 0.5f * size, -0.5f * size,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
+        {{ 0.5f * size,  0.5f * size,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
+        {{-0.5f * size,  0.5f * size,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
     }, std::vector<unsigned int> {
         0, 1, 2,
         2, 3, 0,

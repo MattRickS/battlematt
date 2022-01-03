@@ -16,6 +16,7 @@ public:
     void SetScale(glm::vec3 scale);
     float GetScale() { return m_scale.x; }
     const glm::mat4* GetModel() const { return &m_model; }
+    glm::vec2 GetDimensions() { return glm::vec2(tex->width, tex->height); }
     void Draw(Shader &shader);
 
 private:

@@ -77,8 +77,15 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastMouseY = ypos;
 
     glm::vec2 worldPos = ScreenToWorldPos(xpos, ypos);
-    for (Token& token : scene->tokens)
-        token.isHighlighted = token.Contains(worldPos);
+    bool highlighted = false;
+    for (int i = scene->tokens.size() - 1; i >= 0; i--)
+    {
+        // Only highlight the first matching token, but unhighlight any others that were highlighted
+        // Tokens are drawn from first to last, so iterate in reverse to find the topmost
+        Token* token = &scene->tokens[i];
+        token->isHighlighted = token->Contains(worldPos) && !highlighted;
+        highlighted |= token->isHighlighted;
+    }
 
     if (middleMouseHeld)
         scene->camera->Pan(ScreenToWorldOffset(xoffset, yoffset));
@@ -111,11 +118,17 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
             glm::vec2 worldPos = ScreenToWorldPos(xpos, ypos);
-            for (Token& token : scene->tokens)
+            // Tokens are drawn from first to last, so iterate in reverse to find the topmost
+            for (int i = scene->tokens.size() - 1; i >= 0; i--)
             {
-                token.isSelected = token.Contains(worldPos);
-                if (token.isSelected)
-                    selectedTokens.push_back(&token);
+                Token* token = &scene->tokens[i];
+                // It should only be possible to select one token with a single click
+                if (token->Contains(worldPos))
+                {
+                    token->isSelected = true;
+                    selectedTokens.push_back(token);
+                    break;
+                }
             }
         }
         leftMouseHeld = action == GLFW_PRESS;
@@ -263,9 +276,9 @@ int main(int, char**)
 
     Camera camera = Camera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 1.0f, windowWidth / windowHeight);
     Scene theScene = Scene(&camera, "resources/images/CaveMap.jpg");
-    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0, 0), 0.1f);
-    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0.3f, 0), 0.1f);
-    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0, 0.3f, 0), 0.1f);
+    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0, 0));
+    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0.3f, 0));
+    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0, 0.3f, 0));
 
     scene = &theScene;
 

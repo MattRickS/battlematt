@@ -155,3 +155,4 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Batch Edit
 - [ ] Add Token
 - [ ] Duplicate Token
+- [ ] Save/Load
