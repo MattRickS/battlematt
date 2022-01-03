@@ -2,14 +2,11 @@
 #include <string>
 
 #include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 
 std::string LoadFile(const char* filename);
 GLuint CompileShader(const char* source, GLenum shaderType);
 GLuint CompileProgram(GLuint vertexShader, GLuint fragmentShader);
-GLuint LoadShadersProgram(const char* vertexShaderFile, const char* fragmetnShaderFile);
 
 class Shader
 {

@@ -37,17 +37,10 @@ public:
         glClearColor(bgColor.x * bgColor.w, bgColor.y * bgColor.w, bgColor.z * bgColor.w, bgColor.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glm::mat4 projection = camera->projectionMatrix;
-        glm::mat4 view = camera->viewMatrix;
-
         imageShader.use();
-        imageShader.setMat4("view", view);
-        imageShader.setMat4("projection", projection);
         background.Draw(imageShader);
 
         tokenShader.use();
-        tokenShader.setMat4("view", view);
-        tokenShader.setMat4("projection", projection);
         for (Token& token : tokens)
             token.Draw(tokenShader);
     }

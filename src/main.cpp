@@ -10,9 +10,10 @@
 #include <GLFW/glfw3.h>
 #include <ImGuiFileDialog.h>
 
-#include <Texture.h>
+#include <Buffers.h>
 #include <Camera.h>
 #include <Scene.h>
+#include <Texture.h>
 
 
 unsigned int windowWidth = 1280;
@@ -389,10 +390,16 @@ int main(int, char**)
     // TODO: Initialise
     float bgSize;
 
+    CameraBuffer cameraBuffer = CameraBuffer(scene->camera);
+
     // Main loop
     while (!glfwWindowShouldClose(glGuard.window))
     {
         glfwPollEvents();
+        // TODO: Shouldn't have to update this every time
+        //       Could possibly have a class BufferedCamera : Camera, UniformBuffer
+        //       that updates its buffer when changed...?
+        cameraBuffer.SetCamera(scene->camera);
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
