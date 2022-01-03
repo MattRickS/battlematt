@@ -143,7 +143,9 @@ with filesystem dialog: https://github.com/dfranx/ImFileDialog
 
 Might consider switching to TinyEngine if more features are needed: https://github.com/weigert/TinyEngine
 
+Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGrid/
+
 # TODO
 - [ ] Separate Token and TokenInstance. TokenInstance is a unique model with shared Token. Promotable to individual Token.
-- [ ] Infinite Grid
 - [ ] Relative paths converted to absolute in TextureCache
+- [ ] Further investigation into shared/packed/std140 layouts in glsl

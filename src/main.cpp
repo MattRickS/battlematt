@@ -326,7 +326,7 @@ bool FileLine(std::string label, std::string& path)
 }
 
 
-void DrawUI(float* bgSize)
+void DrawUI(Scene* scene)
 {
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -338,8 +338,17 @@ void DrawUI(float* bgSize)
         ImGui::Begin("Mapmaker UI");
 
         ImGui::ColorEdit3("Background Color", (float*)&scene->bgColor);
-        if (ImGui::SliderFloat("Background Size", bgSize, 1, 100))
-            scene->background.SetScale(*bgSize);
+        float bgSize = scene->background.GetScale();
+        if (ImGui::SliderFloat("Background Size", &bgSize, 1, 100))
+            scene->background.SetScale(bgSize);
+      
+        float gridSize = scene->grid.GetScale();
+        if (ImGui::SliderFloat("Grid Size", &gridSize, 1, 100))
+            scene->grid.SetScale(gridSize);
+        
+        glm::vec3 gridColour = scene->grid.GetColour();
+        if (ImGui::ColorEdit3("Grid Color", (float*)&gridColour))
+            scene->grid.SetColour(gridColour);
 
         ImGui::Text("Num selected tokens : %ld", selectedTokens.size());
         if (selectedTokens.size() > 0)
@@ -390,10 +399,6 @@ int main(int, char**)
     glEnable( GL_BLEND );
 
     // TODO: Initialise
-    float bgSize;
-
-    Shader gridShader = Shader("resources/shaders/Grid.vs", "resources/shaders/Grid.fs");
-    Quad grid = Quad();
     CameraBuffer cameraBuffer = CameraBuffer(scene->camera);
 
     // Main loop
@@ -410,9 +415,7 @@ int main(int, char**)
         lastFrame = currentFrame;
 
         scene->Draw();
-        gridShader.use();
-        grid.Draw(gridShader);
-        DrawUI(&bgSize);
+        DrawUI(scene);
 
         glfwSwapBuffers(glGuard.window);
 

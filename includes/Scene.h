@@ -5,6 +5,7 @@
 
 #include <BGImage.h>
 #include <Camera.h>
+#include <Grid.h>
 #include <Shader.h>
 #include <Token.h>
 
@@ -13,6 +14,7 @@ class Scene
 public:
     glm::vec4 bgColor = glm::vec4(0, 0, 0, 1);
     BGImage background;
+    Grid grid;
     Camera* camera;
     std::vector<Token> tokens;
     Shader imageShader;
@@ -20,6 +22,7 @@ public:
 
     Scene(Camera* camera, std::string bgPath):
         background(bgPath),
+        grid(),
         camera(camera),
         imageShader("resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs"),
         tokenShader("resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs")
@@ -39,6 +42,7 @@ public:
 
         imageShader.use();
         background.Draw(imageShader);
+        grid.Draw();
 
         tokenShader.use();
         for (Token& token : tokens)
