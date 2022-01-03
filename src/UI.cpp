@@ -100,11 +100,11 @@ void DrawUI(Scene* scene, UIState* uiState)
 
         ImGui::ColorEdit3("Background Color", (float*)&scene->bgColor);
         float bgSize = scene->background.GetScale();
-        if (ImGui::SliderFloat("Background Size", &bgSize, 1, 10))
+        if (ImGui::SliderFloat("Background Size", &bgSize, 1, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
             scene->background.SetScale(bgSize);
       
         float gridSize = scene->grid.GetScale();
-        if (ImGui::SliderFloat("Grid Size", &gridSize, 0.1, 50))
+        if (ImGui::SliderFloat("Grid Size", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
             scene->grid.SetScale(gridSize);
         
         glm::vec3 gridColour = scene->grid.GetColour();
@@ -118,12 +118,19 @@ void DrawUI(Scene* scene, UIState* uiState)
         {
             Token* token = uiState->selectedTokens.back();
             ImGui::TextUnformatted(token->name.c_str());
+
             std::string iconPath = token->GetIcon();
             if (FileLine("Icon", iconPath))
                 token->SetIcon(iconPath);
+
             float iconSize = token->GetSize();
-            if (ImGui::SliderFloat("Size", &iconSize, 0, 1))
+            if (ImGui::SliderFloat("Size", &iconSize, 0.1, 10, "%.3f", ImGuiSliderFlags_Logarithmic))
+            {
+                if (uiState->snapToGrid)
+                    iconSize = int(iconSize / scene->grid.GetScale()) * scene->grid.GetScale();
                 token->SetSize(iconSize);
+            }
+
             ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1);
             ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor);
         }
