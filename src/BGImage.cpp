@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 
 #include <glm/glm.hpp>
@@ -34,9 +35,14 @@ void BGImage::Draw(Shader &shader)
 {
     shader.setMat4("model", *GetModel());
 
-    tex.activate(GL_TEXTURE0);
-    shader.setInt("diffuse", 0);
-    glBindTexture(GL_TEXTURE_2D, tex.ID);
+    if (tex)
+    {
+        tex->activate(GL_TEXTURE0);
+        shader.setInt("diffuse", 0);
+        glBindTexture(GL_TEXTURE_2D, tex->ID);
+    }
+    else
+        std::cerr << "No texture assigned to BGImage" << std::endl;
     Quad::Draw(shader);
 }
 

@@ -142,3 +142,8 @@ with filesystem dialog: https://github.com/dfranx/ImFileDialog
     (simplified alternative: https://github.com/aiekick/ImGuiFileDialog)
 
 Might consider switching to TinyEngine if more features are needed: https://github.com/weigert/TinyEngine
+
+# TODO
+- [ ] Separate Token and TokenInstance. TokenInstance is a unique model with shared Token. Promotable to individual Token.
+- [ ] Infinite Grid
+- [ ] Relative paths converted to absolute in TextureCache

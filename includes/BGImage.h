@@ -9,8 +9,6 @@
 class BGImage: public Quad
 {
 public:
-    Texture& tex;
-
     BGImage(std::string texturePath);
     void SetPos(glm::vec3 pos);
     void SetScale(float scale);
@@ -19,6 +17,7 @@ public:
     void Draw(Shader &shader);
 
 private:
+    Texture* tex;
     glm::mat4 m_model;
     glm::vec3 m_pos = glm::vec3(0.0f);
     glm::vec3 m_scale = glm::vec3(1.0f);

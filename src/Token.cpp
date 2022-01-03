@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <iostream>
 #include <string>
 
 #include <glm/glm.hpp>
@@ -58,12 +59,18 @@ void Token::Draw(Shader &shader)
     else
         highlight = glm::vec4(0);
 
-    tex.activate(GL_TEXTURE0);
-    shader.setInt("diffuse", 0);
+    if (tex)
+    {
+        tex->activate(GL_TEXTURE0);
+        shader.setInt("diffuse", 0);
+        glBindTexture(GL_TEXTURE_2D, tex->ID);
+    }
+    else
+        std::cerr << "No texture assigned to Token" << std::endl;
+
     shader.setFloat4("highlightColor", highlight.x, highlight.y, highlight.z, highlight.w);
     shader.setFloat4("borderColor", borderColor.x, borderColor.y, borderColor.z, borderColor.w);
     shader.setFloat("borderWidth", borderWidth);
-    glBindTexture(GL_TEXTURE_2D, tex.ID);
     Quad::Draw(shader);
 }
 

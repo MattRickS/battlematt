@@ -12,7 +12,7 @@ public:
     static void LoadTexture(const std::string path);
     static void UnloadTexture(const std::string path);
     static void Clear();
-    static Texture& GetTexture(const std::string path);
+    static Texture* GetTexture(const std::string path);
     static unsigned int NumTextures();
 
 private:

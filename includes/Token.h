@@ -35,7 +35,7 @@ public:
 
 private:
     std::string iconPath;
-    Texture& tex;
+    Texture* tex;
     glm::mat4 model = glm::mat4(1.0f);
     float m_scale = 1.0f;
     glm::vec3 m_pos =  glm::vec3(0.0f, 0.0f, 0.0f);

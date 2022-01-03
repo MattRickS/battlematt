@@ -300,20 +300,16 @@ namespace ImGui
 bool FileLine(std::string label, std::string& path)
 {
     bool success = false;
-    if (ImGui::InputText(label.c_str(), &path))
+    if (ImGui::InputText(label.c_str(), &path, ImGuiInputTextFlags_EnterReturnsTrue))
         return true;
-    // ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".cpp,.h,.hpp", ".");
 
-    // TODO: 
-    //   1. Affecting all instances of the texture. Useful feature, shouldn't be default
-    //   2. Text line is not updating.
-    //   3. Modifying text line is operating per character change, should be on enter
-    //        Is that even possible with immediate mode?
     ImGui::SameLine();
+    // TODO: Providing wildcard filter doesn't return correct path (uses * as ext)
+    //       Ideally don't want to restrict filters so severely
     if (ImGui::Button("Open File Dialog")) 
-        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", "Images{.png,.jpg,.jpeg}", path);
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDialog", "Choose File", "Images{.png,.jpg,.jpeg}", path);
 
-    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey"))
+    if (ImGuiFileDialog::Instance()->Display("ChooseFileDialog"))
     {
         if (ImGuiFileDialog::Instance()->IsOk())
         {

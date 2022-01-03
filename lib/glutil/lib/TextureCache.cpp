@@ -33,11 +33,11 @@ void TextureCache::Clear()
     loadedTextures.clear();
 }
 
-Texture& TextureCache::GetTexture(const std::string path)
+Texture* TextureCache::GetTexture(const std::string path)
 {
     if (!HasTexture(path))
         LoadTexture(path);
-    return loadedTextures[path];
+    return &loadedTextures[path];
 }
 
 unsigned int TextureCache::NumTextures()
