@@ -9,8 +9,7 @@ layout(std140, binding=0) uniform Camera
     mat4 viewInv;
 } camera;
 
-out vec3 nearPoint;
-out vec3 farPoint;
+out vec3 outPos;
 
 
 vec3 UnprojectPoint(float x, float y, float z) {
@@ -19,8 +18,6 @@ vec3 UnprojectPoint(float x, float y, float z) {
 }
 
 void main() {
-    // TODO: is this needed? Can't we access the 0->1 value from a gl_ builtin?
-    nearPoint = UnprojectPoint(aPos.x, aPos.y, 0.0).xyz; // unprojecting on the near plane
-    farPoint = UnprojectPoint(aPos.x, aPos.y, -10.0).xyz; // unprojecting on the far plane
+    outPos = UnprojectPoint(aPos.x, aPos.y, 0.0).xyz;
     gl_Position = vec4(aPos, 1.0); // using directly the clipped coordinates
 }
