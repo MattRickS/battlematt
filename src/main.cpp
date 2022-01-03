@@ -26,9 +26,8 @@ float lastMouseX, lastMouseY;
 bool middleMouseHeld = false;
 bool leftMouseHeld = false;
 float deltaTime, lastFrame = 0.0f;
-bool snapToGrid = false;
 Scene* scene;
-std::vector<Token*> selectedTokens;
+UIState uiState;
 
 
 // Orthographic operations (Matrices aren't working correctly if camera position is changed)
@@ -100,18 +99,18 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
     if (middleMouseHeld)
         scene->camera->Pan(ScreenToWorldOffset(xoffset, yoffset));
-    else if (leftMouseHeld && selectedTokens.size() > 0)
+    else if (leftMouseHeld && uiState.selectedTokens.size() > 0)
     {
-        if (snapToGrid)
+        if (uiState.snapToGrid)
         {
             glm::vec2 center = NearestGridCenter(ScreenToWorldPos(xpos, ypos));
-            for (Token* token : selectedTokens)
+            for (Token* token : uiState.selectedTokens)
                 token->SetPos(glm::vec3(center.x, center.y, token->GetPos().z));
         }
         else
         {
             glm::vec2 offset = ScreenToWorldOffset(xoffset, yoffset);
-            for (Token* token : selectedTokens)
+            for (Token* token : uiState.selectedTokens)
                 token->Move(offset);
         }
     }
@@ -131,9 +130,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     {
         if (action == GLFW_PRESS)
         {
-            for (Token* token : selectedTokens)
+            for (Token* token : uiState.selectedTokens)
                 token->isSelected = false;
-            selectedTokens.clear();
+            uiState.selectedTokens.clear();
 
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
@@ -146,7 +145,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 if (token->Contains(worldPos))
                 {
                     token->isSelected = true;
-                    selectedTokens.push_back(token);
+                    uiState.selectedTokens.push_back(token);
                     break;
                 }
             }
@@ -322,7 +321,7 @@ int main(int, char**)
         lastFrame = currentFrame;
 
         scene->Draw();
-        DrawUI(scene, selectedTokens);
+        DrawUI(scene, &uiState);
 
         glfwSwapBuffers(glGuard.window);
 

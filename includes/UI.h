@@ -9,6 +9,13 @@
 #include <Token.h>
 
 
+struct UIState
+{
+    bool snapToGrid = false;
+    std::vector<Token*> selectedTokens;
+};
+
+
 class ImGuiContextGuard
 {
 public:
@@ -18,4 +25,4 @@ public:
 
 bool FileLine(std::string label, std::string& path);
 
-void DrawUI(Scene* scene, std::vector<Token*> selectedTokens);
+void DrawUI(Scene* scene, UIState* uiState);

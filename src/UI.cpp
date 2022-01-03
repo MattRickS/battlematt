@@ -21,13 +21,6 @@ namespace ImGui
 }
 
 
-// struct UIState
-// {
-//     bool snapToGrid = false;
-//     std::vector<Token*> selectedTokens;
-// };
-
-
 ImGuiContextGuard::ImGuiContextGuard(GLFWwindow* window, const char* glsl_version)
 {
     // Setup Dear ImGui context
@@ -94,7 +87,7 @@ bool FileLine(std::string label, std::string& path)
 }
 
 
-void DrawUI(Scene* scene, std::vector<Token*> selectedTokens)
+void DrawUI(Scene* scene, UIState* uiState)
 {
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -117,11 +110,13 @@ void DrawUI(Scene* scene, std::vector<Token*> selectedTokens)
         glm::vec3 gridColour = scene->grid.GetColour();
         if (ImGui::ColorEdit3("Grid Color", (float*)&gridColour))
             scene->grid.SetColour(gridColour);
+        
+        ImGui::Checkbox("Snap to Grid", &uiState->snapToGrid);
 
-        ImGui::Text("Num selected tokens : %ld", selectedTokens.size());
-        if (selectedTokens.size() > 0)
+        ImGui::Text("Num selected tokens : %ld", uiState->selectedTokens.size());
+        if (uiState->selectedTokens.size() > 0)
         {
-            Token* token = selectedTokens[0];
+            Token* token = uiState->selectedTokens.back();
             ImGui::TextUnformatted(token->name.c_str());
             std::string iconPath = token->GetIcon();
             if (FileLine("Icon", iconPath))
