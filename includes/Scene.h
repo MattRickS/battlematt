@@ -22,6 +22,7 @@ public:
     Shader tokenShader;
 
     Scene(Camera* camera, std::string bgPath);
+    void AddToken();
     void AddToken(std::string iconPath, glm::vec3 pos=glm::vec3(0));
     void AddToken(std::string iconPath, glm::vec3 pos, float size);
     void Draw();

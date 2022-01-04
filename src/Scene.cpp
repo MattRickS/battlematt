@@ -32,6 +32,11 @@ void Scene::AddToken(std::string iconPath, glm::vec3 pos)
     tokens.back().SetSize(grid.GetScale());
 }
 
+void Scene::AddToken()
+{
+    tokens.emplace_back("resources/images/QuestionMark.jpg");
+}
+
 void Scene::AddToken(std::string iconPath, glm::vec3 pos, float size)
 {
     tokens.emplace_back(iconPath);

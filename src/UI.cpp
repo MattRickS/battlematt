@@ -124,7 +124,7 @@ void DrawUI(Scene* scene, UIState* uiState)
                 token->SetIcon(iconPath);
 
             float iconSize = token->GetSize();
-            if (ImGui::SliderFloat("Size", &iconSize, 0.1, 10, "%.3f", ImGuiSliderFlags_Logarithmic))
+            if (ImGui::SliderFloat("Size", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
             {
                 if (uiState->snapToGrid)
                     iconSize = int(iconSize / scene->grid.GetScale()) * scene->grid.GetScale();
@@ -134,6 +134,10 @@ void DrawUI(Scene* scene, UIState* uiState)
             ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1);
             ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor);
         }
+
+        if (ImGui::Button("Add Token"))
+            scene->AddToken();
+
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
         ImGui::End();

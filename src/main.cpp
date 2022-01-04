@@ -293,11 +293,10 @@ int main(int, char**)
     // Scene
     stbi_set_flip_vertically_on_load(true);
 
-    Camera camera = Camera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 1.0f, windowWidth / windowHeight);
+    Camera camera = Camera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f, windowWidth / windowHeight);
     Scene theScene = Scene(&camera, "resources/images/CaveMap.jpg");
-    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0, 0));
-    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.3f, 0.3f, 0));
-    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0, 0.3f, 0));
+    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.5f, 0.5, 0));
+    theScene.AddToken("resources/images/Dragon.jpeg", glm::vec3(1.5f, 1.5f, 0));
 
     scene = &theScene;
 
