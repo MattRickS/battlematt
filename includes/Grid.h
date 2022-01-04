@@ -18,6 +18,7 @@ public:
     glm::vec2 NearestCenter(glm::vec2 pos);
     glm::vec2 NearestCorner(glm::vec2 pos);
     int TokenGridSize(Token* token);
+    float SnapGridSize(float size);
     glm::vec2 TokenSnapPosition(Token* token, glm::vec2 pos);
 
 private:

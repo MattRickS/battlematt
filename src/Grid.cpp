@@ -65,3 +65,11 @@ glm::vec2 Grid::TokenSnapPosition(Token* token, glm::vec2 pos)
     else
         return NearestCenter(pos);
 }
+
+float Grid::SnapGridSize(float size)
+{
+    if (size >= m_scale)
+        return std::round(size / m_scale) * m_scale;
+    else
+        return m_scale / std::round(m_scale / size);
+}
