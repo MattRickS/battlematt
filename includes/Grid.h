@@ -6,6 +6,19 @@
 #include <Token.h>
 
 
+enum TokenGridSize
+{
+    Fine = -4,
+    Diminutive = -3,
+    Tiny = -2,
+    Small = -1,
+    Medium = 0,
+    Large = 1,
+    Huge = 2,
+    Colossal = 3
+};
+
+
 class Grid
 {
 public:
@@ -15,9 +28,9 @@ public:
     float GetScale();
     void SetColour(glm::vec3 colour);
     glm::vec3 GetColour();
-    glm::vec2 NearestCenter(glm::vec2 pos);
-    glm::vec2 NearestCorner(glm::vec2 pos);
-    int TokenGridSize(Token* token);
+    glm::vec2 NearestCenter(float tokenSize, glm::vec2 pos);
+    glm::vec2 NearestCorner(float tokenSize, glm::vec2 pos);
+    TokenGridSize GetTokenGridSize(Token* token);
     float SnapGridSize(float size);
     glm::vec2 TokenSnapPosition(Token* token, glm::vec2 pos);
 

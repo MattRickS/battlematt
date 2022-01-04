@@ -39,31 +39,38 @@ void Grid::SetColour(glm::vec3 colour)
 glm::vec3 Grid::GetColour() { return m_colour; }
 
 
-glm::vec2 Grid::NearestCenter(glm::vec2 pos)
+glm::vec2 Grid::NearestCenter(float tokenSize, glm::vec2 pos)
 {
-    float halfScale = m_scale * 0.5f;
+    float size = std::min(m_scale, SnapGridSize(tokenSize));
+    float halfSize = size * 0.5f;
     return glm::vec2(
-        int(pos.x / m_scale) * m_scale + (pos.x > 0 ? halfScale : -halfScale),
-        int(pos.y / m_scale) * m_scale + (pos.y > 0 ? halfScale : -halfScale)
+        int(pos.x / size) * size + (pos.x > 0 ? halfSize : -halfSize),
+        int(pos.y / size) * size + (pos.y > 0 ? halfSize : -halfSize)
     );
 }
 
-glm::vec2 Grid::NearestCorner(glm::vec2 pos)
+glm::vec2 Grid::NearestCorner(float tokenSize, glm::vec2 pos)
 {
-    return glm::vec2(int(pos.x / m_scale) * m_scale, int(pos.y / m_scale) * m_scale);
+    float size = std::min(m_scale, SnapGridSize(tokenSize));
+    return glm::vec2(int(pos.x / size) * size, int(pos.y / size) * size);
 }
 
-int Grid::TokenGridSize(Token* token)
+TokenGridSize Grid::GetTokenGridSize(Token* token)
 {
-    return std::round(token->GetSize() / GetScale());
+    float size = token->GetSize();
+    if (size >= m_scale)
+        return static_cast<TokenGridSize>(std::round(size / m_scale) - 1);
+    else
+        return static_cast<TokenGridSize>(1 - std::round(m_scale / size));
 }
 
 glm::vec2 Grid::TokenSnapPosition(Token* token, glm::vec2 pos)
 {
-    if (TokenGridSize(token) % 2 == 0)
-        return NearestCorner(pos);
+    int gridSize = GetTokenGridSize(token);
+    if (gridSize < 0 || gridSize % 2 == 0)
+        return NearestCenter(token->GetSize(), pos);
     else
-        return NearestCenter(pos);
+        return NearestCorner(token->GetSize(), pos);
 }
 
 float Grid::SnapGridSize(float size)
