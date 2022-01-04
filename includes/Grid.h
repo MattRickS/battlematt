@@ -3,6 +3,7 @@
 
 #include <Primitives.h>
 #include <Shader.h>
+#include <Token.h>
 
 
 class Grid
@@ -14,6 +15,10 @@ public:
     float GetScale();
     void SetColour(glm::vec3 colour);
     glm::vec3 GetColour();
+    glm::vec2 NearestCenter(glm::vec2 pos);
+    glm::vec2 NearestCorner(glm::vec2 pos);
+    int TokenGridSize(Token* token);
+    glm::vec2 TokenSnapPosition(Token* token, glm::vec2 pos);
 
 private:
     Shader shader;

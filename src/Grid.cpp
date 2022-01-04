@@ -2,6 +2,7 @@
 
 #include <Primitives.h>
 #include <Shader.h>
+#include <Token.h>
 #include <Grid.h>
 
 
@@ -37,3 +38,30 @@ void Grid::SetColour(glm::vec3 colour)
 
 glm::vec3 Grid::GetColour() { return m_colour; }
 
+
+glm::vec2 Grid::NearestCenter(glm::vec2 pos)
+{
+    float halfScale = m_scale * 0.5f;
+    return glm::vec2(
+        int(pos.x / m_scale) * m_scale + (pos.x > 0 ? halfScale : -halfScale),
+        int(pos.y / m_scale) * m_scale + (pos.y > 0 ? halfScale : -halfScale)
+    );
+}
+
+glm::vec2 Grid::NearestCorner(glm::vec2 pos)
+{
+    return glm::vec2(int(pos.x / m_scale) * m_scale, int(pos.y / m_scale) * m_scale);
+}
+
+int Grid::TokenGridSize(Token* token)
+{
+    return std::round(token->GetSize() / GetScale());
+}
+
+glm::vec2 Grid::TokenSnapPosition(Token* token, glm::vec2 pos)
+{
+    if (TokenGridSize(token) % 2 == 0)
+        return NearestCorner(pos);
+    else
+        return NearestCenter(pos);
+}
