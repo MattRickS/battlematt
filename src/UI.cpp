@@ -127,7 +127,7 @@ void DrawUI(Scene* scene, UIState* uiState)
             if (ImGui::SliderFloat("Size", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
             {
                 if (uiState->snapToGrid)
-                    iconSize = int(iconSize / scene->grid.GetScale()) * scene->grid.GetScale();
+                    iconSize = std::round(iconSize / scene->grid.GetScale()) * scene->grid.GetScale();
                 token->SetSize(iconSize);
             }
 

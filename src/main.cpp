@@ -49,6 +49,25 @@ glm::vec2 NearestGridCenter(glm::vec2 pos)
     );
 }
 
+glm::vec2 NearestGridCorner(glm::vec2 pos)
+{
+    float scale = scene->grid.GetScale();
+    return glm::vec2(int(pos.x / scale) * scale, int(pos.y / scale) * scale);
+}
+
+int TokenGridSize(Token* token)
+{
+    return std::round(token->GetSize() / scene->grid.GetScale());
+}
+
+glm::vec2 TokenGridPosition(Token* token, glm::vec2 pos)
+{
+    if (TokenGridSize(token) % 2 == 0)
+        return NearestGridCorner(pos);
+    else
+        return NearestGridCenter(pos);
+}
+
 glm::vec2 ScreenToWorldOffset(float x, float y)
 {
     return glm::vec2(
@@ -103,9 +122,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     {
         if (uiState.snapToGrid)
         {
-            glm::vec2 center = NearestGridCenter(ScreenToWorldPos(xpos, ypos));
             for (Token* token : uiState.selectedTokens)
+            {
+                glm::vec2 center = TokenGridPosition(token, ScreenToWorldPos(xpos, ypos));
                 token->SetPos(glm::vec3(center.x, center.y, token->GetPos().z));
+            }
         }
         else
         {
