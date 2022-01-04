@@ -159,10 +159,24 @@ void Application::OnKey(int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS)
-        scene->camera->MovementSpeed *= 5;
-    if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE)
-        scene->camera->MovementSpeed /= 5;
+    if (key == GLFW_KEY_S && action == GLFW_RELEASE)
+        uiState.snapToGrid = !uiState.snapToGrid;
+    if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && uiState.selectedTokens.size() > 0)
+    {
+        for (Token* token : uiState.selectedTokens)
+        {
+            TokenGridSize gridSize = static_cast<TokenGridSize>(scene->grid.GetTokenGridSize(token) + 1);
+            token->SetSize(scene->grid.SnapGridSize(gridSize));
+        }
+    }
+    if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_RELEASE && uiState.selectedTokens.size() > 0)
+    {
+        for (Token* token : uiState.selectedTokens)
+        {
+            TokenGridSize gridSize = static_cast<TokenGridSize>(scene->grid.GetTokenGridSize(token) - 1);
+            token->SetSize(scene->grid.SnapGridSize(gridSize));
+        }
+    }
 }
 
 bool Application::IsInitialised()
@@ -262,7 +276,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     app->SetWindowSize(width, height);
 }
 
-
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -282,7 +295,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     Application* app = (Application*)glfwGetWindowUserPointer(window);
     app->OnMouseButton(button, action, mods);
 }
-
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {

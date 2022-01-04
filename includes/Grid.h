@@ -15,7 +15,8 @@ enum TokenGridSize
     Medium = 0,
     Large = 1,
     Huge = 2,
-    Colossal = 3
+    Gargantuan = 3,
+    Colossal = 4
 };
 
 
@@ -31,6 +32,7 @@ public:
     glm::vec2 NearestCenter(float tokenSize, glm::vec2 pos);
     glm::vec2 NearestCorner(float tokenSize, glm::vec2 pos);
     TokenGridSize GetTokenGridSize(Token* token);
+    float SnapGridSize(TokenGridSize tokenGridSize);
     float SnapGridSize(float size);
     glm::vec2 TokenSnapPosition(Token* token, glm::vec2 pos);
 
