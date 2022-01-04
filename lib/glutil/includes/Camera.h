@@ -1,9 +1,5 @@
+#pragma once
 
-
-#ifndef CAMERA_HPP
-#define CAMERA_HPP
-
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -69,7 +65,7 @@ public:
     void Pan(float xoffset, float yoffset);
     void ProcessKeyboard(Camera_Movement direction, float deltaTime);
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
-    void ProcessMouseScroll(float yoffset);
+    void Zoom(float yoffset);
     void SetAperture(float haperture);
 
 private:
@@ -77,5 +73,3 @@ private:
     void updateProjectionMatrix();
     void updateViewMatrix();
 };
-#endif
-

@@ -79,7 +79,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
 }
 
 // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-void Camera::ProcessMouseScroll(float yoffset)
+void Camera::Zoom(float yoffset)
 {
     Focal *= (1.0f - yoffset * 0.1f);
     if (Focal < 0.01f)

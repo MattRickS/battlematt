@@ -149,10 +149,10 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Separate Token and TokenInstance. TokenInstance is a unique model with shared Token. Promotable to individual Token.
 - [ ] Relative paths converted to absolute in TextureCache
 - [ ] Further investigation into shared/packed/std140 layouts in glsl
-- [ ] Snap to grid
+- [x] Snap to grid
 - [ ] UI sections (background, grid, tokens, etc...)
 - [ ] Drag select
 - [ ] Batch Edit
-- [ ] Add Token
+- [x] Add Token
 - [ ] Duplicate Token
 - [ ] Save/Load

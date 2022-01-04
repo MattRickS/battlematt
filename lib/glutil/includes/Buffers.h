@@ -1,3 +1,4 @@
+#pragma once
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -48,7 +49,8 @@ layout(std140, binding=0) uniform Camera
 class CameraBuffer : public UniformBuffer
 {
 public:
-    CameraBuffer(Camera* camera) : UniformBuffer(4 * STD140_MATRIX_SIZE)
+    CameraBuffer() : UniformBuffer(4 * STD140_MATRIX_SIZE) {}
+    CameraBuffer(Camera* camera) : CameraBuffer()
     {
         SetCamera(camera);
     }
