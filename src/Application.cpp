@@ -217,6 +217,16 @@ void Application::OnKey(int key, int scancode, int action, int mods)
         scene->RemoveTokens(uiState.selectedTokens);
         ClearSelection();
     }
+    if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && uiState.selectedTokens.size() > 0)
+    {
+        uint numTokens = scene->tokens.size();
+        for (Token* token : uiState.selectedTokens)
+            scene->AddToken(token->GetIcon(), token->GetPos() + glm::vec3(1, 1, 0), token->GetSize());
+
+        ClearSelection();
+        for (uint i = numTokens; i < scene->tokens.size(); i++)
+            SelectToken(&scene->tokens[i]);
+    }
 }
 
 bool Application::IsInitialised()
