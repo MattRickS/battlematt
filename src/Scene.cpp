@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -39,6 +40,18 @@ void Scene::AddToken(std::string iconPath, glm::vec3 pos, float size)
     tokens.back().SetPos(pos);
     tokens.back().SetSize(size);
 }
+
+void Scene::RemoveTokens(std::vector<Token*> toRemove)
+{
+
+    auto pred = [&toRemove](const Token& t) ->bool
+    {
+        return std::find(toRemove.begin(), toRemove.end(), &t) != toRemove.end();
+    };
+
+    tokens.erase(std::remove_if(tokens.begin(), tokens.end(), pred), tokens.end());
+}
+
 
 void Scene::Draw()
 {

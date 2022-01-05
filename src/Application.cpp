@@ -212,6 +212,11 @@ void Application::OnKey(int key, int scancode, int action, int mods)
             token->SetSize(scene->grid.SnapGridSize(gridSize));
         }
     }
+    if (key == GLFW_KEY_DELETE && uiState.selectedTokens.size() > 0)
+    {
+        scene->RemoveTokens(uiState.selectedTokens);
+        ClearSelection();
+    }
 }
 
 bool Application::IsInitialised()
