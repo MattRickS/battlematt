@@ -121,18 +121,30 @@ void DrawUI(Scene* scene, UIState* uiState)
 
             std::string iconPath = token->GetIcon();
             if (FileLine("Icon", iconPath))
-                token->SetIcon(iconPath);
+            {
+                for (Token* t : uiState->selectedTokens)
+                    t->SetIcon(iconPath);
+            }
 
             float iconSize = token->GetSize();
             if (ImGui::SliderFloat("Size", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
             {
                 if (uiState->snapToGrid)
                     iconSize = scene->grid.SnapGridSize(iconSize);
-                token->SetSize(iconSize);
+                for (Token* t : uiState->selectedTokens)
+                    t->SetSize(iconSize);
             }
 
-            ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1);
-            ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor);
+            if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
+            {
+                for (Token* t : uiState->selectedTokens)
+                    t->borderWidth = token->borderWidth;
+            }
+            if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
+            {
+                for (Token* t : uiState->selectedTokens)
+                    t->borderColor = token->borderColor;
+            }
         }
 
         if (ImGui::Button("Add Token"))
