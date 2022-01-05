@@ -17,7 +17,7 @@ int main(int, char**)
 
     glm::vec2 windowDimensions = app.WindowDimensions();
     Camera camera = Camera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f, windowDimensions.x / windowDimensions.y);
-    Scene scene = Scene(&camera, "resources/images/CaveMap.jpg");
+    Scene scene = Scene(&camera);
     scene.AddToken("resources/images/Dragon.jpeg", glm::vec3(0.5f, 0.5, 0));
     scene.AddToken("resources/images/Dragon.jpeg", glm::vec3(1.5f, 1.5f, 0));
 

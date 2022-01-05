@@ -9,8 +9,12 @@
 #include <BGImage.h>
 
 
+const float DEFAULT_PIXELS_PER_UNIT = 50.0f;
+
+
 BGImage::BGImage(std::string texturePath) : Quad(), tex(TextureCache::GetTexture(texturePath))
 {
+    m_scale = tex->width / DEFAULT_PIXELS_PER_UNIT;
     RebuildModel();
 }
 
@@ -20,15 +24,9 @@ void BGImage::SetPos(glm::vec3 pos)
     RebuildModel();
 }
 
-void BGImage::SetScale(glm::vec3 scale)
-{
-    m_scale = scale;
-    RebuildModel();
-}
-
 void BGImage::SetScale(float scale)
 {
-    m_scale = glm::vec3(scale);
+    m_scale = scale;
     RebuildModel();
 }
 
@@ -63,4 +61,7 @@ std::string BGImage::GetImage()
 void BGImage::SetImage(std::string imagePath)
 {
     tex = TextureCache::GetTexture(imagePath);
+    if (!m_scale)
+        m_scale = tex->width / DEFAULT_PIXELS_PER_UNIT;
+    RebuildModel();
 }

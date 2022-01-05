@@ -11,7 +11,6 @@
 #include <Scene.h>
 
 
-const float PIXELS_PER_GRID_CELL = 50.0f;
 
 
 Scene::Scene(Camera* camera, std::string bgPath):
@@ -20,10 +19,7 @@ Scene::Scene(Camera* camera, std::string bgPath):
     camera(camera),
     imageShader("resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs"),
     tokenShader("resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs")
-{
-    glm::vec2 size = background.GetDimensions() / PIXELS_PER_GRID_CELL;
-    background.SetScale(size.x * grid.GetScale());
-}
+{ }
 
 void Scene::AddToken(std::string iconPath, glm::vec3 pos)
 {
