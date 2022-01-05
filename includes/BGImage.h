@@ -18,6 +18,8 @@ public:
     const glm::mat4* GetModel() const { return &m_model; }
     glm::vec2 GetDimensions() { return glm::vec2(tex->width, tex->height); }
     void Draw(Shader &shader);
+    std::string GetImage();
+    void SetImage(std::string imagePath);
 
 private:
     Texture* tex;

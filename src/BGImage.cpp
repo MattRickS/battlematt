@@ -53,3 +53,14 @@ void BGImage::RebuildModel()
     m_model = glm::translate(m_model, m_pos);
     m_model = glm::scale(m_model, glm::vec3(m_scale));
 }
+
+
+std::string BGImage::GetImage()
+{
+    return tex->filename;
+}
+
+void BGImage::SetImage(std::string imagePath)
+{
+    tex = TextureCache::GetTexture(imagePath);
+}

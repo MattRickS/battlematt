@@ -102,6 +102,10 @@ void DrawUI(Scene* scene, UIState* uiState)
         float bgSize = scene->background.GetScale();
         if (ImGui::SliderFloat("Background Size", &bgSize, 1, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
             scene->background.SetScale(bgSize);
+        
+        std::string imagePath = scene->background.GetImage();
+        if (FileLine("Background Image", imagePath))
+            scene->background.SetImage(imagePath);
       
         float gridSize = scene->grid.GetScale();
         if (ImGui::SliderFloat("Grid Size", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
