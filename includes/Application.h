@@ -56,6 +56,9 @@ private:
     void SetCallbacks();
 
     std::vector<Token*> TokensInScreenRect(float minx, float miny, float maxx, float maxy);
+    void ClearSelection();
+    void SelectToken(Token* token);
+    Token* GetTokenAtScreenPos(float xpos, float ypos);
 };
 
 // =============================================================================

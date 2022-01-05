@@ -132,7 +132,6 @@ void Application::OnMouseMove(double xpos, double ypos)
     }
 }
 
-
 void Application::OnMouseButton(int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_MIDDLE)
@@ -141,29 +140,18 @@ void Application::OnMouseButton(int button, int action, int mods)
     {
         if (action == GLFW_PRESS)
         {
-            for (Token* token : uiState.selectedTokens)
-                token->isSelected = false;
-            uiState.selectedTokens.clear();
-
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
-            glm::vec2 worldPos = ScreenToWorldPos(xpos, ypos);
-            // Tokens are drawn from first to last, so iterate in reverse to find the topmost
-            for (int i = scene->tokens.size() - 1; i >= 0; i--)
+            Token* token = GetTokenAtScreenPos(xpos, ypos);
+            if (token && !token->isSelected)
             {
-                Token* token = &scene->tokens[i];
-                // It should only be possible to select one token with a single click
-                if (token->Contains(worldPos))
-                {
-                    token->isSelected = true;
-                    uiState.selectedTokens.push_back(token);
-                    break;
-                }
+                ClearSelection();
+                SelectToken(token);
             }
-
-            // If nothing was immediately selected, start a drag select
-            if (uiState.selectedTokens.size() == 0)
+            // If nothing was immediately selected/being modified, start a drag select
+            else if (!token)
             {
+                ClearSelection();
                 uiState.dragSelectRect = std::make_unique<RectOverlay>();
                 // GL uses inverted Y-axis
                 uiState.dragSelectRect->startCorner = uiState.dragSelectRect->endCorner = glm::vec2(xpos, windowHeight - ypos);
@@ -322,6 +310,36 @@ std::vector<Token*> Application::TokensInScreenRect(float minx, float miny, floa
         }
     }
     return tokens;
+}
+
+void Application::ClearSelection()
+{
+    for (Token* token : uiState.selectedTokens)
+        token->isSelected = false;
+    uiState.selectedTokens.clear();
+}
+
+void Application::SelectToken(Token* token)
+{
+    uiState.selectedTokens.push_back(token);
+    token->isSelected = true;
+}
+
+
+Token* Application::GetTokenAtScreenPos(float xpos, float ypos)
+{
+    glm::vec2 worldPos = ScreenToWorldPos(xpos, ypos);
+    // Tokens are drawn from first to last, so iterate in reverse to find the topmost
+    for (int i = scene->tokens.size() - 1; i >= 0; i--)
+    {
+        Token* token = &scene->tokens[i];
+        // It should only be possible to select one token with a single click
+        if (token->Contains(worldPos))
+        {
+            return token;
+        }
+    }
+    return nullptr;
 }
 
 // =============================================================================
