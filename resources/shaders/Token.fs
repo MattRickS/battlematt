@@ -21,7 +21,7 @@ void main()
     float dist = dot(offset, offset);
     if (dist <= borderBand)
     {
-        FragColor = vec4(vec3(texture(diffuse, UV)), 1.0);
+        FragColor = vec4(vec3(texture(diffuse, UV)) * (1 - dist * 3), 1.0);
         if (dist >= borderBand - AAsize)
             FragColor = mix(FragColor, borderColor, (dist - (borderBand - AAsize)) / AAsize);
     }
