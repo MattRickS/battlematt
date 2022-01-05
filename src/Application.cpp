@@ -166,18 +166,15 @@ void Application::OnMouseButton(int button, int action, int mods)
             if (uiState.dragSelectRect)
             {
                 // Y-axis is inverted on rect, use re-invert for calculating world positions
-                auto selectedTokens = TokensInScreenRect(
+                auto tokensInBounds = TokensInScreenRect(
                     uiState.dragSelectRect->MinX(),
                     windowHeight - uiState.dragSelectRect->MinY(),
                     uiState.dragSelectRect->MaxX(),
                     windowHeight - uiState.dragSelectRect->MaxY()
                 );
 
-                for (Token* token : selectedTokens)
-                {
-                    token->isSelected = true;
-                    uiState.selectedTokens.push_back(token);
-                }
+                for (Token* token : tokensInBounds)
+                    SelectToken(token);
 
                 uiState.dragSelectRect.reset();
             }

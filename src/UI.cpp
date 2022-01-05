@@ -61,19 +61,26 @@ ImGuiContextGuard::~ImGuiContextGuard()
     ImGui::DestroyContext();
 }
 
-bool FileLine(std::string label, std::string& path)
+bool FileLine(std::string dialogName, std::string label, std::string& path)
 {
     bool success = false;
     if (ImGui::InputText(label.c_str(), &path, ImGuiInputTextFlags_EnterReturnsTrue))
         return true;
 
     ImGui::SameLine();
+    // Elements need to be uniquely named within a window, but can use ## to add a
+    // suffix to the ID but not the label, or ### to add a suffix that is the entire ID.
+    // Eg,
+    //   Name##extra results in label="Name" and ID="Name##extra"
+    //   Name###extra results in label="Name" and ID="extra"
+    // It's also possible to use PushID()/PopID() to ensure unique IDs, useful in a loop
     // TODO: Providing wildcard filter doesn't return correct path (uses * as ext)
     //       Ideally don't want to restrict filters so severely
-    if (ImGui::Button("Open File Dialog")) 
-        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDialog", "Choose File", "Images{.png,.jpg,.jpeg}", path);
+    std::string buttonName = "Choose File##" + dialogName;
+    if (ImGui::Button(buttonName.c_str()))
+        ImGuiFileDialog::Instance()->OpenDialog(dialogName, "Choose File", "Images{.png,.jpg,.jpeg}", path);
 
-    if (ImGuiFileDialog::Instance()->Display("ChooseFileDialog"))
+    if (ImGuiFileDialog::Instance()->Display(dialogName))
     {
         if (ImGuiFileDialog::Instance()->IsOk())
         {
@@ -104,7 +111,7 @@ void DrawUI(Scene* scene, UIState* uiState)
             scene->background.SetScale(bgSize);
         
         std::string imagePath = scene->background.GetImage();
-        if (FileLine("Background Image", imagePath))
+        if (FileLine("ChooseBGImage", "Background Image", imagePath))
             scene->background.SetImage(imagePath);
       
         float gridSize = scene->grid.GetScale();
@@ -117,14 +124,16 @@ void DrawUI(Scene* scene, UIState* uiState)
         
         ImGui::Checkbox("Snap to Grid", &uiState->snapToGrid);
 
+        ImGui::Separator();
+
         ImGui::Text("Num selected tokens : %ld", uiState->selectedTokens.size());
         if (uiState->selectedTokens.size() > 0)
         {
             Token* token = uiState->selectedTokens.back();
-            ImGui::TextUnformatted(token->name.c_str());
+            ImGui::InputText("Name", &token->name);
 
             std::string iconPath = token->GetIcon();
-            if (FileLine("Icon", iconPath))
+            if (FileLine("ChooseTokenIcon", "Icon", iconPath))
             {
                 for (Token* t : uiState->selectedTokens)
                     t->SetIcon(iconPath);
@@ -150,6 +159,8 @@ void DrawUI(Scene* scene, UIState* uiState)
                     t->borderColor = token->borderColor;
             }
         }
+
+        ImGui::Separator();
 
         if (ImGui::Button("Add Token"))
             scene->AddToken();
