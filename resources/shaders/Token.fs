@@ -8,7 +8,7 @@ uniform float borderWidth;
 // Highlight Color will have no alpha if not highlighted
 uniform vec4 highlightColor;
 
-float highlightWidth = 0.04;
+float highlightWidth = 0.06;
 float maxBand = 0.25;
 float highlightBand = maxBand - highlightWidth;
 float borderBand = highlightBand * (1.0 - borderWidth);
@@ -34,7 +34,7 @@ void main()
     else if (highlightColor.w > 0 && dist < maxBand)
     {
         float alpha = (maxBand - dist) * (1 / highlightWidth);
-        FragColor = vec4(vec3(highlightColor), alpha * alpha);
+        FragColor = vec4(vec3(highlightColor), alpha);
     }
     else
         FragColor = vec4(0);
