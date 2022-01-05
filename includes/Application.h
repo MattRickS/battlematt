@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 #include <GLFW/glfw3.h>
 #include <ImGuiFileDialog.h>
@@ -53,12 +54,14 @@ private:
 
     void InitGL();
     void SetCallbacks();
+
+    std::vector<Token*> TokensInScreenRect(float minx, float miny, float maxx, float maxy);
 };
 
 // =============================================================================
 // Callbacks
 
-static void glfw_error_callback(int error, const char* description);
+void glfw_error_callback(int error, const char* description);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);

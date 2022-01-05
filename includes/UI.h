@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <vector>
 
 #include <imgui.h>
@@ -7,12 +8,14 @@
 
 #include <Scene.h>
 #include <Token.h>
+#include <Overlays.h>
 
 
 struct UIState
 {
     bool snapToGrid = false;
     std::vector<Token*> selectedTokens;
+    std::unique_ptr<RectOverlay> dragSelectRect;
 };
 
 

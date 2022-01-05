@@ -151,8 +151,9 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Further investigation into shared/packed/std140 layouts in glsl
 - [x] Snap to grid
 - [ ] UI sections (background, grid, tokens, etc...)
-- [ ] Drag select
+- [x] Drag select
 - [ ] Batch Edit
 - [x] Add Token
 - [ ] Duplicate Token
 - [ ] Save/Load
+- [ ] Undo Queue (Actions)

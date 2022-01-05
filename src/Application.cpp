@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <chrono>
 #include <thread>
+#include <vector>
 
 #include <glad/glad.h>
 #include <imgui.h>
@@ -113,10 +114,24 @@ void Application::OnMouseMove(double xpos, double ypos)
                 token->Move(offset);
         }
     }
-    // else
-    //     scene->camera->ProcessMouseMovement(xoffset, yoffset);
+    else if (leftMouseHeld && uiState.dragSelectRect)
+    {
+        // GL uses inverted Y-axis
+        uiState.dragSelectRect->endCorner = glm::vec2(xpos, windowHeight - ypos);
 
+        // Y-axis is inverted on rect, use re-invert for calculating world positions
+        auto selectedTokens = TokensInScreenRect(
+            uiState.dragSelectRect->MinX(),
+            windowHeight - uiState.dragSelectRect->MinY(),
+            uiState.dragSelectRect->MaxX(),
+            windowHeight - uiState.dragSelectRect->MaxY()
+        );
+
+        for (Token* token : selectedTokens)
+            token->isHighlighted = true;
+    }
 }
+
 
 void Application::OnMouseButton(int button, int action, int mods)
 {
@@ -145,6 +160,32 @@ void Application::OnMouseButton(int button, int action, int mods)
                     break;
                 }
             }
+
+            // If nothing was immediately selected, start a drag select
+            if (uiState.selectedTokens.size() == 0)
+            {
+                uiState.dragSelectRect = std::make_unique<RectOverlay>();
+                // GL uses inverted Y-axis
+                uiState.dragSelectRect->startCorner = uiState.dragSelectRect->endCorner = glm::vec2(xpos, windowHeight - ypos);
+            }
+        }
+        else if (action == GLFW_RELEASE && uiState.dragSelectRect)
+        {
+            // Y-axis is inverted on rect, use re-invert for calculating world positions
+            auto selectedTokens = TokensInScreenRect(
+                uiState.dragSelectRect->MinX(),
+                windowHeight - uiState.dragSelectRect->MinY(),
+                uiState.dragSelectRect->MaxX(),
+                windowHeight - uiState.dragSelectRect->MaxY()
+            );
+
+            for (Token* token : selectedTokens)
+            {
+                token->isSelected = true;
+                uiState.selectedTokens.push_back(token);
+            }
+
+            uiState.dragSelectRect.reset();
         }
         leftMouseHeld = action == GLFW_PRESS;
     }
@@ -207,6 +248,8 @@ void Application::Draw()
         lastFrame = currentFrame;
 
         scene->Draw();
+        if (uiState.dragSelectRect)
+            uiState.dragSelectRect->Draw();
         DrawUI(scene, &uiState);
 
         glfwSwapBuffers(window);
@@ -262,10 +305,29 @@ void Application::SetCallbacks()
     glfwSetKeyCallback(window, key_callback);
 }
 
+std::vector<Token*> Application::TokensInScreenRect(float minx, float miny, float maxx, float maxy)
+{
+    glm::vec2 lo = ScreenToWorldPos(minx, miny);
+    glm::vec2 hi = ScreenToWorldPos(maxx, maxy);
+
+    std::vector<Token*> tokens;
+    for (Token& token: scene->tokens)
+    {
+        float radius = token.GetSize() * 0.5f;
+        glm::vec3 tokenPos = token.GetPos();
+        if (tokenPos.x + radius > lo.x && tokenPos.x - radius < hi.x
+            && tokenPos.y + radius > lo.y && tokenPos.y - radius < hi.y)
+        {
+            tokens.push_back(&token);
+        }
+    }
+    return tokens;
+}
+
 // =============================================================================
 // Callbacks
 
-static void glfw_error_callback(int error, const char* description)
+void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
@@ -301,7 +363,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse)
     {
-        std::cout << "Captured" << std::endl;
         return;
     }
 
