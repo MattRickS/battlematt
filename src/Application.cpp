@@ -148,13 +148,15 @@ void Application::OnMouseButton(int button, int action, int mods)
             uiState.tokenUnderCursor = GetTokenAtScreenPos(xpos, ypos);
             if (uiState.tokenUnderCursor && !uiState.tokenUnderCursor->isSelected)
             {
-                ClearSelection();
+                if (!mods & GLFW_MOD_SHIFT)
+                    ClearSelection();
                 SelectToken(uiState.tokenUnderCursor);
             }
             // If nothing was immediately selected/being modified, start a drag select
             else if (!uiState.tokenUnderCursor)
             {
-                ClearSelection();
+                if (!mods & GLFW_MOD_SHIFT)
+                    ClearSelection();
                 uiState.dragSelectRect = std::make_unique<RectOverlay>();
                 // GL uses inverted Y-axis
                 uiState.dragSelectRect->startCorner = uiState.dragSelectRect->endCorner = glm::vec2(xpos, windowHeight - ypos);
