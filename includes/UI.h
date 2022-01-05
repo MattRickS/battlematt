@@ -16,6 +16,7 @@ struct UIState
     bool snapToGrid = false;
     std::vector<Token*> selectedTokens;
     std::unique_ptr<RectOverlay> dragSelectRect;
+    Token* tokenUnderCursor = nullptr;
 };
 
 

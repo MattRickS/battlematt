@@ -97,14 +97,17 @@ void Application::OnMouseMove(double xpos, double ypos)
 
     if (middleMouseHeld)
         scene->camera->Pan(ScreenToWorldOffset(xoffset, yoffset));
-    else if (leftMouseHeld && uiState.selectedTokens.size() > 0)
+    else if (leftMouseHeld && uiState.tokenUnderCursor)
     {
         if (uiState.snapToGrid)
         {
-            for (Token* token : uiState.selectedTokens)
+            glm::vec2 newPos = scene->grid.TokenSnapPosition(uiState.tokenUnderCursor, ScreenToWorldPos(xpos, ypos));
+            glm::vec2 currPos = glm::vec2(uiState.tokenUnderCursor->GetPos());
+            if (newPos != currPos)
             {
-                glm::vec2 center = scene->grid.TokenSnapPosition(token, ScreenToWorldPos(xpos, ypos));
-                token->SetPos(glm::vec3(center.x, center.y, token->GetPos().z));
+                glm::vec2 offset = newPos - currPos;
+                for (Token* token : uiState.selectedTokens)
+                    token->Move(offset);
             }
         }
         else
@@ -142,14 +145,14 @@ void Application::OnMouseButton(int button, int action, int mods)
         {
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
-            Token* token = GetTokenAtScreenPos(xpos, ypos);
-            if (token && !token->isSelected)
+            uiState.tokenUnderCursor = GetTokenAtScreenPos(xpos, ypos);
+            if (uiState.tokenUnderCursor && !uiState.tokenUnderCursor->isSelected)
             {
                 ClearSelection();
-                SelectToken(token);
+                SelectToken(uiState.tokenUnderCursor);
             }
             // If nothing was immediately selected/being modified, start a drag select
-            else if (!token)
+            else if (!uiState.tokenUnderCursor)
             {
                 ClearSelection();
                 uiState.dragSelectRect = std::make_unique<RectOverlay>();
@@ -157,23 +160,27 @@ void Application::OnMouseButton(int button, int action, int mods)
                 uiState.dragSelectRect->startCorner = uiState.dragSelectRect->endCorner = glm::vec2(xpos, windowHeight - ypos);
             }
         }
-        else if (action == GLFW_RELEASE && uiState.dragSelectRect)
+        else if (action == GLFW_RELEASE)
         {
-            // Y-axis is inverted on rect, use re-invert for calculating world positions
-            auto selectedTokens = TokensInScreenRect(
-                uiState.dragSelectRect->MinX(),
-                windowHeight - uiState.dragSelectRect->MinY(),
-                uiState.dragSelectRect->MaxX(),
-                windowHeight - uiState.dragSelectRect->MaxY()
-            );
-
-            for (Token* token : selectedTokens)
+            uiState.tokenUnderCursor = nullptr;
+            if (uiState.dragSelectRect)
             {
-                token->isSelected = true;
-                uiState.selectedTokens.push_back(token);
-            }
+                // Y-axis is inverted on rect, use re-invert for calculating world positions
+                auto selectedTokens = TokensInScreenRect(
+                    uiState.dragSelectRect->MinX(),
+                    windowHeight - uiState.dragSelectRect->MinY(),
+                    uiState.dragSelectRect->MaxX(),
+                    windowHeight - uiState.dragSelectRect->MaxY()
+                );
 
-            uiState.dragSelectRect.reset();
+                for (Token* token : selectedTokens)
+                {
+                    token->isSelected = true;
+                    uiState.selectedTokens.push_back(token);
+                }
+
+                uiState.dragSelectRect.reset();
+            }
         }
         leftMouseHeld = action == GLFW_PRESS;
     }
