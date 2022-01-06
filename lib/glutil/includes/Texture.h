@@ -9,7 +9,7 @@ class Texture
 {
 public:
     std::string filename;
-    int width, height, numChannels;
+    int width = 0, height = 0, numChannels = 0;
     GLuint ID;
 
     Texture() {}

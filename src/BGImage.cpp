@@ -15,7 +15,8 @@ const float DEFAULT_PIXELS_PER_UNIT = 50.0f;
 
 BGImage::BGImage(std::string texturePath) : Quad(), tex(TextureCache::GetTexture(texturePath))
 {
-    m_scale = tex->width / DEFAULT_PIXELS_PER_UNIT;
+    if (tex->width)
+        m_scale = tex->width / DEFAULT_PIXELS_PER_UNIT;
     RebuildModel();
 }
 
