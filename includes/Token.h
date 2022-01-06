@@ -20,6 +20,7 @@ public:
     bool isHighlighted = false;
     bool isSelected = false;
 
+    Token();
     Token(std::string iconPath);
     Token(std::string iconPath, std::string name);
     void SetIcon(std::string path);
@@ -35,6 +36,7 @@ public:
     bool Contains(glm::vec2 pt) const;
     bool Contains(float x, float y) const;
     nlohmann::json Serialize() const;
+    void Deserialize(nlohmann::json json);
 
 private:
     Texture* tex;

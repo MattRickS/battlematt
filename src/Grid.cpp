@@ -95,3 +95,8 @@ nlohmann::json Grid::Serialize() const
         {"scale", m_scale}
     };
 }
+
+void Grid::Deserialize(nlohmann::json json)
+{
+    m_scale = json["scale"];
+}

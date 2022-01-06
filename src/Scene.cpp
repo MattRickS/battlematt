@@ -82,6 +82,20 @@ nlohmann::json Scene::Serialize() const
     };
 }
 
+void Scene::Deserialize(nlohmann::json json)
+{
+    camera->Deserialize(json["camera"]);
+    background.Deserialize(json["background"]);
+    grid.Deserialize(json["grid"]);
+
+    tokens.clear();
+    uint i = 0;
+    nlohmann::json jtokens = json["tokens"];
+    tokens = std::vector<Token>(jtokens.size());
+    std::for_each(jtokens.begin(), jtokens.end(),
+                  [this, &i](const nlohmann::json& jtoken){ tokens[i++].Deserialize(jtoken); });
+}
+
 void Scene::Save(std::string path)
 {
     std::cerr << "Saving to " << path << std::endl;
@@ -90,6 +104,21 @@ void Scene::Save(std::string path)
     {
         myfile << Serialize();
         myfile.close();
+    }
+    else
+        std::cerr << "Unable to open file" << std::endl;
+}
+
+void Scene::Load(std::string path)
+{
+    std::cerr << "Loading from " << path << std::endl;
+    nlohmann::json j;
+    std::ifstream myfile (path);
+    if (myfile.is_open())
+    {
+        myfile >> j;
+        myfile.close();
+        Deserialize(j);
     }
     else
         std::cerr << "Unable to open file" << std::endl;

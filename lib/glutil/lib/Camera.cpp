@@ -103,6 +103,15 @@ nlohmann::json Camera::Serialize()
     };
 }
 
+void Camera::Deserialize(nlohmann::json json)
+{
+    Position = glm::vec3(json["pos"][0], json["pos"][1], json["pos"][2]);
+    Focal = json["focal"];
+    updateCameraVectors();
+    updateProjectionMatrix();
+    updateViewMatrix();
+}
+
 // calculates the front vector from the Camera's (updated) Euler Angles
 void Camera::updateCameraVectors()
 {

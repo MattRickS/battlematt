@@ -69,6 +69,7 @@ public:
     void Zoom(float yoffset);
     void SetAperture(float haperture);
     nlohmann::json Serialize();
+    void Deserialize(nlohmann::json json);
 
 private:
     void updateCameraVectors();

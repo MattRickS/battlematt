@@ -76,3 +76,10 @@ nlohmann::json BGImage::Serialize() const
         {"pos", {m_pos.x, m_pos.y, m_pos.z}}
     };
 }
+
+void BGImage::Deserialize(nlohmann::json json)
+{
+    SetImage(json["texture"]);
+    SetScale(json["scale"]);
+    m_pos = glm::vec3(json["pos"][0], json["pos"][1], json["pos"][2]);
+}

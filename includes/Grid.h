@@ -37,6 +37,7 @@ public:
     float SnapGridSize(float size);
     glm::vec2 TokenSnapPosition(Token* token, glm::vec2 pos);
     nlohmann::json Serialize() const;
+    void Deserialize(nlohmann::json json);
 
 private:
     Shader shader;

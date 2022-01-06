@@ -29,6 +29,8 @@ public:
     void RemoveTokens(std::vector<Token*> toRemove);
     void Draw();
     nlohmann::json Serialize() const;
+    void Deserialize(nlohmann::json json);
     // TODO: Move this off this class
     void Save(std::string path);
+    void Load(std::string path);
 };

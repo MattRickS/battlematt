@@ -20,6 +20,7 @@ public:
     std::string GetImage();
     void SetImage(std::string imagePath);
     nlohmann::json Serialize() const;
+    void Deserialize(nlohmann::json json);
 
 private:
     Texture* tex;

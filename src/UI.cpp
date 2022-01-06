@@ -142,7 +142,7 @@ void DrawUI(Scene* scene, UIState* uiState)
 
         ImGui::Separator();
 
-        ImGui::Text("Num selected tokens : %ld", uiState->selectedTokens.size());
+        ImGui::Text("Num selected tokens : %ld / %ld", uiState->selectedTokens.size(), scene->tokens.size());
         if (uiState->selectedTokens.size() > 0)
         {
             Token* token = uiState->selectedTokens.back();
@@ -194,6 +194,21 @@ void DrawUI(Scene* scene, UIState* uiState)
             ImGuiFileDialog::Instance()->Close();
         }
         
+        ImGui::SameLine();
+
+        if (ImGui::Button("Load"))
+            ImGuiFileDialog::Instance()->OpenDialog("LoadDialog", "Choose File", ".json", "");
+
+        if (ImGuiFileDialog::Instance()->Display("LoadDialog"))
+        {
+            if (ImGuiFileDialog::Instance()->IsOk())
+            {
+                std::string loadPath = ImGuiFileDialog::Instance()->GetFilePathName();
+                scene->Load(loadPath);
+            }            
+            ImGuiFileDialog::Instance()->Close();
+        }
+
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
         ImGui::End();

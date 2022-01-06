@@ -10,6 +10,7 @@
 #include <Primitives.h>
 #include <TextureCache.h>
 
+Token::Token() : Quad(), name("") {}
 
 Token::Token(std::string iconPath) : Token(iconPath, std::filesystem::path(iconPath).stem()) {}
 
@@ -106,4 +107,15 @@ nlohmann::json Token::Serialize() const
         {"borderWidth", borderWidth},
         {"borderColour", {borderColor.x, borderColor.y, borderColor.z, borderColor.w}}
     };
+}
+
+void Token::Deserialize(nlohmann::json json)
+{
+    SetIcon(json["texture"]);
+    SetSize(json["scale"]);
+    SetPos(glm::vec3(json["pos"][0], json["pos"][1], json["pos"][2]));
+    borderWidth = json["borderWidth"];
+    borderColor = glm::vec4(
+        json["borderColour"][0], json["borderColour"][1], json["borderColour"][2], json["borderColour"][3]
+    );
 }
