@@ -95,6 +95,14 @@ void Camera::SetAperture(float haperture)
     updateProjectionMatrix();
 }
 
+nlohmann::json Camera::Serialize()
+{
+    return {
+        {"pos", {Position.x, Position.y, Position.z}},
+        {"focal", Focal}
+    };
+}
+
 // calculates the front vector from the Camera's (updated) Euler Angles
 void Camera::updateCameraVectors()
 {

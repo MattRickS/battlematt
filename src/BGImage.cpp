@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <json.hpp>
 
 #include <TextureCache.h>
 #include <Primitives.h>
@@ -64,4 +65,13 @@ void BGImage::SetImage(std::string imagePath)
     if (!m_scale)
         m_scale = tex->width / DEFAULT_PIXELS_PER_UNIT;
     RebuildModel();
+}
+
+nlohmann::json BGImage::Serialize() const
+{
+    return {
+        {"texture", tex->filename},
+        {"scale", m_scale},
+        {"pos", {m_pos.x, m_pos.y, m_pos.z}}
+    };
 }

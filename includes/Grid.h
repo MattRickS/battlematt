@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <json.hpp>
 
 #include <Primitives.h>
 #include <Shader.h>
@@ -35,6 +36,7 @@ public:
     float SnapGridSize(TokenGridSize tokenGridSize);
     float SnapGridSize(float size);
     glm::vec2 TokenSnapPosition(Token* token, glm::vec2 pos);
+    nlohmann::json Serialize() const;
 
 private:
     Shader shader;

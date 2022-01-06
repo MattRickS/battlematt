@@ -129,6 +129,10 @@ PATCH /scenes/<id>/
 }
 ```
 
+## Textures
+Textures should be loaded and a checksum calculated. The TextureCache should be able to look up by path or checksum. Textures should be serialized separately and store the checksum and filepath together. Clients will receive the serialized scene, then compare the checksums against their local cache. Missing checksums can be requested from the host and then saved to the local cache.
+
+
 # Architecture
 Could potentially have the C++ handle OpenGL/UI and a python networking layer. The C++ API would only need to expose a way of updating it's scene file.
 
@@ -146,14 +150,16 @@ Might consider switching to TinyEngine if more features are needed: https://gith
 Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGrid/
 
 # TODO
-- [ ] Separate Token and TokenInstance. TokenInstance is a unique model with shared Token. Promotable to individual Token.
+- [ ] Separate Token and TokenInstance. TokenInstance is a unique model with shared Token. Promotable to individual Token. (Not really necessary now that batch edit is an option)
 - [ ] Relative paths converted to absolute in TextureCache
 - [ ] Further investigation into shared/packed/std140 layouts in glsl
 - [x] Snap to grid
 - [ ] UI sections (background, grid, tokens, etc...)
 - [x] Drag select
-- [ ] Batch Edit
+- [x] Batch Edit
 - [x] Add Token
-- [ ] Duplicate Token
+- [x] Duplicate Token
 - [ ] Save/Load
 - [ ] Undo Queue (Actions)
+- [ ] Images not loading with correct sizes/distortion. Likely the wrong stbi options.
+- [ ] Background image offset

@@ -94,6 +94,22 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
 }
 
 
+// void Save(Scene* scene)
+// {
+//     ImGuiFileDialog::Instance()->OpenDialog("SaveDialog", "Choose File", "Scene{.json}", "");
+
+//     if (ImGuiFileDialog::Instance()->Display("SaveDialog"))
+//     {
+//         if (ImGuiFileDialog::Instance()->IsOk())
+//         {
+//             std::string savePath = ImGuiFileDialog::Instance()->GetFilePathName();
+//             scene->Save(savePath);
+//         }            
+//         ImGuiFileDialog::Instance()->Close();
+//     }
+// }
+
+
 void DrawUI(Scene* scene, UIState* uiState)
 {
     // Start the Dear ImGui frame
@@ -165,6 +181,19 @@ void DrawUI(Scene* scene, UIState* uiState)
         if (ImGui::Button("Add Token"))
             scene->AddToken();
 
+        if (ImGui::Button("Save"))
+            ImGuiFileDialog::Instance()->OpenDialog("SaveDialog", "Choose File", ".json", "");
+
+        if (ImGuiFileDialog::Instance()->Display("SaveDialog"))
+        {
+            if (ImGuiFileDialog::Instance()->IsOk())
+            {
+                std::string savePath = ImGuiFileDialog::Instance()->GetFilePathName();
+                scene->Save(savePath);
+            }            
+            ImGuiFileDialog::Instance()->Close();
+        }
+        
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
         ImGui::End();

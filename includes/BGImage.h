@@ -2,6 +2,7 @@
 #include <string>
 
 #include <glm/glm.hpp>
+#include <json.hpp>
 
 #include <Texture.h>
 #include <Primitives.h>
@@ -18,6 +19,7 @@ public:
     void Draw(Shader &shader);
     std::string GetImage();
     void SetImage(std::string imagePath);
+    nlohmann::json Serialize() const;
 
 private:
     Texture* tex;

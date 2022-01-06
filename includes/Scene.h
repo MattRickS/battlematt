@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <glm/glm.hpp>
+#include <json.hpp>
 
 #include <BGImage.h>
 #include <Camera.h>
@@ -27,4 +28,7 @@ public:
     void AddToken(std::string iconPath, glm::vec3 pos, float size);
     void RemoveTokens(std::vector<Token*> toRemove);
     void Draw();
+    nlohmann::json Serialize() const;
+    // TODO: Move this off this class
+    void Save(std::string path);
 };

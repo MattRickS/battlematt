@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <json.hpp>
 
 #include <vector>
 
@@ -67,6 +68,7 @@ public:
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
     void Zoom(float yoffset);
     void SetAperture(float haperture);
+    nlohmann::json Serialize();
 
 private:
     void updateCameraVectors();

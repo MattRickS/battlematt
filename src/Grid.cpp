@@ -88,3 +88,10 @@ float Grid::SnapGridSize(float size)
     else
         return m_scale / std::round(m_scale / size);
 }
+
+nlohmann::json Grid::Serialize() const
+{
+    return {
+        {"scale", m_scale}
+    };
+}

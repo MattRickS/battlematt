@@ -4,6 +4,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <json.hpp>
 
 #include <Token.h>
 #include <Primitives.h>
@@ -12,14 +13,13 @@
 
 Token::Token(std::string iconPath) : Token(iconPath, std::filesystem::path(iconPath).stem()) {}
 
-Token::Token(std::string iconPath, std::string name) : Quad(), name(name), iconPath(iconPath), tex(TextureCache::GetTexture(iconPath))
+Token::Token(std::string iconPath, std::string name) : Quad(), name(name), tex(TextureCache::GetTexture(iconPath))
 {
     RebuildModel();
 }
 
 void Token::SetIcon(std::string path)
 {
-    iconPath = path;
     tex = TextureCache::GetTexture(path);
 }
 
@@ -95,4 +95,15 @@ void Token::RebuildModel()
     model = glm::translate(model, m_pos);
     model = glm::scale(model, glm::vec3(m_scale));
     // model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+}
+
+nlohmann::json Token::Serialize() const
+{
+    return {
+        {"texture", tex->filename},
+        {"pos", {m_pos.x, m_pos.y, m_pos.z}},
+        {"scale", m_scale},
+        {"borderWidth", borderWidth},
+        {"borderColour", {borderColor.x, borderColor.y, borderColor.z, borderColor.w}}
+    };
 }

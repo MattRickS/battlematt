@@ -1,8 +1,11 @@
 #include <algorithm>
+#include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
 #include <glm/glm.hpp>
+#include <json.hpp>
 
 #include <BGImage.h>
 #include <Camera.h>
@@ -65,4 +68,29 @@ void Scene::Draw()
     tokenShader.use();
     for (Token& token : tokens)
         token.Draw(tokenShader);
+}
+
+nlohmann::json Scene::Serialize() const
+{
+    std::vector<nlohmann::json> jtokens(tokens.size());
+    std::transform(tokens.begin(), tokens.end(), jtokens.begin(), [](const Token& token){ return token.Serialize(); });
+    return {
+        {"camera", camera->Serialize()},
+        {"background", background.Serialize()},
+        {"grid", grid.Serialize()},
+        {"tokens", jtokens}
+    };
+}
+
+void Scene::Save(std::string path)
+{
+    std::cerr << "Saving to " << path << std::endl;
+    std::ofstream myfile (path);
+    if (myfile.is_open())
+    {
+        myfile << Serialize();
+        myfile.close();
+    }
+    else
+        std::cerr << "Unable to open file" << std::endl;
 }

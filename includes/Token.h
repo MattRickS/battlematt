@@ -2,6 +2,7 @@
 #include <string>
 
 #include <glm/glm.hpp>
+#include <json.hpp>
 
 #include <Primitives.h>
 #include <Texture.h>
@@ -26,16 +27,16 @@ public:
     void SetPos(glm::vec3 pos);
     glm::vec3 GetPos() { return m_pos; }
     float GetSize() { return m_scale; }
-    std::string GetIcon() { return iconPath; }
+    std::string GetIcon() { return tex->filename; }
     void Move(glm::vec2 offset);
     void Move(float xoffset, float yoffset);
     const glm::mat4* GetModel() const;
     void Draw(Shader &shader);
     bool Contains(glm::vec2 pt) const;
     bool Contains(float x, float y) const;
+    nlohmann::json Serialize() const;
 
 private:
-    std::string iconPath;
     Texture* tex;
     glm::mat4 model = glm::mat4(1.0f);
     float m_scale = 1.0f;
