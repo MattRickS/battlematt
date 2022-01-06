@@ -179,7 +179,13 @@ void DrawUI(Scene* scene, UIState* uiState)
         ImGui::Separator();
 
         if (ImGui::Button("Add Token"))
+        {
+            // TODO: Select logic should be moved to UI state so ClearSelection can be used here
+            for (Token* token : uiState->selectedTokens)
+                token->isSelected = false;
+            uiState->selectedTokens.clear();
             scene->AddToken();
+        }
 
         if (ImGui::Button("Save"))
             ImGuiFileDialog::Instance()->OpenDialog("SaveDialog", "Choose File", ".json", "");
