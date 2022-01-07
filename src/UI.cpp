@@ -138,13 +138,13 @@ void DrawUI(Scene* scene, UIState* uiState)
 
         if (ImGui::CollapsingHeader("Background"))
         {
-            ImGui::ColorEdit3("Color", (float*)&scene->bgColor);
+            ImGui::ColorEdit3("Color##Background", (float*)&scene->bgColor);
             glm::vec2 bgPos = glm::vec2(scene->background.GetPos());
-            if (ImGui::DragFloat2("Position", (float*)&bgPos))
+            if (ImGui::DragFloat2("Position##Background", (float*)&bgPos))
                 scene->background.SetPos(glm::vec3(bgPos, 0));
 
             float bgSize = scene->background.GetScale();
-            if (ImGui::SliderFloat("Size", &bgSize, 1, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
+            if (ImGui::SliderFloat("Size##Background", &bgSize, 1, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
                 scene->background.SetScale(bgSize);
             
             std::string imagePath = scene->background.GetImage();
@@ -155,11 +155,11 @@ void DrawUI(Scene* scene, UIState* uiState)
         if (ImGui::CollapsingHeader("Grid"))
         {
             float gridSize = scene->grid.GetScale();
-            if (ImGui::SliderFloat("Size", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
+            if (ImGui::SliderFloat("Size##Grid", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
                 scene->grid.SetScale(gridSize);
             
             glm::vec3 gridColour = scene->grid.GetColour();
-            if (ImGui::ColorEdit3("Color", (float*)&gridColour))
+            if (ImGui::ColorEdit3("Color##Color", (float*)&gridColour))
                 scene->grid.SetColour(gridColour);
             
             ImGui::Checkbox("Snap to Grid", &uiState->snapToGrid);
@@ -181,7 +181,7 @@ void DrawUI(Scene* scene, UIState* uiState)
                 }
 
                 float iconSize = token->GetSize();
-                if (ImGui::SliderFloat("Size", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
+                if (ImGui::SliderFloat("Size##Token", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
                 {
                     if (uiState->snapToGrid)
                         iconSize = scene->grid.SnapGridSize(iconSize);
