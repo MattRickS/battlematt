@@ -26,6 +26,11 @@ void BGImage::SetPos(glm::vec3 pos)
     RebuildModel();
 }
 
+glm::vec3 BGImage::GetPos()
+{
+    return m_pos;
+}
+
 void BGImage::SetScale(float scale)
 {
     m_scale = scale;

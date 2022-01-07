@@ -122,6 +122,10 @@ void DrawUI(Scene* scene, UIState* uiState)
         ImGui::Begin("Mapmaker UI");
 
         ImGui::ColorEdit3("Background Color", (float*)&scene->bgColor);
+        glm::vec2 bgPos = glm::vec2(scene->background.GetPos());
+        if (ImGui::DragFloat2("Background Position", (float*)&bgPos))
+            scene->background.SetPos(glm::vec3(bgPos, 0));
+
         float bgSize = scene->background.GetScale();
         if (ImGui::SliderFloat("Background Size", &bgSize, 1, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
             scene->background.SetScale(bgSize);

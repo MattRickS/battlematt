@@ -13,6 +13,7 @@ class BGImage: public Quad
 public:
     BGImage(std::string texturePath);
     void SetPos(glm::vec3 pos);
+    glm::vec3 GetPos();
     void SetScale(float scale);
     float GetScale() { return m_scale; }
     const glm::mat4* GetModel() const { return &m_model; }
