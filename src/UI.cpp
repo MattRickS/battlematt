@@ -121,75 +121,82 @@ void DrawUI(Scene* scene, UIState* uiState)
     {
         ImGui::Begin("Mapmaker UI");
 
-        ImGui::ColorEdit3("Background Color", (float*)&scene->bgColor);
-        glm::vec2 bgPos = glm::vec2(scene->background.GetPos());
-        if (ImGui::DragFloat2("Background Position", (float*)&bgPos))
-            scene->background.SetPos(glm::vec3(bgPos, 0));
+        if (ImGui::CollapsingHeader("Background"))
+        {
+            ImGui::ColorEdit3("Color", (float*)&scene->bgColor);
+            glm::vec2 bgPos = glm::vec2(scene->background.GetPos());
+            if (ImGui::DragFloat2("Position", (float*)&bgPos))
+                scene->background.SetPos(glm::vec3(bgPos, 0));
 
-        float bgSize = scene->background.GetScale();
-        if (ImGui::SliderFloat("Background Size", &bgSize, 1, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
-            scene->background.SetScale(bgSize);
-        
-        std::string imagePath = scene->background.GetImage();
-        if (FileLine("ChooseBGImage", "Background Image", imagePath))
-            scene->background.SetImage(imagePath);
-      
-        float gridSize = scene->grid.GetScale();
-        if (ImGui::SliderFloat("Grid Size", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
-            scene->grid.SetScale(gridSize);
-        
-        glm::vec3 gridColour = scene->grid.GetColour();
-        if (ImGui::ColorEdit3("Grid Color", (float*)&gridColour))
-            scene->grid.SetColour(gridColour);
-        
-        ImGui::Checkbox("Snap to Grid", &uiState->snapToGrid);
+            float bgSize = scene->background.GetScale();
+            if (ImGui::SliderFloat("Size", &bgSize, 1, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
+                scene->background.SetScale(bgSize);
+            
+            std::string imagePath = scene->background.GetImage();
+            if (FileLine("ChooseBGImage", "Image", imagePath))
+                scene->background.SetImage(imagePath);
+        }
 
-        ImGui::Separator();
+        if (ImGui::CollapsingHeader("Grid"))
+        {
+            float gridSize = scene->grid.GetScale();
+            if (ImGui::SliderFloat("Size", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
+                scene->grid.SetScale(gridSize);
+            
+            glm::vec3 gridColour = scene->grid.GetColour();
+            if (ImGui::ColorEdit3("Color", (float*)&gridColour))
+                scene->grid.SetColour(gridColour);
+            
+            ImGui::Checkbox("Snap to Grid", &uiState->snapToGrid);
+        }
 
         ImGui::Text("Num selected tokens : %ld / %ld", uiState->selectedTokens.size(), scene->tokens.size());
-        if (uiState->selectedTokens.size() > 0)
+        if (ImGui::CollapsingHeader("Token"))
         {
-            Token* token = uiState->selectedTokens.back();
-            ImGui::InputText("Name", &token->name);
-
-            std::string iconPath = token->GetIcon();
-            if (FileLine("ChooseTokenIcon", "Icon", iconPath))
+            if (uiState->selectedTokens.size() > 0)
             {
-                for (Token* t : uiState->selectedTokens)
-                    t->SetIcon(iconPath);
+                Token* token = uiState->selectedTokens.back();
+                ImGui::InputText("Name", &token->name);
+
+                std::string iconPath = token->GetIcon();
+                if (FileLine("ChooseTokenIcon", "Icon", iconPath))
+                {
+                    for (Token* t : uiState->selectedTokens)
+                        t->SetIcon(iconPath);
+                }
+
+                float iconSize = token->GetSize();
+                if (ImGui::SliderFloat("Size", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
+                {
+                    if (uiState->snapToGrid)
+                        iconSize = scene->grid.SnapGridSize(iconSize);
+                    for (Token* t : uiState->selectedTokens)
+                        t->SetSize(iconSize);
+                }
+
+                if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
+                {
+                    for (Token* t : uiState->selectedTokens)
+                        t->borderWidth = token->borderWidth;
+                }
+                if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
+                {
+                    for (Token* t : uiState->selectedTokens)
+                        t->borderColor = token->borderColor;
+                }
             }
 
-            float iconSize = token->GetSize();
-            if (ImGui::SliderFloat("Size", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
+            if (ImGui::Button("Add Token"))
             {
-                if (uiState->snapToGrid)
-                    iconSize = scene->grid.SnapGridSize(iconSize);
-                for (Token* t : uiState->selectedTokens)
-                    t->SetSize(iconSize);
-            }
-
-            if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
-            {
-                for (Token* t : uiState->selectedTokens)
-                    t->borderWidth = token->borderWidth;
-            }
-            if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
-            {
-                for (Token* t : uiState->selectedTokens)
-                    t->borderColor = token->borderColor;
+                // TODO: Select logic should be moved to UI state so ClearSelection can be used here
+                for (Token* token : uiState->selectedTokens)
+                    token->isSelected = false;
+                uiState->selectedTokens.clear();
+                scene->AddToken();
             }
         }
 
-        ImGui::Separator();
-
-        if (ImGui::Button("Add Token"))
-        {
-            // TODO: Select logic should be moved to UI state so ClearSelection can be used here
-            for (Token* token : uiState->selectedTokens)
-                token->isSelected = false;
-            uiState->selectedTokens.clear();
-            scene->AddToken();
-        }
+        ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
         if (ImGui::Button("Save"))
             ImGuiFileDialog::Instance()->OpenDialog("SaveDialog", "Choose File", ".json", "");
