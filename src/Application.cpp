@@ -149,14 +149,14 @@ void Application::OnMouseButton(int button, int action, int mods)
             if (uiState.tokenUnderCursor && !uiState.tokenUnderCursor->isSelected)
             {
                 if (!mods & GLFW_MOD_SHIFT)
-                    ClearSelection();
-                SelectToken(uiState.tokenUnderCursor);
+                    uiState.ClearSelection();
+                uiState.SelectToken(uiState.tokenUnderCursor);
             }
             // If nothing was immediately selected/being modified, start a drag select
             else if (!uiState.tokenUnderCursor)
             {
                 if (!mods & GLFW_MOD_SHIFT)
-                    ClearSelection();
+                    uiState.ClearSelection();
                 uiState.dragSelectRect = std::make_unique<RectOverlay>();
                 // GL uses inverted Y-axis
                 uiState.dragSelectRect->startCorner = uiState.dragSelectRect->endCorner = glm::vec2(xpos, windowHeight - ypos);
@@ -176,7 +176,7 @@ void Application::OnMouseButton(int button, int action, int mods)
                 );
 
                 for (Token* token : tokensInBounds)
-                    SelectToken(token);
+                    uiState.SelectToken(token);
 
                 uiState.dragSelectRect.reset();
             }
@@ -215,7 +215,7 @@ void Application::OnKey(int key, int scancode, int action, int mods)
     if (key == GLFW_KEY_DELETE && uiState.selectedTokens.size() > 0)
     {
         scene->RemoveTokens(uiState.selectedTokens);
-        ClearSelection();
+        uiState.ClearSelection();
     }
     if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && uiState.selectedTokens.size() > 0)
     {
@@ -223,9 +223,9 @@ void Application::OnKey(int key, int scancode, int action, int mods)
         for (Token* token : uiState.selectedTokens)
             scene->AddToken(token->GetIcon(), token->GetPos() + glm::vec3(1, 1, 0), token->GetSize());
 
-        ClearSelection();
+        uiState.ClearSelection();
         for (uint i = numTokens; i < scene->tokens.size(); i++)
-            SelectToken(&scene->tokens[i]);
+            uiState.SelectToken(&scene->tokens[i]);
     }
 }
 
@@ -331,19 +331,6 @@ std::vector<Token*> Application::TokensInScreenRect(float minx, float miny, floa
         }
     }
     return tokens;
-}
-
-void Application::ClearSelection()
-{
-    for (Token* token : uiState.selectedTokens)
-        token->isSelected = false;
-    uiState.selectedTokens.clear();
-}
-
-void Application::SelectToken(Token* token)
-{
-    uiState.selectedTokens.push_back(token);
-    token->isSelected = true;
 }
 
 

@@ -17,6 +17,9 @@ struct UIState
     std::vector<Token*> selectedTokens;
     std::unique_ptr<RectOverlay> dragSelectRect;
     Token* tokenUnderCursor = nullptr;
+
+    void ClearSelection();
+    void SelectToken(Token* token);
 };
 
 

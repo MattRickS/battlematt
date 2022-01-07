@@ -61,6 +61,21 @@ ImGuiContextGuard::~ImGuiContextGuard()
     ImGui::DestroyContext();
 }
 
+
+void UIState::ClearSelection()
+{
+    for (Token* token : selectedTokens)
+        token->isSelected = false;
+    selectedTokens.clear();
+}
+
+void UIState::SelectToken(Token* token)
+{
+    selectedTokens.push_back(token);
+    token->isSelected = true;
+}
+
+
 bool FileLine(std::string dialogName, std::string label, std::string& path)
 {
     bool success = false;
@@ -188,11 +203,9 @@ void DrawUI(Scene* scene, UIState* uiState)
 
             if (ImGui::Button("Add Token"))
             {
-                // TODO: Select logic should be moved to UI state so ClearSelection can be used here
-                for (Token* token : uiState->selectedTokens)
-                    token->isSelected = false;
-                uiState->selectedTokens.clear();
+                uiState->ClearSelection();
                 scene->AddToken();
+                uiState->SelectToken(&scene->tokens.back());
             }
         }
 
