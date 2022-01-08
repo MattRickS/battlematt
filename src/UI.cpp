@@ -76,25 +76,12 @@ void UIState::SelectToken(Token* token)
 }
 
 
-bool FileLine(std::string dialogName, std::string label, std::string& path)
+bool FilepathButton(const char* buttonName, const char* dialogName, const char* ext, std::string& path)
 {
+    if (ImGui::Button(buttonName))
+        ImGuiFileDialog::Instance()->OpenDialog(dialogName, "Choose File", ext, "");
+
     bool success = false;
-    if (ImGui::InputText(label.c_str(), &path, ImGuiInputTextFlags_EnterReturnsTrue))
-        return true;
-
-    ImGui::SameLine();
-    // Elements need to be uniquely named within a window, but can use ## to add a
-    // suffix to the ID but not the label, or ### to add a suffix that is the entire ID.
-    // Eg,
-    //   Name##extra results in label="Name" and ID="Name##extra"
-    //   Name###extra results in label="Name" and ID="extra"
-    // It's also possible to use PushID()/PopID() to ensure unique IDs, useful in a loop
-    // TODO: Providing wildcard filter doesn't return correct path (uses * as ext)
-    //       Ideally don't want to restrict filters so severely
-    std::string buttonName = "Choose File##" + dialogName;
-    if (ImGui::Button(buttonName.c_str()))
-        ImGuiFileDialog::Instance()->OpenDialog(dialogName, "Choose File", "Images{.png,.jpg,.jpeg}", path);
-
     if (ImGuiFileDialog::Instance()->Display(dialogName))
     {
         if (ImGuiFileDialog::Instance()->IsOk())
@@ -102,27 +89,25 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
             path = ImGuiFileDialog::Instance()->GetFilePathName();
             success = true;
         }
-        
         ImGuiFileDialog::Instance()->Close();
     }
     return success;
 }
 
 
-// void Save(Scene* scene)
-// {
-//     ImGuiFileDialog::Instance()->OpenDialog("SaveDialog", "Choose File", "Scene{.json}", "");
+bool FileLine(std::string dialogName, std::string label, std::string& path)
+{
+    if (ImGui::InputText(label.c_str(), &path, ImGuiInputTextFlags_EnterReturnsTrue))
+        return true;
 
-//     if (ImGuiFileDialog::Instance()->Display("SaveDialog"))
-//     {
-//         if (ImGuiFileDialog::Instance()->IsOk())
-//         {
-//             std::string savePath = ImGuiFileDialog::Instance()->GetFilePathName();
-//             scene->Save(savePath);
-//         }            
-//         ImGuiFileDialog::Instance()->Close();
-//     }
-// }
+    ImGui::SameLine();
+    std::string buttonName = "Choose File##" + dialogName;
+    if (FilepathButton(buttonName.c_str(), dialogName.c_str(), "Images{.png,.jpg,.jpeg}", path))
+        return true;
+
+    return false;
+}
+
 
 void DrawBackgroundOptions(BGImage* background, glm::vec4* bgColor)
 {
@@ -219,36 +204,20 @@ void DrawUI(Scene* scene, UIState* uiState)
             }
         }
 
+        // Spacer
         ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
-        if (ImGui::Button("Save"))
-            ImGuiFileDialog::Instance()->OpenDialog("SaveDialog", "Choose File", ".json", "");
-
-        if (ImGuiFileDialog::Instance()->Display("SaveDialog"))
-        {
-            if (ImGuiFileDialog::Instance()->IsOk())
-            {
-                std::string savePath = ImGuiFileDialog::Instance()->GetFilePathName();
-                scene->Save(savePath);
-            }            
-            ImGuiFileDialog::Instance()->Close();
-        }
+        // Save / Load
+        std::string path;
+        if (FilepathButton("Save", "saveDialog", ".json", path))
+            scene->Save(path);
         
         ImGui::SameLine();
 
-        if (ImGui::Button("Load"))
-            ImGuiFileDialog::Instance()->OpenDialog("LoadDialog", "Choose File", ".json", "");
+        if (FilepathButton("Load", "loadDialog", ".json", path))
+            scene->Load(path);
 
-        if (ImGuiFileDialog::Instance()->Display("LoadDialog"))
-        {
-            if (ImGuiFileDialog::Instance()->IsOk())
-            {
-                std::string loadPath = ImGuiFileDialog::Instance()->GetFilePathName();
-                scene->Load(loadPath);
-            }            
-            ImGuiFileDialog::Instance()->Close();
-        }
-
+        // Debug
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
         ImGui::End();
