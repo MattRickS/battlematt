@@ -112,6 +112,11 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
 void DrawBackgroundOptions(BGImage* background, glm::vec4* bgColor)
 {
     ImGui::ColorEdit3("Color##Background", (float*)bgColor);
+
+    std::string imagePath = background->GetImage();
+    if (FileLine("ChooseBGImage", "Image", imagePath))
+        background->SetImage(imagePath);
+
     glm::vec2 bgPos = glm::vec2(background->GetPos());
     if (ImGui::DragFloat2("Position##Background", (float*)&bgPos))
         background->SetPos(glm::vec3(bgPos, 0));
@@ -119,10 +124,10 @@ void DrawBackgroundOptions(BGImage* background, glm::vec4* bgColor)
     glm::vec2 bgSize = background->GetScale();
     if (ImGui::DragFloat2("Size##Background", (float*)&bgSize))
         background->SetScale(bgSize);
-    
-    std::string imagePath = background->GetImage();
-    if (FileLine("ChooseBGImage", "Image", imagePath))
-        background->SetImage(imagePath);
+
+    float bgRot = background->GetRotation();
+    if (ImGui::SliderFloat("Rotation##Background", &bgRot, 0, 360, "%.2f"))
+        background->SetRotation(bgRot);
 }
 
 void DrawGridOptions(Grid* grid, UIState* uiState)

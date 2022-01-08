@@ -37,6 +37,17 @@ void BGImage::SetScale(glm::vec2 scale)
     RebuildModel();
 }
 
+void BGImage::SetRotation(float degrees)
+{
+    m_rot = degrees;
+    RebuildModel();
+}
+
+float BGImage::GetRotation()
+{
+    return m_rot;
+}
+
 void BGImage::Draw(Shader &shader)
 {
     shader.setMat4("model", *GetModel());
@@ -55,6 +66,7 @@ void BGImage::RebuildModel()
     m_model = glm::mat4(1.0f);
     m_model = glm::translate(m_model, m_pos);
     m_model = glm::scale(m_model, glm::vec3(m_scale, 1.0f));
+    m_model = glm::rotate(m_model, glm::radians(-m_rot), glm::vec3(0, 0, 1));
 }
 
 

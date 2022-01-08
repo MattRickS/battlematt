@@ -16,6 +16,8 @@ public:
     glm::vec3 GetPos();
     void SetScale(glm::vec2 scale);
     glm::vec2 GetScale() { return m_scale; }
+    void SetRotation(float degrees);
+    float GetRotation();
     const glm::mat4* GetModel() const { return &m_model; }
     void Draw(Shader &shader);
     std::string GetImage();
@@ -28,6 +30,7 @@ private:
     glm::mat4 m_model;
     glm::vec3 m_pos = glm::vec3(0.0f);
     glm::vec2 m_scale = glm::vec2(1.0f);
+    float m_rot = 0.0f;
 
     void RebuildModel();
 };
