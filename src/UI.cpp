@@ -143,8 +143,8 @@ void DrawUI(Scene* scene, UIState* uiState)
             if (ImGui::DragFloat2("Position##Background", (float*)&bgPos))
                 scene->background.SetPos(glm::vec3(bgPos, 0));
 
-            float bgSize = scene->background.GetScale();
-            if (ImGui::SliderFloat("Size##Background", &bgSize, 1, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
+            glm::vec2 bgSize = scene->background.GetScale();
+            if (ImGui::DragFloat2("Size##Background", (float*)&bgSize))
                 scene->background.SetScale(bgSize);
             
             std::string imagePath = scene->background.GetImage();
@@ -159,7 +159,7 @@ void DrawUI(Scene* scene, UIState* uiState)
                 scene->grid.SetScale(gridSize);
             
             glm::vec3 gridColour = scene->grid.GetColour();
-            if (ImGui::ColorEdit3("Color##Color", (float*)&gridColour))
+            if (ImGui::ColorEdit3("Color##Grid", (float*)&gridColour))
                 scene->grid.SetColour(gridColour);
             
             ImGui::Checkbox("Snap to Grid", &uiState->snapToGrid);

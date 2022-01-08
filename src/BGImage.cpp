@@ -16,7 +16,7 @@ const float DEFAULT_PIXELS_PER_UNIT = 50.0f;
 BGImage::BGImage(std::string texturePath) : Quad(), tex(TextureCache::GetTexture(texturePath))
 {
     if (tex->width)
-        m_scale = tex->width / DEFAULT_PIXELS_PER_UNIT;
+        m_scale = glm::vec2(tex->width / DEFAULT_PIXELS_PER_UNIT, tex->width / DEFAULT_PIXELS_PER_UNIT);
     RebuildModel();
 }
 
@@ -31,7 +31,7 @@ glm::vec3 BGImage::GetPos()
     return m_pos;
 }
 
-void BGImage::SetScale(float scale)
+void BGImage::SetScale(glm::vec2 scale)
 {
     m_scale = scale;
     RebuildModel();
@@ -56,7 +56,7 @@ void BGImage::RebuildModel()
 {
     m_model = glm::mat4(1.0f);
     m_model = glm::translate(m_model, m_pos);
-    m_model = glm::scale(m_model, glm::vec3(m_scale));
+    m_model = glm::scale(m_model, glm::vec3(m_scale, 1.0f));
 }
 
 
@@ -67,9 +67,9 @@ std::string BGImage::GetImage()
 
 void BGImage::SetImage(std::string imagePath)
 {
+    float hSize = tex->width * m_scale.x;
     tex = TextureCache::GetTexture(imagePath);
-    if (!m_scale)
-        m_scale = tex->width / DEFAULT_PIXELS_PER_UNIT;
+    m_scale = glm::vec2(hSize / tex->width, hSize / tex->height);
     RebuildModel();
 }
 
@@ -77,7 +77,7 @@ nlohmann::json BGImage::Serialize() const
 {
     return {
         {"texture", tex->filename},
-        {"scale", m_scale},
+        {"scale", {m_scale.x, m_scale.y}},
         {"pos", {m_pos.x, m_pos.y, m_pos.z}}
     };
 }
@@ -85,6 +85,6 @@ nlohmann::json BGImage::Serialize() const
 void BGImage::Deserialize(nlohmann::json json)
 {
     SetImage(json["texture"]);
-    SetScale(json["scale"]);
+    SetScale(glm::vec2(json["scale"][0], json["scale"][1]));
     m_pos = glm::vec3(json["pos"][0], json["pos"][1], json["pos"][2]);
 }

@@ -84,8 +84,8 @@ void Camera::Zoom(float yoffset)
     Focal *= (1.0f - yoffset * 0.1f);
     if (Focal < 0.01f)
         Focal = 0.01f;
-    if (Focal > 45.0f)
-        Focal = 45.0f;
+    if (Focal > 90.0f)
+        Focal = 90.0f;
     updateProjectionMatrix();
 }
 
