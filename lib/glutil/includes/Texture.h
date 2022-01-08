@@ -10,10 +10,11 @@ class Texture
 public:
     std::string filename;
     int width = 0, height = 0, numChannels = 0;
-    GLuint ID;
+    GLuint ID = 0;
 
     Texture() {}
     Texture(const char *filename);
 
     void activate(GLuint textureID) const;
+    bool IsValid() const;
 };

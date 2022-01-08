@@ -61,14 +61,12 @@ void Token::Draw(Shader &shader)
     else
         highlight = glm::vec4(0);
 
-    if (tex)
+    if (tex && tex->IsValid())
     {
         tex->activate(GL_TEXTURE0);
         shader.setInt("diffuse", 0);
         glBindTexture(GL_TEXTURE_2D, tex->ID);
     }
-    else
-        std::cerr << "No texture assigned to Token" << std::endl;
 
     shader.setFloat4("highlightColor", highlight.x, highlight.y, highlight.z, highlight.w);
     shader.setFloat4("borderColor", borderColor.x, borderColor.y, borderColor.z, borderColor.w);

@@ -111,7 +111,7 @@ void Scene::Save(std::string path)
 
 void Scene::Load(std::string path)
 {
-    std::cerr << "Loading from " << path << std::endl;
+    std::cerr << "Loading Scene from " << path << std::endl;
     nlohmann::json j;
     std::ifstream myfile (path);
     if (myfile.is_open())

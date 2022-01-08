@@ -8,12 +8,12 @@
 
 Texture::Texture(const char *filename) : filename(filename)
 {
-    glGenTextures(1, &ID);
-
     // Load data into the texture
     unsigned char* data = stbi_load(filename, &width, &height, &numChannels, 0);
     if (data)
     {
+        glGenTextures(1, &ID);
+
         GLenum format;
         if (numChannels == 1)
             format = GL_RED;
@@ -34,11 +34,10 @@ Texture::Texture(const char *filename) : filename(filename)
         // set texture filtering parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        std::cerr << "Loaded: " << filename << " as ID " << ID << std::endl;
     }
     else
-    {
-        std::cout << "Failed to load texture: " << filename << std::endl;
-    }
+        std::cerr << "Failed to load texture: " << filename << std::endl;
     
     // Cleanup
     stbi_image_free(data);
@@ -50,3 +49,5 @@ void Texture::activate(GLuint textureID) const
     glActiveTexture(textureID);
     glBindTexture(GL_TEXTURE_2D, ID);
 }
+
+bool Texture::IsValid() const { return ID > 0; }
