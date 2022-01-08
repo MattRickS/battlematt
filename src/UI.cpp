@@ -124,6 +124,69 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
 //     }
 // }
 
+void DrawBackgroundOptions(BGImage* background, glm::vec4* bgColor)
+{
+    ImGui::ColorEdit3("Color##Background", (float*)bgColor);
+    glm::vec2 bgPos = glm::vec2(background->GetPos());
+    if (ImGui::DragFloat2("Position##Background", (float*)&bgPos))
+        background->SetPos(glm::vec3(bgPos, 0));
+
+    glm::vec2 bgSize = background->GetScale();
+    if (ImGui::DragFloat2("Size##Background", (float*)&bgSize))
+        background->SetScale(bgSize);
+    
+    std::string imagePath = background->GetImage();
+    if (FileLine("ChooseBGImage", "Image", imagePath))
+        background->SetImage(imagePath);
+}
+
+void DrawGridOptions(Grid* grid, UIState* uiState)
+{
+    float gridSize = grid->GetScale();
+    if (ImGui::SliderFloat("Size##Grid", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
+        grid->SetScale(gridSize);
+    
+    glm::vec3 gridColour = grid->GetColour();
+    if (ImGui::ColorEdit3("Color##Grid", (float*)&gridColour))
+        grid->SetColour(gridColour);
+    
+    ImGui::Checkbox("Snap to Grid", &uiState->snapToGrid);
+
+}
+
+
+void DrawTokenOptions(Token* token, Grid* grid, UIState* uiState)
+{
+    ImGui::InputText("Name", &token->name);
+
+    std::string iconPath = token->GetIcon();
+    if (FileLine("ChooseTokenIcon", "Icon", iconPath))
+    {
+        for (Token* t : uiState->selectedTokens)
+            t->SetIcon(iconPath);
+    }
+
+    float iconSize = token->GetSize();
+    if (ImGui::SliderFloat("Size##Token", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
+    {
+        if (uiState->snapToGrid)
+            iconSize = grid->SnapGridSize(iconSize);
+        for (Token* t : uiState->selectedTokens)
+            t->SetSize(iconSize);
+    }
+
+    if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
+    {
+        for (Token* t : uiState->selectedTokens)
+            t->borderWidth = token->borderWidth;
+    }
+    if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
+    {
+        for (Token* t : uiState->selectedTokens)
+            t->borderColor = token->borderColor;
+    }
+}
+
 
 void DrawUI(Scene* scene, UIState* uiState)
 {
@@ -137,69 +200,16 @@ void DrawUI(Scene* scene, UIState* uiState)
         ImGui::Begin("Mapmaker UI");
 
         if (ImGui::CollapsingHeader("Background"))
-        {
-            ImGui::ColorEdit3("Color##Background", (float*)&scene->bgColor);
-            glm::vec2 bgPos = glm::vec2(scene->background.GetPos());
-            if (ImGui::DragFloat2("Position##Background", (float*)&bgPos))
-                scene->background.SetPos(glm::vec3(bgPos, 0));
-
-            glm::vec2 bgSize = scene->background.GetScale();
-            if (ImGui::DragFloat2("Size##Background", (float*)&bgSize))
-                scene->background.SetScale(bgSize);
-            
-            std::string imagePath = scene->background.GetImage();
-            if (FileLine("ChooseBGImage", "Image", imagePath))
-                scene->background.SetImage(imagePath);
-        }
+            DrawBackgroundOptions(&scene->background, &scene->bgColor);
 
         if (ImGui::CollapsingHeader("Grid"))
-        {
-            float gridSize = scene->grid.GetScale();
-            if (ImGui::SliderFloat("Size##Grid", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
-                scene->grid.SetScale(gridSize);
-            
-            glm::vec3 gridColour = scene->grid.GetColour();
-            if (ImGui::ColorEdit3("Color##Grid", (float*)&gridColour))
-                scene->grid.SetColour(gridColour);
-            
-            ImGui::Checkbox("Snap to Grid", &uiState->snapToGrid);
-        }
+            DrawGridOptions(&scene->grid, uiState);
 
         ImGui::Text("Num selected tokens : %ld / %ld", uiState->selectedTokens.size(), scene->tokens.size());
         if (ImGui::CollapsingHeader("Token"))
         {
             if (uiState->selectedTokens.size() > 0)
-            {
-                Token* token = uiState->selectedTokens.back();
-                ImGui::InputText("Name", &token->name);
-
-                std::string iconPath = token->GetIcon();
-                if (FileLine("ChooseTokenIcon", "Icon", iconPath))
-                {
-                    for (Token* t : uiState->selectedTokens)
-                        t->SetIcon(iconPath);
-                }
-
-                float iconSize = token->GetSize();
-                if (ImGui::SliderFloat("Size##Token", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
-                {
-                    if (uiState->snapToGrid)
-                        iconSize = scene->grid.SnapGridSize(iconSize);
-                    for (Token* t : uiState->selectedTokens)
-                        t->SetSize(iconSize);
-                }
-
-                if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
-                {
-                    for (Token* t : uiState->selectedTokens)
-                        t->borderWidth = token->borderWidth;
-                }
-                if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
-                {
-                    for (Token* t : uiState->selectedTokens)
-                        t->borderColor = token->borderColor;
-                }
-            }
+                DrawTokenOptions(uiState->selectedTokens.back(), &scene->grid, uiState);
 
             if (ImGui::Button("Add Token"))
             {
