@@ -11,11 +11,11 @@
 #include <Primitives.h>
 #include <TextureCache.h>
 
-Token::Token() : Quad(), name("") {}
+Token::Token() : Quad(), name(""), m_model() {}
 
 Token::Token(std::string iconPath) : Token(iconPath, std::filesystem::path(iconPath).stem()) {}
 
-Token::Token(std::string iconPath, std::string name) : Quad(), name(name), tex(TextureCache::GetTexture(iconPath))
+Token::Token(std::string iconPath, std::string name) : Quad(), name(name), tex(TextureCache::GetTexture(iconPath)), m_model()
 {}
 
 void Token::SetIcon(std::string path)

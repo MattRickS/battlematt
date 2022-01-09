@@ -5,16 +5,15 @@
 #include <json.hpp>
 
 #include <Matrix2D.h>
+#include <Shape2D.h>
 #include <Texture.h>
-#include <Primitives.h>
 
 
-class BGImage: public Quad
+class BGImage: public Rect
 {
 public:
     BGImage(std::string texturePath);
-    Matrix2D* GetModel() { return &m_model; }
-    void Draw(Shader &shader);
+    void Draw(Shader &shader) override;
     std::string GetImage();
     void SetImage(std::string imagePath);
     nlohmann::json Serialize() const;
@@ -22,5 +21,4 @@ public:
 
 private:
     Texture* tex;
-    Matrix2D m_model;
 };

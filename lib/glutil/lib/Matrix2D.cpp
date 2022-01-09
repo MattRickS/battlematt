@@ -5,7 +5,7 @@
 #include <Matrix2D.h>
 
 
-Matrix2D::Matrix2D() : m_pos(0), m_scale(1), m_rot(0) {}
+Matrix2D::Matrix2D() : m_pos(0), m_scale(1), m_rot(0) { Rebuild(); }
 
 void Matrix2D::Offset(glm::vec2 offset)
 {

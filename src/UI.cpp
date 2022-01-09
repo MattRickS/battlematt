@@ -171,6 +171,13 @@ void DrawTokenOptions(Token* token, Grid* grid, UIState* uiState)
             t->GetModel()->SetScalef(iconSize);
     }
 
+    float rotation = token->GetModel()->GetRotation();
+    if (ImGui::SliderFloat("Rotation##Token", &rotation, 0, 360, "%.2f"))
+    {
+        for (Token* t : uiState->selectedTokens)
+            t->GetModel()->SetRotation(rotation);
+    }
+
     if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
     {
         for (Token* t : uiState->selectedTokens)

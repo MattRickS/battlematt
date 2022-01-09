@@ -9,12 +9,13 @@
 #include <TextureCache.h>
 #include <Primitives.h>
 #include <BGImage.h>
+#include <Shape2D.h>
 
 
 const float DEFAULT_PIXELS_PER_UNIT = 50.0f;
 
 
-BGImage::BGImage(std::string texturePath) : Quad(), tex(TextureCache::GetTexture(texturePath)), m_model()
+BGImage::BGImage(std::string texturePath) : Rect(), tex(TextureCache::GetTexture(texturePath))
 {
     if (tex->IsValid())
         m_model.SetScale(glm::vec2(tex->width / DEFAULT_PIXELS_PER_UNIT, tex->width / DEFAULT_PIXELS_PER_UNIT));
@@ -22,7 +23,7 @@ BGImage::BGImage(std::string texturePath) : Quad(), tex(TextureCache::GetTexture
 
 void BGImage::Draw(Shader &shader)
 {
-    shader.setMat4("model", *GetModel()->Value());
+    shader.setMat4("model", *m_model.Value());
 
     if (tex && tex->IsValid())
     {
@@ -30,7 +31,7 @@ void BGImage::Draw(Shader &shader)
         shader.setInt("diffuse", 0);
         glBindTexture(GL_TEXTURE_2D, tex->ID);
     }
-    Quad::Draw(shader);
+    Rect::Draw(shader);
 }
 
 std::string BGImage::GetImage()
