@@ -25,11 +25,11 @@ public:
     nlohmann::json Serialize() const;
     void Deserialize(nlohmann::json json);
 
+    void Rebuild();
+
 private:
     glm::mat4 m_matrix;
     glm::vec2 m_pos;
     glm::vec2 m_scale;
     float m_rot;
-
-    void Rebuild();
 };

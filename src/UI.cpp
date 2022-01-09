@@ -6,6 +6,7 @@
 #include <imgui_impl_opengl3.h>
 #include <ImGuiFileDialog.h>
 
+#include <Matrix2D.h>
 #include <Scene.h>
 #include <Token.h>
 #include <UI.h>
@@ -108,6 +109,21 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
     return false;
 }
 
+void DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D)
+{
+    glm::vec2 pos = matrix2D->GetPos();
+    if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
+        matrix2D->SetPos(pos);
+
+    glm::vec2 scale = matrix2D->GetScale();
+    if (ImGui::DragFloat2(("Size##" + suffixID).c_str(), (float*)&scale))
+        matrix2D->SetScale(scale);
+
+    float rotation = matrix2D->GetRotation();
+    if (ImGui::SliderFloat(("Rotation##" + suffixID).c_str(), &rotation, 0, 360, "%.2f"))
+        matrix2D->SetRotation(rotation);
+}
+
 
 void DrawBackgroundOptions(BGImage* background, glm::vec4* bgColor)
 {
@@ -117,17 +133,7 @@ void DrawBackgroundOptions(BGImage* background, glm::vec4* bgColor)
     if (FileLine("ChooseBGImage", "Image", imagePath))
         background->SetImage(imagePath);
 
-    glm::vec2 bgPos = glm::vec2(background->GetPos());
-    if (ImGui::DragFloat2("Position##Background", (float*)&bgPos))
-        background->SetPos(glm::vec3(bgPos, 0));
-
-    glm::vec2 bgSize = background->GetScale();
-    if (ImGui::DragFloat2("Size##Background", (float*)&bgSize))
-        background->SetScale(bgSize);
-
-    float bgRot = background->GetRotation();
-    if (ImGui::SliderFloat("Rotation##Background", &bgRot, 0, 360, "%.2f"))
-        background->SetRotation(bgRot);
+    DrawMatrix2DOptions("Background", background->GetModel());
 }
 
 void DrawGridOptions(Grid* grid, UIState* uiState)

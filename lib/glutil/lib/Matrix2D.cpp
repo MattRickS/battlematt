@@ -62,6 +62,6 @@ void Matrix2D::Rebuild()
 {
     m_matrix = glm::mat4(1.0f);
     m_matrix = glm::translate(m_matrix, glm::vec3(m_pos, 0.0f));
-    m_matrix = glm::scale(m_matrix, glm::vec3(m_scale, 1.0f));
     m_matrix = glm::rotate(m_matrix, glm::radians(-m_rot), glm::vec3(0, 0, 1));
+    m_matrix = glm::scale(m_matrix, glm::vec3(m_scale, 1.0f));
 }
