@@ -101,7 +101,7 @@ void Application::OnMouseMove(double xpos, double ypos)
     {
         if (uiState.snapToGrid)
         {
-            glm::vec2 newPos = scene->grid.TokenSnapPosition(uiState.tokenUnderCursor, ScreenToWorldPos(xpos, ypos));
+            glm::vec2 newPos = scene->grid.ShapeSnapPosition(uiState.tokenUnderCursor, ScreenToWorldPos(xpos, ypos));
             glm::vec2 currPos = uiState.tokenUnderCursor->GetModel()->GetPos();
             if (newPos != currPos)
             {
@@ -200,7 +200,7 @@ void Application::OnKey(int key, int scancode, int action, int mods)
     {
         for (Token* token : uiState.selectedTokens)
         {
-            TokenGridSize gridSize = static_cast<TokenGridSize>(scene->grid.GetTokenGridSize(token) + 1);
+            ShapeGridSize gridSize = static_cast<ShapeGridSize>(scene->grid.GetShapeGridSize(token) + 1);
             token->GetModel()->SetScalef(scene->grid.SnapGridSize(gridSize));
         }
     }
@@ -208,7 +208,7 @@ void Application::OnKey(int key, int scancode, int action, int mods)
     {
         for (Token* token : uiState.selectedTokens)
         {
-            TokenGridSize gridSize = static_cast<TokenGridSize>(scene->grid.GetTokenGridSize(token) - 1);
+            ShapeGridSize gridSize = static_cast<ShapeGridSize>(scene->grid.GetShapeGridSize(token) - 1);
             token->GetModel()->SetScalef(scene->grid.SnapGridSize(gridSize));
         }
     }

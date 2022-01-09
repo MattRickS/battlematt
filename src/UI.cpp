@@ -7,6 +7,7 @@
 #include <ImGuiFileDialog.h>
 
 #include <Matrix2D.h>
+#include <Shape2D.h>
 #include <Scene.h>
 #include <Token.h>
 #include <UI.h>
@@ -124,6 +125,47 @@ void DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D)
         matrix2D->SetRotation(rotation);
 }
 
+// Draw a single set of UI inputs and copy all changes to each Shape2D
+void DrawShape2DOptions(std::string suffixID, std::vector<Shape2D*>& shapes, Grid* grid, bool snapToGrid = false, bool singleScale = false)
+{
+    Matrix2D* matrix2D = shapes[0]->GetModel();
+
+    glm::vec2 pos = matrix2D->GetPos();
+    if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
+    {
+        for (Shape2D* shape : shapes)
+        {
+            if (snapToGrid)
+                pos = grid->ShapeSnapPosition(shape, pos);
+            shape->GetModel()->SetPos(pos);
+        }
+    }
+
+    glm::vec2 scale = matrix2D->GetScale();
+    if (singleScale && ImGui::SliderFloat(("Size##1" + suffixID).c_str(), &scale.x, 0, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
+        for (Shape2D* shape : shapes)
+        {
+            if (snapToGrid)
+                scale = glm::vec2(grid->SnapGridSize(scale.x));
+            shape->GetModel()->SetScalef(scale.x);
+        }
+    else if (!singleScale && ImGui::DragFloat2(("Size##2" + suffixID).c_str(), (float*)&scale, 0.5f))
+    {
+        for (Shape2D* shape : shapes)
+        {
+            if (snapToGrid)
+                scale = glm::vec2(grid->SnapGridSize(scale.x), grid->SnapGridSize(scale.y));
+            shape->GetModel()->SetScale(scale);
+        }
+
+    }
+
+    float rotation = matrix2D->GetRotation();
+    if (ImGui::SliderFloat(("Rotation##" + suffixID).c_str(), &rotation, 0, 360, "%.2f"))
+        for (Shape2D* shape : shapes)
+            shape->GetModel()->SetRotation(rotation);
+}
+
 
 void DrawBackgroundOptions(BGImage* background, glm::vec4* bgColor)
 {
@@ -150,44 +192,33 @@ void DrawGridOptions(Grid* grid, UIState* uiState)
 
 }
 
-
-void DrawTokenOptions(Token* token, Grid* grid, UIState* uiState)
+void DrawTokenOptions(std::vector<Token*> tokens, Grid* grid, bool snapToGrid = false)
 {
+    Token* token = tokens[0];
+
     ImGui::InputText("Name", &token->name);
 
     std::string iconPath = token->GetIcon();
     if (FileLine("ChooseTokenIcon", "Icon", iconPath))
     {
-        for (Token* t : uiState->selectedTokens)
+        for (Token* t : tokens)
             t->SetIcon(iconPath);
-    }
-
-    float iconSize = token->GetModel()->GetScalef();
-    if (ImGui::SliderFloat("Size##Token", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
-    {
-        if (uiState->snapToGrid)
-            iconSize = grid->SnapGridSize(iconSize);
-        for (Token* t : uiState->selectedTokens)
-            t->GetModel()->SetScalef(iconSize);
-    }
-
-    float rotation = token->GetModel()->GetRotation();
-    if (ImGui::SliderFloat("Rotation##Token", &rotation, 0, 360, "%.2f"))
-    {
-        for (Token* t : uiState->selectedTokens)
-            t->GetModel()->SetRotation(rotation);
     }
 
     if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
     {
-        for (Token* t : uiState->selectedTokens)
+        for (Token* t : tokens)
             t->borderWidth = token->borderWidth;
     }
     if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
     {
-        for (Token* t : uiState->selectedTokens)
+        for (Token* t : tokens)
             t->borderColor = token->borderColor;
     }
+
+    std::vector<Shape2D*> shapes(tokens.size());
+    std::transform(tokens.begin(), tokens.end(), shapes.begin(), [](Token* t){ return static_cast<Shape2D*>(t); });
+    DrawShape2DOptions("Token", shapes, grid, snapToGrid, true);
 }
 
 
@@ -212,7 +243,7 @@ void DrawUI(Scene* scene, UIState* uiState)
         if (ImGui::CollapsingHeader("Token"))
         {
             if (uiState->selectedTokens.size() > 0)
-                DrawTokenOptions(uiState->selectedTokens.back(), &scene->grid, uiState);
+                DrawTokenOptions(uiState->selectedTokens, &scene->grid, uiState->snapToGrid);
 
             if (ImGui::Button("Add Token"))
             {

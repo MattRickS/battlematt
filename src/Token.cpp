@@ -11,21 +11,17 @@
 #include <Primitives.h>
 #include <TextureCache.h>
 
-Token::Token() : Quad(), name(""), m_model() {}
+Token::Token() : Rect(), name("") {}
 
 Token::Token(std::string iconPath) : Token(iconPath, std::filesystem::path(iconPath).stem()) {}
 
-Token::Token(std::string iconPath, std::string name) : Quad(), name(name), tex(TextureCache::GetTexture(iconPath)), m_model()
+Token::Token(std::string iconPath, std::string name) : Rect(), name(name), tex(TextureCache::GetTexture(iconPath))
 {}
 
 void Token::SetIcon(std::string path)
 {
     tex = TextureCache::GetTexture(path);
 }
-
-Matrix2D* Token::GetModel() { return &m_model; }
-
-void Token::SetModel(Matrix2D matrix) { m_model = matrix; }
 
 void Token::Draw(Shader &shader)
 {
@@ -49,7 +45,7 @@ void Token::Draw(Shader &shader)
     shader.setFloat4("highlightColor", highlight.x, highlight.y, highlight.z, highlight.w);
     shader.setFloat4("borderColor", borderColor.x, borderColor.y, borderColor.z, borderColor.w);
     shader.setFloat("borderWidth", borderWidth);
-    Quad::Draw(shader);
+    Rect::Draw(shader);
 }
 
 bool Token::Contains(float x, float y) const

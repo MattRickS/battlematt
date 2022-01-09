@@ -10,6 +10,7 @@ class Shape2D
 {
 public:
     Matrix2D* GetModel();
+    void SetModel(Matrix2D matrix);
     virtual bool Contains(float x, float y) = 0;
     virtual bool Contains(glm::vec2 pt);
     virtual void Draw(Shader& shader) = 0;

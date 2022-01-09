@@ -3,11 +3,12 @@
 #include <json.hpp>
 
 #include <Primitives.h>
+#include <Shape2D.h>
 #include <Shader.h>
 #include <Token.h>
 
 
-enum TokenGridSize
+enum ShapeGridSize
 {
     Fine = -4,
     Diminutive = -3,
@@ -32,10 +33,10 @@ public:
     glm::vec3 GetColour();
     glm::vec2 NearestCenter(float tokenSize, glm::vec2 pos);
     glm::vec2 NearestCorner(float tokenSize, glm::vec2 pos);
-    TokenGridSize GetTokenGridSize(Token* token);
-    float SnapGridSize(TokenGridSize tokenGridSize);
+    ShapeGridSize GetShapeGridSize(Shape2D* token);
+    float SnapGridSize(ShapeGridSize tokenGridSize);
     float SnapGridSize(float size);
-    glm::vec2 TokenSnapPosition(Token* token, glm::vec2 pos);
+    glm::vec2 ShapeSnapPosition(Shape2D* token, glm::vec2 pos);
     nlohmann::json Serialize() const;
     void Deserialize(nlohmann::json json);
 

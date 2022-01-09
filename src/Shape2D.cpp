@@ -7,6 +7,7 @@
 
 // Shape2D
 Matrix2D* Shape2D::GetModel() { return &m_model; }
+void Shape2D::SetModel(Matrix2D matrix) { m_model = matrix; }
 
 bool Shape2D::Contains(glm::vec2 pt) { return Contains(pt.x, pt.y); }
 
