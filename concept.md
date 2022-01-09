@@ -151,15 +151,26 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 
 # TODO
 - [ ] Separate Token and TokenInstance. TokenInstance is a unique model with shared Token. Promotable to individual Token. (Not really necessary now that batch edit is an option)
-- [ ] Relative paths converted to absolute in TextureCache
+- [ ] Relative paths converted to absolute in TextureCache (less important as unlikely to be manually entering paths)
 - [ ] Further investigation into shared/packed/std140 layouts in glsl
 - [x] Snap to grid
-- [ ] UI sections (background, grid, tokens, etc...)
+- [x] UI sections (background, grid, tokens, etc...)
 - [x] Drag select
 - [x] Batch Edit
 - [x] Add Token
 - [x] Duplicate Token
-- [ ] Save/Load
+- [x] Save/Load
 - [ ] Undo Queue (Actions)
 - [ ] Images not loading with correct sizes/distortion. Likely the wrong stbi options.
-- [ ] Background image offset
+- [x] Background image offset
+- [ ] Clean up structure. Global shaders, Window logic separated, single quad mesh that's shared, InputManager. Proper memory management.
+- [ ] Overlays
+- [ ] Fog of War
+- [ ] Lighting effects
+- [ ] Token statuses (multiple predefined effects that can be toggled)
+- [ ] Separate windows for viewport and UI (SetWindowSize to match framebuffer)
+    - [ ] Hotkey to show/hide UI window
+- [ ] scene file as CLI arg
+- [ ] Esc confirm dialog (once separate UI windows, esc should at worst close the UI window automatically)
+    - [ ] Maybe file dialogs closed by Esc if open
+- [ ] Initiative tracker?

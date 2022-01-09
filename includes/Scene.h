@@ -8,6 +8,7 @@
 #include <BGImage.h>
 #include <Camera.h>
 #include <Grid.h>
+#include <Matrix2D.h>
 #include <Shader.h>
 #include <Token.h>
 
@@ -25,7 +26,7 @@ public:
     Scene(Camera* camera, std::string bgPath="");
     void AddToken();
     void AddToken(std::string iconPath, glm::vec3 pos=glm::vec3(0));
-    void AddToken(std::string iconPath, glm::vec3 pos, float size);
+    void AddToken(std::string iconPath, Matrix2D matrix);
     void RemoveTokens(std::vector<Token*> toRemove);
     void Draw();
     nlohmann::json Serialize() const;

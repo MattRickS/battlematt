@@ -57,7 +57,7 @@ glm::vec2 Grid::NearestCorner(float tokenSize, glm::vec2 pos)
 
 TokenGridSize Grid::GetTokenGridSize(Token* token)
 {
-    float size = token->GetSize();
+    float size = token->GetModel()->GetScalef();
     if (size >= m_scale)
         return static_cast<TokenGridSize>(std::round(size / m_scale) - 1);
     else
@@ -68,9 +68,9 @@ glm::vec2 Grid::TokenSnapPosition(Token* token, glm::vec2 pos)
 {
     int gridSize = GetTokenGridSize(token);
     if (gridSize < 0 || gridSize % 2 == 0)
-        return NearestCenter(token->GetSize(), pos);
+        return NearestCenter(token->GetModel()->GetScalef(), pos);
     else
-        return NearestCorner(token->GetSize(), pos);
+        return NearestCorner(token->GetModel()->GetScalef(), pos);
 }
 
 float Grid::SnapGridSize(TokenGridSize tokenGridSize)

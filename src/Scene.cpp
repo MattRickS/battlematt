@@ -10,6 +10,7 @@
 #include <BGImage.h>
 #include <Camera.h>
 #include <Grid.h>
+#include <Matrix2D.h>
 #include <Shader.h>
 #include <Token.h>
 #include <Scene.h>
@@ -28,8 +29,8 @@ Scene::Scene(Camera* camera, std::string bgPath):
 void Scene::AddToken(std::string iconPath, glm::vec3 pos)
 {
     tokens.emplace_back(iconPath);
-    tokens.back().SetPos(pos);
-    tokens.back().SetSize(grid.GetScale());
+    tokens.back().GetModel()->SetPos(pos);
+    tokens.back().GetModel()->SetScalef(grid.GetScale());
 }
 
 void Scene::AddToken()
@@ -37,11 +38,10 @@ void Scene::AddToken()
     tokens.emplace_back("resources/images/QuestionMark.jpg");
 }
 
-void Scene::AddToken(std::string iconPath, glm::vec3 pos, float size)
+void Scene::AddToken(std::string iconPath, Matrix2D matrix2D)
 {
     tokens.emplace_back(iconPath);
-    tokens.back().SetPos(pos);
-    tokens.back().SetSize(size);
+    tokens.back().SetModel(matrix2D);
 }
 
 void Scene::RemoveTokens(std::vector<Token*> toRemove)

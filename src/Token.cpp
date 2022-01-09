@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <json.hpp>
 
+#include <Matrix2D.h>
 #include <Token.h>
 #include <Primitives.h>
 #include <TextureCache.h>
@@ -15,43 +16,20 @@ Token::Token() : Quad(), name("") {}
 Token::Token(std::string iconPath) : Token(iconPath, std::filesystem::path(iconPath).stem()) {}
 
 Token::Token(std::string iconPath, std::string name) : Quad(), name(name), tex(TextureCache::GetTexture(iconPath))
-{
-    RebuildModel();
-}
+{}
 
 void Token::SetIcon(std::string path)
 {
     tex = TextureCache::GetTexture(path);
 }
 
-void Token::SetSize(float size)
-{
-    m_scale = size;
-    RebuildModel();
-}
+Matrix2D* Token::GetModel() { return &m_model; }
 
-void Token::SetPos(glm::vec3 pos)
-{
-    m_pos = pos;
-    RebuildModel();
-}
-
-void Token::Move(glm::vec2 offset)
-{
-    Move(offset.x, offset.y);
-}
-
-void Token::Move(float xoffset, float yoffset)
-{
-    m_pos += glm::vec3(xoffset, yoffset, 0);
-    RebuildModel();
-}
-
-const glm::mat4* Token::GetModel() const { return &model; }
+void Token::SetModel(Matrix2D matrix) { m_model = matrix; }
 
 void Token::Draw(Shader &shader)
 {
-    shader.setMat4("model", *GetModel());
+    shader.setMat4("model", *m_model.Value());
 
     glm::vec4 highlight;
     if (isSelected)
@@ -83,26 +61,16 @@ bool Token::Contains(float x, float y) const
 bool Token::Contains(glm::vec2 pt) const
 {
     // Scale is the diameter, use radius for comparison
-    return glm::length(glm::vec2(m_pos) - pt) < (m_scale * 0.5f);
+    return glm::length(m_model.GetPos() - pt) < (m_model.GetScalef() * 0.5f);
 }
 
-
-void Token::RebuildModel()
-{
-    // TODO: Model should be separated from the rest of the token properties so that it can be drawn as multiple instances
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, m_pos);
-    model = glm::scale(model, glm::vec3(m_scale));
-    // model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
-}
 
 nlohmann::json Token::Serialize() const
 {
     return {
         {"name", name},
         {"texture", tex->filename},
-        {"pos", {m_pos.x, m_pos.y, m_pos.z}},
-        {"scale", m_scale},
+        {"matrix2D", m_model.Serialize()},
         {"borderWidth", borderWidth},
         {"borderColour", {borderColor.x, borderColor.y, borderColor.z, borderColor.w}}
     };
@@ -110,9 +78,8 @@ nlohmann::json Token::Serialize() const
 
 void Token::Deserialize(nlohmann::json json)
 {
+    m_model.Deserialize(json["matrix2D"]);
     SetIcon(json["texture"]);
-    SetSize(json["scale"]);
-    SetPos(glm::vec3(json["pos"][0], json["pos"][1], json["pos"][2]));
     name = json["name"];
     borderWidth = json["borderWidth"];
     borderColor = glm::vec4(

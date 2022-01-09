@@ -102,19 +102,19 @@ void Application::OnMouseMove(double xpos, double ypos)
         if (uiState.snapToGrid)
         {
             glm::vec2 newPos = scene->grid.TokenSnapPosition(uiState.tokenUnderCursor, ScreenToWorldPos(xpos, ypos));
-            glm::vec2 currPos = glm::vec2(uiState.tokenUnderCursor->GetPos());
+            glm::vec2 currPos = uiState.tokenUnderCursor->GetModel()->GetPos();
             if (newPos != currPos)
             {
                 glm::vec2 offset = newPos - currPos;
                 for (Token* token : uiState.selectedTokens)
-                    token->Move(offset);
+                    token->GetModel()->Offset(offset);
             }
         }
         else
         {
             glm::vec2 offset = ScreenToWorldOffset(xoffset, yoffset);
             for (Token* token : uiState.selectedTokens)
-                token->Move(offset);
+                token->GetModel()->Offset(offset);
         }
     }
     else if (leftMouseHeld && uiState.dragSelectRect)
@@ -201,7 +201,7 @@ void Application::OnKey(int key, int scancode, int action, int mods)
         for (Token* token : uiState.selectedTokens)
         {
             TokenGridSize gridSize = static_cast<TokenGridSize>(scene->grid.GetTokenGridSize(token) + 1);
-            token->SetSize(scene->grid.SnapGridSize(gridSize));
+            token->GetModel()->SetScalef(scene->grid.SnapGridSize(gridSize));
         }
     }
     if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_RELEASE && uiState.selectedTokens.size() > 0)
@@ -209,7 +209,7 @@ void Application::OnKey(int key, int scancode, int action, int mods)
         for (Token* token : uiState.selectedTokens)
         {
             TokenGridSize gridSize = static_cast<TokenGridSize>(scene->grid.GetTokenGridSize(token) - 1);
-            token->SetSize(scene->grid.SnapGridSize(gridSize));
+            token->GetModel()->SetScalef(scene->grid.SnapGridSize(gridSize));
         }
     }
     if (key == GLFW_KEY_DELETE && uiState.selectedTokens.size() > 0)
@@ -221,7 +221,12 @@ void Application::OnKey(int key, int scancode, int action, int mods)
     {
         uint numTokens = scene->tokens.size();
         for (Token* token : uiState.selectedTokens)
-            scene->AddToken(token->GetIcon(), token->GetPos() + glm::vec3(1, 1, 0), token->GetSize());
+        {
+            // Copy the matrix with an offset
+            Matrix2D matrix = *token->GetModel();
+            matrix.Offset(glm::vec2(1));
+            scene->AddToken(token->GetIcon(), matrix);
+        }
 
         uiState.ClearSelection();
         for (uint i = numTokens; i < scene->tokens.size(); i++)
@@ -322,8 +327,8 @@ std::vector<Token*> Application::TokensInScreenRect(float minx, float miny, floa
     std::vector<Token*> tokens;
     for (Token& token: scene->tokens)
     {
-        float radius = token.GetSize() * 0.5f;
-        glm::vec3 tokenPos = token.GetPos();
+        float radius = token.GetModel()->GetScalef() * 0.5f;
+        glm::vec2 tokenPos = token.GetModel()->GetPos();
         if (tokenPos.x + radius > lo.x && tokenPos.x - radius < hi.x
             && tokenPos.y + radius > lo.y && tokenPos.y - radius < hi.y)
         {

@@ -156,13 +156,13 @@ void DrawTokenOptions(Token* token, Grid* grid, UIState* uiState)
             t->SetIcon(iconPath);
     }
 
-    float iconSize = token->GetSize();
+    float iconSize = token->GetModel()->GetScalef();
     if (ImGui::SliderFloat("Size##Token", &iconSize, 0.1, 30, "%.3f", ImGuiSliderFlags_Logarithmic))
     {
         if (uiState->snapToGrid)
             iconSize = grid->SnapGridSize(iconSize);
         for (Token* t : uiState->selectedTokens)
-            t->SetSize(iconSize);
+            t->GetModel()->SetScalef(iconSize);
     }
 
     if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
