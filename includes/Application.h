@@ -8,6 +8,7 @@
 #include <Camera.h>
 #include <Scene.h>
 #include <UI.h>
+#include <Resources.h>
 
 
 class Application
@@ -15,6 +16,7 @@ class Application
 public:
     const char* glsl_version = "#version 330";
     Scene* scene;
+    std::shared_ptr<Resources> resources;
 
     Application();
     ~Application();

@@ -9,6 +9,7 @@
 #include <Camera.h>
 #include <Grid.h>
 #include <Matrix2D.h>
+#include <Resources.h>
 #include <Shader.h>
 #include <Token.h>
 
@@ -20,10 +21,8 @@ public:
     Grid grid;
     Camera* camera;
     std::vector<Token> tokens;
-    Shader imageShader;
-    Shader tokenShader;
 
-    Scene(Camera* camera, std::string bgPath="");
+    Scene(std::shared_ptr<Resources> resources, Camera* camera, std::string bgPath="");
     void AddToken();
     void AddToken(std::string iconPath, glm::vec3 pos=glm::vec3(0));
     void AddToken(std::string iconPath, Matrix2D matrix);
@@ -34,4 +33,7 @@ public:
     // TODO: Move this off this class
     void Save(std::string path);
     void Load(std::string path);
+
+private:
+    std::shared_ptr<Resources> m_resources;
 };

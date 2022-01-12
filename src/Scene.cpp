@@ -12,18 +12,16 @@
 #include <Grid.h>
 #include <Matrix2D.h>
 #include <Shader.h>
+#include <Resources.h>
 #include <Token.h>
 #include <Scene.h>
 
 
-
-
-Scene::Scene(Camera* camera, std::string bgPath):
+Scene::Scene(std::shared_ptr<Resources> resources, Camera* camera, std::string bgPath):
     background(bgPath),
     grid(),
     camera(camera),
-    imageShader("resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs"),
-    tokenShader("resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs")
+    m_resources(resources)
 { }
 
 void Scene::AddToken(std::string iconPath, glm::vec3 pos)
@@ -56,18 +54,21 @@ void Scene::RemoveTokens(std::vector<Token*> toRemove)
 }
 
 
+// TODO: Move to renderer class
 void Scene::Draw()
 {
     glClearColor(bgColor.x * bgColor.w, bgColor.y * bgColor.w, bgColor.z * bgColor.w, bgColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    imageShader.use();
-    background.Draw(imageShader);
+    std::shared_ptr<Shader> imageShader = m_resources->GetShader(Resources::ShaderType::Image);
+    imageShader->use();
+    background.Draw(*imageShader);
     grid.Draw();
 
-    tokenShader.use();
+    std::shared_ptr<Shader> tokenShader = m_resources->GetShader(Resources::ShaderType::Token);
+    tokenShader->use();
     for (Token& token : tokens)
-        token.Draw(tokenShader);
+        token.Draw(*tokenShader);
 }
 
 nlohmann::json Scene::Serialize() const

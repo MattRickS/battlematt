@@ -17,7 +17,7 @@ int main(int, char**)
 
     glm::vec2 windowDimensions = app.WindowDimensions();
     Camera camera = Camera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f, windowDimensions.x / windowDimensions.y);
-    Scene scene = Scene(&camera);
+    Scene scene = Scene(app.resources, &camera);
     app.scene = &scene;
     app.Draw();
 

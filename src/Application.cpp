@@ -17,9 +17,13 @@
 #include <Shader.h>
 #include <Scene.h>
 #include <Texture.h>
+#include <Resources.h>
 #include <UI.h>
 
 #include <Application.h>
+
+
+const int GRID_SHADER = 1;
 
 
 Application::Application()
@@ -29,6 +33,35 @@ Application::Application()
         return;
     glfwSetWindowUserPointer(window, this);
     SetCallbacks();
+    resources = std::make_shared<Resources>();
+    resources->CreateMesh(
+        Resources::MeshType::Quad,
+        std::vector<Vertex>{
+            {{-0.5f, -0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
+            {{ 0.5f, -0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
+            {{ 0.5f,  0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
+            {{-0.5f,  0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
+        }, std::vector<unsigned int> {
+            0, 1, 2,
+            2, 3, 0,
+        }
+    );
+    resources->CreateMesh(
+        Resources::MeshType::Quad2,
+        std::vector<Vertex>{
+            {{-1.0f, -1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
+            {{ 1.0f, -1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
+            {{ 1.0f,  1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
+            {{-1.0f,  1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
+        }, std::vector<unsigned int> {
+            0, 1, 2,
+            2, 3, 0,
+        }
+    );
+    resources->CreateShader(Resources::ShaderType::Grid, "resources/shaders/Grid.vs", "resources/shaders/Grid.fs");
+    resources->CreateShader(Resources::ShaderType::ScreenRect, "resources/shaders/Grid.vs", "resources/shaders/Rect.fs");
+    resources->CreateShader(Resources::ShaderType::Image, "resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
+    resources->CreateShader(Resources::ShaderType::Token, "resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs");
 }
 
 Application::~Application()

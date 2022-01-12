@@ -13,6 +13,11 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) : ve
     setupMesh();
 }
 
+Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices) : vertices(vertices), indices(indices)
+{
+    setupMesh();
+}
+
 void Mesh::Draw(Shader &shader)
 {
     glActiveTexture(GL_TEXTURE0);
