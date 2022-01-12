@@ -22,6 +22,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 direction, bool isOrtho, float foca
 
     updateCameraVectors();
     updateProjectionMatrix();
+    updateViewMatrix();
 }
 
 
@@ -93,23 +94,6 @@ void Camera::SetAperture(float haperture)
 {
     hAperture = haperture;
     updateProjectionMatrix();
-}
-
-nlohmann::json Camera::Serialize()
-{
-    return {
-        {"pos", {Position.x, Position.y, Position.z}},
-        {"focal", Focal}
-    };
-}
-
-void Camera::Deserialize(nlohmann::json json)
-{
-    Position = glm::vec3(json["pos"][0], json["pos"][1], json["pos"][2]);
-    Focal = json["focal"];
-    updateCameraVectors();
-    updateProjectionMatrix();
-    updateViewMatrix();
 }
 
 // calculates the front vector from the Camera's (updated) Euler Angles

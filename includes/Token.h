@@ -1,14 +1,14 @@
 #pragma once
+#include <memory>
 #include <string>
 
 #include <glm/glm.hpp>
-#include <json.hpp>
 
 #include <Matrix2D.h>
-#include <Shape2D.h>
-#include <Primitives.h>
-#include <Texture.h>
+#include <Mesh.h>
 #include <Shader.h>
+#include <Shape2D.h>
+#include <Texture.h>
 
 
 const glm::vec4 highlightColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
@@ -22,17 +22,15 @@ public:
     bool isHighlighted = false;
     bool isSelected = false;
 
-    Token();
-    Token(std::string iconPath);
-    Token(std::string iconPath, std::string name);
-    void SetIcon(std::string path);
-    std::string GetIcon() { return tex->filename; }
+    Token(std::shared_ptr<Mesh> mesh);
+    Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture);
+    Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture, std::string name);
+    void SetIcon(std::shared_ptr<Texture> texture);
+    std::shared_ptr<Texture> GetIcon();
     virtual void Draw(Shader &shader);
     virtual bool Contains(glm::vec2 pt) const;
     virtual bool Contains(float x, float y) const;
-    nlohmann::json Serialize() const;
-    void Deserialize(nlohmann::json json);
 
 private:
-    Texture* tex;
+    std::shared_ptr<Texture> m_texture;
 };

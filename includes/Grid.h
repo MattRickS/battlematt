@@ -1,6 +1,5 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <json.hpp>
 
 #include <Primitives.h>
 #include <Shape2D.h>
@@ -25,7 +24,8 @@ enum ShapeGridSize
 class Grid
 {
 public:
-    Grid();
+    Grid(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader);
+
     void Draw();
     void SetScale(float scale);
     float GetScale();
@@ -33,16 +33,14 @@ public:
     glm::vec3 GetColour();
     glm::vec2 NearestCenter(float tokenSize, glm::vec2 pos);
     glm::vec2 NearestCorner(float tokenSize, glm::vec2 pos);
-    ShapeGridSize GetShapeGridSize(Shape2D* token);
+    ShapeGridSize GetShapeGridSize(std::shared_ptr<Shape2D> token);
     float SnapGridSize(ShapeGridSize tokenGridSize);
     float SnapGridSize(float size);
-    glm::vec2 ShapeSnapPosition(Shape2D* token, glm::vec2 pos);
-    nlohmann::json Serialize() const;
-    void Deserialize(nlohmann::json json);
+    glm::vec2 ShapeSnapPosition(std::shared_ptr<Shape2D> token, glm::vec2 pos);
 
 private:
-    Shader shader;
-    Quad mesh;
+    std::shared_ptr<Mesh> m_mesh;
+    std::shared_ptr<Shader> m_shader;
     float m_scale = 1.0f;
     glm::vec3 m_colour = glm::vec3(0.2);
 };

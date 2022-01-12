@@ -1,11 +1,11 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <json.hpp>
 
 class Matrix2D
 {
 public:
     Matrix2D();
+    Matrix2D(glm::vec2 pos, glm::vec2 scale, float rot);
 
     void Offset(glm::vec2 offset);
 
@@ -21,9 +21,6 @@ public:
     float GetRotation() const;
 
     const glm::mat4* Value() const;
-
-    nlohmann::json Serialize() const;
-    void Deserialize(nlohmann::json json);
 
     void Rebuild();
 

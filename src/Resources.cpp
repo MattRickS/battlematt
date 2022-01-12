@@ -30,6 +30,16 @@ std::shared_ptr<Shader> Resources::GetShader(ShaderType shaderType)
     return m_shaders[shaderType];
 }
 
+void Resources::CreateTexture(TextureType textureType, std::string path)
+{
+    m_textureTypes[textureType] = GetTexture(path);
+}
+
+std::shared_ptr<Texture> Resources::GetTexture(TextureType textureType)
+{
+    return m_textureTypes[textureType];
+}
+
 std::shared_ptr<Texture> Resources::GetTexture(std::string path)
 {
     auto [it, success] = m_textures.try_emplace(path, nullptr);

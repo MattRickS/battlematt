@@ -12,7 +12,7 @@ void Shape2D::SetModel(Matrix2D matrix) { m_model = matrix; }
 bool Shape2D::Contains(glm::vec2 pt) { return Contains(pt.x, pt.y); }
 
 // Rect
-Rect::Rect() : Quad() {}
+Rect::Rect(std::shared_ptr<Mesh> mesh) : m_mesh(mesh) {}
 
 bool Rect::Contains(float x, float y)
 {
@@ -24,5 +24,5 @@ bool Rect::Contains(float x, float y)
 
 void Rect::Draw(Shader& shader)
 {
-    Quad::Draw(shader);
+    m_mesh->Draw(shader);
 }

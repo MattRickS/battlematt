@@ -17,4 +17,5 @@ public:
 
     void activate(GLuint textureID) const;
     bool IsValid() const;
+    std::string Name() const;
 };

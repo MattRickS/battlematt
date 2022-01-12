@@ -1,11 +1,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <json.hpp>
 
 #include <Matrix2D.h>
 
 
 Matrix2D::Matrix2D() : m_pos(0), m_scale(1), m_rot(0) { Rebuild(); }
+
+Matrix2D::Matrix2D(glm::vec2 pos, glm::vec2 scale, float rot) : m_pos(pos), m_scale(scale), m_rot(rot) {}
 
 void Matrix2D::Offset(glm::vec2 offset)
 {
@@ -41,22 +42,6 @@ glm::vec2 Matrix2D::GetScale() const { return m_scale; }
 float Matrix2D::GetScalef() const { return m_scale.x; }
 float Matrix2D::GetRotation() const { return m_rot; }
 const glm::mat4* Matrix2D::Value() const { return &m_matrix; }
-
-nlohmann::json Matrix2D::Serialize() const
-{
-    return {
-        {"pos", {m_pos.x, m_pos.y}},
-        {"scale", {m_scale.x, m_scale.y}},
-        {"rotation", m_rot},
-    };
-}
-void Matrix2D::Deserialize(nlohmann::json json)
-{
-    m_pos = glm::vec2(json["pos"][0], json["pos"][1]);
-    m_scale = glm::vec2(json["scale"][0], json["scale"][1]);
-    m_rot = json["rotation"];
-    Rebuild();
-}
 
 void Matrix2D::Rebuild()
 {

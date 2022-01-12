@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -50,30 +52,30 @@ class CameraBuffer : public UniformBuffer
 {
 public:
     CameraBuffer() : UniformBuffer(4 * STD140_MATRIX_SIZE) {}
-    CameraBuffer(Camera* camera) : CameraBuffer()
+    CameraBuffer(std::shared_ptr<Camera> camera) : CameraBuffer()
     {
         SetCamera(camera);
     }
 
     void UpdateProjection()
     {
-        bind(glm::value_ptr(camera->projectionMatrix), STD140_MATRIX_SIZE);
-        bind(glm::value_ptr(camera->invProjectionMatrix), STD140_MATRIX_SIZE, STD140_MATRIX_SIZE);
+        bind(glm::value_ptr(m_camera->projectionMatrix), STD140_MATRIX_SIZE);
+        bind(glm::value_ptr(m_camera->invProjectionMatrix), STD140_MATRIX_SIZE, STD140_MATRIX_SIZE);
     }
 
     void UpdateView()
     {
-        bind(glm::value_ptr(camera->viewMatrix), STD140_MATRIX_SIZE, 2 * STD140_MATRIX_SIZE);
-        bind(glm::value_ptr(camera->invViewMatrix), STD140_MATRIX_SIZE, 3 * STD140_MATRIX_SIZE);
+        bind(glm::value_ptr(m_camera->viewMatrix), STD140_MATRIX_SIZE, 2 * STD140_MATRIX_SIZE);
+        bind(glm::value_ptr(m_camera->invViewMatrix), STD140_MATRIX_SIZE, 3 * STD140_MATRIX_SIZE);
     }
 
-    void SetCamera(Camera* camera)
+    void SetCamera(std::shared_ptr<Camera> camera)
     {
-        this->camera = camera;
+        m_camera = camera;
         UpdateProjection();
         UpdateView();
     }
 
 private:
-    Camera* camera;
+    std::shared_ptr<Camera> m_camera;
 };

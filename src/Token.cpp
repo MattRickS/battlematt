@@ -1,27 +1,20 @@
-#include <filesystem>
 #include <iostream>
 #include <string>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <json.hpp>
 
 #include <Matrix2D.h>
 #include <Token.h>
 #include <Primitives.h>
 #include <TextureCache.h>
 
-Token::Token() : Rect(), name("") {}
+Token::Token(std::shared_ptr<Mesh> mesh) : Rect(mesh), name("") {}
+Token::Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture) : Token(mesh, texture, texture->Name()) {}
+Token::Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture, std::string name) : Rect(mesh), name(name), m_texture(texture) {}
 
-Token::Token(std::string iconPath) : Token(iconPath, std::filesystem::path(iconPath).stem()) {}
-
-Token::Token(std::string iconPath, std::string name) : Rect(), name(name), tex(TextureCache::GetTexture(iconPath))
-{}
-
-void Token::SetIcon(std::string path)
-{
-    tex = TextureCache::GetTexture(path);
-}
+void Token::SetIcon(std::shared_ptr<Texture> texture) { m_texture = texture; }
+std::shared_ptr<Texture> Token::GetIcon() { return m_texture; }
 
 void Token::Draw(Shader &shader)
 {
@@ -35,11 +28,11 @@ void Token::Draw(Shader &shader)
     else
         highlight = glm::vec4(0);
 
-    if (tex && tex->IsValid())
+    if (m_texture && m_texture->IsValid())
     {
-        tex->activate(GL_TEXTURE0);
+        m_texture->activate(GL_TEXTURE0);
         shader.setInt("diffuse", 0);
-        glBindTexture(GL_TEXTURE_2D, tex->ID);
+        glBindTexture(GL_TEXTURE_2D, m_texture->ID);
     }
 
     shader.setFloat4("highlightColor", highlight.x, highlight.y, highlight.z, highlight.w);
@@ -58,27 +51,4 @@ bool Token::Contains(glm::vec2 pt) const
 {
     // Scale is the diameter, use radius for comparison
     return glm::length(m_model.GetPos() - pt) < (m_model.GetScalef() * 0.5f);
-}
-
-
-nlohmann::json Token::Serialize() const
-{
-    return {
-        {"name", name},
-        {"texture", tex->filename},
-        {"matrix2D", m_model.Serialize()},
-        {"borderWidth", borderWidth},
-        {"borderColour", {borderColor.x, borderColor.y, borderColor.z, borderColor.w}}
-    };
-}
-
-void Token::Deserialize(nlohmann::json json)
-{
-    m_model.Deserialize(json["matrix2D"]);
-    SetIcon(json["texture"]);
-    name = json["name"];
-    borderWidth = json["borderWidth"];
-    borderColor = glm::vec4(
-        json["borderColour"][0], json["borderColour"][1], json["borderColour"][2], json["borderColour"][3]
-    );
 }

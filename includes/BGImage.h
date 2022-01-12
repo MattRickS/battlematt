@@ -1,10 +1,10 @@
 #pragma once
-#include <string>
+#include <memory>
 
 #include <glm/glm.hpp>
-#include <json.hpp>
 
 #include <Matrix2D.h>
+#include <Mesh.h>
 #include <Shape2D.h>
 #include <Texture.h>
 
@@ -12,13 +12,11 @@
 class BGImage: public Rect
 {
 public:
-    BGImage(std::string texturePath);
+    BGImage(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture);
     void Draw(Shader &shader) override;
-    std::string GetImage();
-    void SetImage(std::string imagePath);
-    nlohmann::json Serialize() const;
-    void Deserialize(nlohmann::json json);
+    std::shared_ptr<Texture> GetImage();
+    void SetImage(std::shared_ptr<Texture> texture);
 
 private:
-    Texture* tex;
+    std::shared_ptr<Texture> m_texture;
 };

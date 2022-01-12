@@ -10,7 +10,7 @@
 #include <Shape2D.h>
 #include <Scene.h>
 #include <Token.h>
-#include <UI.h>
+#include <UIWindow.h>
 
 
 namespace ImGui
@@ -23,7 +23,7 @@ namespace ImGui
 }
 
 
-ImGuiContextGuard::ImGuiContextGuard(GLFWwindow* window, const char* glsl_version)
+UIWindow::UIWindow(unsigned int width, unsigned int height, const char* glsl_version, const char* name) : Window(width, height, name)
 {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -56,25 +56,11 @@ ImGuiContextGuard::ImGuiContextGuard(GLFWwindow* window, const char* glsl_versio
     //IM_ASSERT(font != NULL);
 }
 
-ImGuiContextGuard::~ImGuiContextGuard()
+UIWindow::~UIWindow()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-}
-
-
-void UIState::ClearSelection()
-{
-    for (Token* token : selectedTokens)
-        token->isSelected = false;
-    selectedTokens.clear();
-}
-
-void UIState::SelectToken(Token* token)
-{
-    selectedTokens.push_back(token);
-    token->isSelected = true;
 }
 
 
@@ -167,11 +153,11 @@ void DrawShape2DOptions(std::string suffixID, std::vector<Shape2D*>& shapes, Gri
 }
 
 
-void DrawBackgroundOptions(BGImage* background, glm::vec4* bgColor)
+void DrawBackgroundOptions(std::shared_ptr<BGImage> background, glm::vec4* bgColor)
 {
     ImGui::ColorEdit3("Color##Background", (float*)bgColor);
 
-    std::string imagePath = background->GetImage();
+    std::string imagePath = background->GetImage()->filename;
     if (FileLine("ChooseBGImage", "Image", imagePath))
         background->SetImage(imagePath);
 
@@ -222,7 +208,7 @@ void DrawTokenOptions(std::vector<Token*> tokens, Grid* grid, bool snapToGrid = 
 }
 
 
-void DrawUI(Scene* scene, UIState* uiState)
+void DrawUI(std::shared_ptr<Scene> scene, UIState* uiState)
 {
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -234,22 +220,25 @@ void DrawUI(Scene* scene, UIState* uiState)
         ImGui::Begin("Mapmaker UI");
 
         if (ImGui::CollapsingHeader("Background"))
-            DrawBackgroundOptions(&scene->background, &scene->bgColor);
+        {
+            if (scene->backgrounds.size() > 0)
+                DrawBackgroundOptions(scene->backgrounds.back(), &scene->bgColor);
+        }
 
         if (ImGui::CollapsingHeader("Grid"))
-            DrawGridOptions(&scene->grid, uiState);
+            DrawGridOptions(scene->grid, uiState);
 
         ImGui::Text("Num selected tokens : %ld / %ld", uiState->selectedTokens.size(), scene->tokens.size());
         if (ImGui::CollapsingHeader("Token"))
         {
             if (uiState->selectedTokens.size() > 0)
-                DrawTokenOptions(uiState->selectedTokens, &scene->grid, uiState->snapToGrid);
+                DrawTokenOptions(uiState->selectedTokens, scene->grid, uiState->snapToGrid);
 
             if (ImGui::Button("Add Token"))
             {
                 uiState->ClearSelection();
                 scene->AddToken();
-                uiState->SelectToken(&scene->tokens.back());
+                uiState->SelectToken(scene->tokens.back());
             }
         }
 

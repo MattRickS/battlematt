@@ -6,25 +6,19 @@
 #include <Grid.h>
 
 
-// Default quad is (-0.5 -> 0.5), we want (-1 -> 1) to fill the screen
-Grid::Grid(): shader("resources/shaders/Grid.vs", "resources/shaders/Grid.fs"), mesh(2)
-{
-    shader.use();
-    shader.setFloat("gridScale", m_scale);
-    shader.setFloat3("gridColour", m_colour.x, m_colour.y, m_colour.z);
-}
+Grid::Grid(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader) : m_mesh(mesh), m_shader(shader) {}
 
 void Grid::Draw()
 {
-    shader.use();
-    mesh.Draw(shader);
+    m_shader->use();
+    m_mesh->Draw(*m_shader);
 }
 
 void Grid::SetScale(float scale)
 {
     m_scale = scale;
-    shader.use();
-    shader.setFloat("gridScale", m_scale);
+    m_shader->use();
+    m_shader->setFloat("gridScale", m_scale);
 }
 
 float Grid::GetScale() { return m_scale; }
@@ -32,8 +26,8 @@ float Grid::GetScale() { return m_scale; }
 void Grid::SetColour(glm::vec3 colour)
 {
     m_colour = colour;
-    shader.use();
-    shader.setFloat3("gridColour", m_colour.x, m_colour.y, m_colour.z);
+    m_shader->use();
+    m_shader->setFloat3("gridColour", m_colour.x, m_colour.y, m_colour.z);
 }
 
 glm::vec3 Grid::GetColour() { return m_colour; }
@@ -55,7 +49,7 @@ glm::vec2 Grid::NearestCorner(float shapeSize, glm::vec2 pos)
     return glm::vec2(int(pos.x / size) * size, int(pos.y / size) * size);
 }
 
-ShapeGridSize Grid::GetShapeGridSize(Shape2D* shape)
+ShapeGridSize Grid::GetShapeGridSize(std::shared_ptr<Shape2D> shape)
 {
     float size = shape->GetModel()->GetScalef();
     if (size >= m_scale)
@@ -64,7 +58,7 @@ ShapeGridSize Grid::GetShapeGridSize(Shape2D* shape)
         return static_cast<ShapeGridSize>(1 - std::round(m_scale / size));
 }
 
-glm::vec2 Grid::ShapeSnapPosition(Shape2D* shape, glm::vec2 pos)
+glm::vec2 Grid::ShapeSnapPosition(std::shared_ptr<Shape2D> shape, glm::vec2 pos)
 {
     int gridSize = GetShapeGridSize(shape);
     if (gridSize < 0 || gridSize % 2 == 0)
@@ -87,16 +81,4 @@ float Grid::SnapGridSize(float size)
         return std::round(size / m_scale) * m_scale;
     else
         return m_scale / std::round(m_scale / size);
-}
-
-nlohmann::json Grid::Serialize() const
-{
-    return {
-        {"scale", m_scale}
-    };
-}
-
-void Grid::Deserialize(nlohmann::json json)
-{
-    m_scale = json["scale"];
 }

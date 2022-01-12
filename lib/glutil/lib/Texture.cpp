@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <iostream>
 
 #include <stb_image.h>
@@ -51,3 +52,5 @@ void Texture::activate(GLuint textureID) const
 }
 
 bool Texture::IsValid() const { return ID > 0; }
+
+std::string Texture::Name() const { return std::filesystem::path(filename).stem(); }

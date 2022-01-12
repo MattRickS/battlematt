@@ -1,70 +1,55 @@
 #include <iostream>
-#include <string>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <json.hpp>
 
 #include <Matrix2D.h>
-#include <TextureCache.h>
-#include <Primitives.h>
-#include <BGImage.h>
+#include <Mesh.h>
 #include <Shape2D.h>
+#include <Texture.h>
+
+#include <BGImage.h>
 
 
 const float DEFAULT_PIXELS_PER_UNIT = 50.0f;
 
 
-BGImage::BGImage(std::string texturePath) : Rect(), tex(TextureCache::GetTexture(texturePath))
+BGImage::BGImage(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture) : Rect(mesh), m_texture(texture)
 {
-    if (tex->IsValid())
-        m_model.SetScale(glm::vec2(tex->width / DEFAULT_PIXELS_PER_UNIT, tex->width / DEFAULT_PIXELS_PER_UNIT));
+    if (m_texture->IsValid())
+        m_model.SetScale(glm::vec2(m_texture->width / DEFAULT_PIXELS_PER_UNIT, m_texture->width / DEFAULT_PIXELS_PER_UNIT));
 }
 
 void BGImage::Draw(Shader &shader)
 {
     shader.setMat4("model", *m_model.Value());
 
-    if (tex && tex->IsValid())
+    if (m_texture && m_texture->IsValid())
     {
-        tex->activate(GL_TEXTURE0);
+        m_texture->activate(GL_TEXTURE0);
         shader.setInt("diffuse", 0);
-        glBindTexture(GL_TEXTURE_2D, tex->ID);
+        glBindTexture(GL_TEXTURE_2D, m_texture->ID);
     }
     Rect::Draw(shader);
 }
 
-std::string BGImage::GetImage()
+std::shared_ptr<Texture> BGImage::GetImage()
 {
-    return tex->filename;
+    return m_texture;
 }
 
-void BGImage::SetImage(std::string imagePath)
+void BGImage::SetImage(std::shared_ptr<Texture> texture)
 {
-    if (tex->IsValid())
+    if (m_texture->IsValid())
     {
         // Resize the incoming image to match the width of the current image
-        float hSize = tex->width * m_model.GetScale().x;
-        tex = TextureCache::GetTexture(imagePath);
-        m_model.SetScale(glm::vec2(hSize / tex->width, hSize / tex->height));
+        float hSize = m_texture->width * m_model.GetScale().x;
+        m_texture = texture;
+        m_model.SetScale(glm::vec2(hSize / texture->width, hSize / texture->height));
     }
     else
     {
-        tex = TextureCache::GetTexture(imagePath);
+        m_texture = texture;
         m_model.Rebuild();
     }
-}
-
-nlohmann::json BGImage::Serialize() const
-{
-    return {
-        {"texture", tex->filename},
-        {"matrix2D", m_model.Serialize()},
-    };
-}
-
-void BGImage::Deserialize(nlohmann::json json)
-{
-    SetImage(json["texture"]);
-    m_model.Deserialize(json["matrix2D"]);
 }

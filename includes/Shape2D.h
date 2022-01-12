@@ -1,8 +1,10 @@
 #pragma once
+#include <memory>
+
 #include <glm/glm.hpp>
 
 #include <Matrix2D.h>
-#include <Primitives.h>
+#include <Mesh.h>
 #include <Shader.h>
 
 
@@ -20,10 +22,13 @@ protected:
 };
 
 
-class Rect : public Shape2D, public Quad
+class Rect : public Shape2D
 {
 public:
-    Rect();
+    Rect(std::shared_ptr<Mesh> mesh);
     virtual bool Contains(float x, float y);
     virtual void Draw(Shader& shader);
+
+private:
+    std::shared_ptr<Mesh> m_mesh;
 };
