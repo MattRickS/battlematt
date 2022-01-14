@@ -17,10 +17,10 @@ public:
     glm::vec4 bgColor = glm::vec4(0, 0, 0, 1);
     std::vector<std::shared_ptr<BGImage>> backgrounds;
     std::vector<std::shared_ptr<Token>> tokens;
-    std::shared_ptr<Grid> grid;
-    std::shared_ptr<Camera> camera;
+    std::shared_ptr<Grid> grid = nullptr;
+    std::shared_ptr<Camera> camera = nullptr;
 
-    Scene(std::shared_ptr<Resources> resources, std::shared_ptr<Camera> camera);
+    Scene(std::shared_ptr<Resources> resources);
     void AddImage(std::string path);
     void AddToken();
     void AddToken(std::string path);

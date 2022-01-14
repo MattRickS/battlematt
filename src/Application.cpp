@@ -33,43 +33,42 @@ Application::Application() : m_resources(std::make_shared<Resources>()), m_seria
     if (!IsInitialised())
         return;
     
-    m_uiWindow = std::make_shared<UIWindow>();
-    m_viewport = std::make_shared<Window>();
-    m_inputManager = std::make_shared<InputManager>(m_scene, m_viewport, m_uiWindow);
+    m_scene = std::make_shared<Scene>(m_resources);
+    m_uiWindow = std::make_shared<UIWindow>(200, 200, m_scene, m_resources);
+    m_viewport = std::make_shared<Viewport>(200, 100, m_scene);
+    m_controller = std::make_shared<Controller>(m_scene, m_viewport, m_uiWindow);
+
+    LoadDefaultResources();
 }
 
 void Application::LoadDefaultResources()
 {
-    resources->CreateMesh(
-        Resources::MeshType::Quad,
-        std::vector<Vertex>{
-            {{-0.5f, -0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
-            {{ 0.5f, -0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
-            {{ 0.5f,  0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
-            {{-0.5f,  0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
-        }, std::vector<unsigned int> {
-            0, 1, 2,
-            2, 3, 0,
-        }
-    );
-    resources->CreateMesh(
-        Resources::MeshType::Quad2,
-        std::vector<Vertex>{
-            {{-1.0f, -1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
-            {{ 1.0f, -1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
-            {{ 1.0f,  1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
-            {{-1.0f,  1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
-        }, std::vector<unsigned int> {
-            0, 1, 2,
-            2, 3, 0,
-        }
-    );
-    resources->CreateShader(Resources::ShaderType::Grid, "resources/shaders/Grid.vs", "resources/shaders/Grid.fs");
-    resources->CreateShader(Resources::ShaderType::ScreenRect, "resources/shaders/Grid.vs", "resources/shaders/Rect.fs");
-    resources->CreateShader(Resources::ShaderType::Image, "resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
-    resources->CreateShader(Resources::ShaderType::Token, "resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs");
+    auto vertices = std::vector<Vertex>{
+        {{-0.5f, -0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
+        {{ 0.5f,  0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
+        {{-0.5f,  0.5f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
+    };
+    auto indices = std::vector<unsigned int> {
+        0, 1, 2,
+        2, 3, 0,
+    };
+    m_resources->CreateMesh(Resources::MeshType::Quad, vertices, indices);
 
-    resources->CreateTexture(Resources::TextureType::Default, "resources/images/QuestionMark.jpg");
+    vertices = std::vector<Vertex>{
+        {{-1.0f, -1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f,  0.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
+    };
+    m_resources->CreateMesh(Resources::MeshType::Quad2, vertices, indices);
+
+    m_resources->CreateShader(Resources::ShaderType::Grid, "resources/shaders/Grid.vs", "resources/shaders/Grid.fs");
+    m_resources->CreateShader(Resources::ShaderType::ScreenRect, "resources/shaders/Grid.vs", "resources/shaders/Rect.fs");
+    m_resources->CreateShader(Resources::ShaderType::Image, "resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
+    m_resources->CreateShader(Resources::ShaderType::Token, "resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs");
+
+    m_resources->CreateTexture(Resources::TextureType::Default, "resources/images/QuestionMark.jpg");
 }
 
 Application::~Application()
@@ -80,26 +79,18 @@ Application::~Application()
 
 bool Application::IsInitialised()
 {
-    return m_glfw_initialised && m_glad_initialised && m_uiWindow->ID() && m_viewport->ID();
+    return m_glfw_initialised && m_glad_initialised && m_uiWindow->IsInitialised() && m_viewport->IsInitialised();
 }
 
-void Application::Draw()
+void Application::Exec()
 {
-    // TODO: Initialising here to prevent segault on init, this needs a cleaner setup
-    CameraBuffer camBuffer = CameraBuffer();
-    cameraBuffer = &camBuffer;
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_BLEND );
 
     // Main loop
-    while (!m_viewport->ShouldClose())
+    while (!m_viewport->IsClosing())
     {
         glfwPollEvents();
-        // TODO: Shouldn't have to update this every time
-        //       Could possibly have a class BufferedCamera : Camera, UniformBuffer
-        //       that updates its buffer when changed...?
-        cameraBuffer->SetCamera(m_scene->camera);
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -109,8 +100,8 @@ void Application::Draw()
         m_viewport->Draw();
         // m_scene->Draw();
         // if (m_inputManager.dragSelectRect)
-        //     m_inputManager.dragSelectRect->Draw();
-        m_uiWindow->Draw(m_scene);
+        //     m_controller.dragSelectRect->Draw();
+        m_uiWindow->Draw(m_controller->uiState);
 
         // Lazy hack to limit frame rate for now
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -120,6 +111,11 @@ void Application::Draw()
 // =============================================================================
 // Private
 
+void glfw_error_callback(int error, const char* description)
+{
+    fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+}
+
 void Application::InitGL()
 {
     // Setup window
@@ -128,13 +124,6 @@ void Application::InitGL()
         return;
 
     m_glfw_initialised = true;
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-
-#if defined(__APPLE__)
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-#endif
 
     // Initialize GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))

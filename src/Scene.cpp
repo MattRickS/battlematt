@@ -13,12 +13,13 @@
 #include <Scene.h>
 
 
-Scene::Scene(std::shared_ptr<Resources> resources, std::shared_ptr<Camera> camera) : m_resources(resources), camera(camera)
+Scene::Scene(std::shared_ptr<Resources> resources) : m_resources(resources)
 {
     grid = std::make_shared<Grid>(
         m_resources->GetMesh(Resources::MeshType::Quad2),
         m_resources->GetShader(Resources::ShaderType::Grid)
     );
+    camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true);
 }
 
 void Scene::AddImage(std::string path)
@@ -52,10 +53,9 @@ void Scene::AddToken(std::shared_ptr<Token> token)
 
 void Scene::RemoveTokens(std::vector<std::shared_ptr<Token>> toRemove)
 {
-
-    auto pred = [&toRemove](const Token& t) ->bool
+    auto pred = [&toRemove](const std::shared_ptr<Token> t) ->bool
     {
-        return std::find(toRemove.begin(), toRemove.end(), &t) != toRemove.end();
+        return std::find(toRemove.begin(), toRemove.end(), t) != toRemove.end();
     };
 
     tokens.erase(std::remove_if(tokens.begin(), tokens.end(), pred), tokens.end());

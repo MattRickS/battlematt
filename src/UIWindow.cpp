@@ -10,6 +10,8 @@
 #include <Shape2D.h>
 #include <Scene.h>
 #include <Token.h>
+#include <UIState.h>
+
 #include <UIWindow.h>
 
 
@@ -23,7 +25,8 @@ namespace ImGui
 }
 
 
-UIWindow::UIWindow(unsigned int width, unsigned int height, const char* glsl_version, const char* name) : Window(width, height, name)
+UIWindow::UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Scene> scene, std::shared_ptr<Resources> resources) :
+    Window(width, height, "UI"), m_scene(scene), m_resources(resources)
 {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -38,7 +41,7 @@ UIWindow::UIWindow(unsigned int width, unsigned int height, const char* glsl_ver
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
+    ImGui_ImplOpenGL3_Init("#version 330");
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -63,7 +66,6 @@ UIWindow::~UIWindow()
     ImGui::DestroyContext();
 }
 
-
 bool FilepathButton(const char* buttonName, const char* dialogName, const char* ext, std::string& path)
 {
     if (ImGui::Button(buttonName))
@@ -82,7 +84,6 @@ bool FilepathButton(const char* buttonName, const char* dialogName, const char* 
     return success;
 }
 
-
 bool FileLine(std::string dialogName, std::string label, std::string& path)
 {
     if (ImGui::InputText(label.c_str(), &path, ImGuiInputTextFlags_EnterReturnsTrue))
@@ -96,7 +97,7 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
     return false;
 }
 
-void DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D)
+void UIWindow::DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D)
 {
     glm::vec2 pos = matrix2D->GetPos();
     if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
@@ -112,15 +113,16 @@ void DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D)
 }
 
 // Draw a single set of UI inputs and copy all changes to each Shape2D
-void DrawShape2DOptions(std::string suffixID, std::vector<Shape2D*>& shapes, Grid* grid, bool snapToGrid = false, bool singleScale = false)
+void UIWindow::DrawShape2DOptions(std::string suffixID, std::vector<std::shared_ptr<Shape2D>>& shapes, std::shared_ptr<Grid> grid, bool snapToGrid, bool singleScale)
 {
     Matrix2D* matrix2D = shapes[0]->GetModel();
 
     glm::vec2 pos = matrix2D->GetPos();
     if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
     {
-        for (Shape2D* shape : shapes)
+        for (std::shared_ptr<Shape2D> shape : shapes)
         {
+            // TODO: Get relaative offset and apply offset to all shapes rather than move everything on top of each other
             if (snapToGrid)
                 pos = grid->ShapeSnapPosition(shape, pos);
             shape->GetModel()->SetPos(pos);
@@ -129,7 +131,7 @@ void DrawShape2DOptions(std::string suffixID, std::vector<Shape2D*>& shapes, Gri
 
     glm::vec2 scale = matrix2D->GetScale();
     if (singleScale && ImGui::SliderFloat(("Size##1" + suffixID).c_str(), &scale.x, 0, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
-        for (Shape2D* shape : shapes)
+        for (std::shared_ptr<Shape2D> shape : shapes)
         {
             if (snapToGrid)
                 scale = glm::vec2(grid->SnapGridSize(scale.x));
@@ -137,7 +139,7 @@ void DrawShape2DOptions(std::string suffixID, std::vector<Shape2D*>& shapes, Gri
         }
     else if (!singleScale && ImGui::DragFloat2(("Size##2" + suffixID).c_str(), (float*)&scale, 0.5f))
     {
-        for (Shape2D* shape : shapes)
+        for (std::shared_ptr<Shape2D> shape : shapes)
         {
             if (snapToGrid)
                 scale = glm::vec2(grid->SnapGridSize(scale.x), grid->SnapGridSize(scale.y));
@@ -148,23 +150,22 @@ void DrawShape2DOptions(std::string suffixID, std::vector<Shape2D*>& shapes, Gri
 
     float rotation = matrix2D->GetRotation();
     if (ImGui::SliderFloat(("Rotation##" + suffixID).c_str(), &rotation, 0, 360, "%.2f"))
-        for (Shape2D* shape : shapes)
+        for (std::shared_ptr<Shape2D> shape : shapes)
             shape->GetModel()->SetRotation(rotation);
 }
 
-
-void DrawBackgroundOptions(std::shared_ptr<BGImage> background, glm::vec4* bgColor)
+void UIWindow::DrawBackgroundOptions(std::shared_ptr<BGImage> background, glm::vec4* bgColor)
 {
     ImGui::ColorEdit3("Color##Background", (float*)bgColor);
 
     std::string imagePath = background->GetImage()->filename;
     if (FileLine("ChooseBGImage", "Image", imagePath))
-        background->SetImage(imagePath);
+        background->SetImage(m_resources->GetTexture(imagePath));
 
     DrawMatrix2DOptions("Background", background->GetModel());
 }
 
-void DrawGridOptions(Grid* grid, UIState* uiState)
+void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid, std::shared_ptr<UIState> uiState)
 {
     float gridSize = grid->GetScale();
     if (ImGui::SliderFloat("Size##Grid", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
@@ -178,37 +179,36 @@ void DrawGridOptions(Grid* grid, UIState* uiState)
 
 }
 
-void DrawTokenOptions(std::vector<Token*> tokens, Grid* grid, bool snapToGrid = false)
+void UIWindow::DrawTokenOptions(std::vector<std::shared_ptr<Token>> tokens, std::shared_ptr<Grid> grid, bool snapToGrid)
 {
-    Token* token = tokens[0];
+    std::shared_ptr<Token> token = tokens[0];
 
     ImGui::InputText("Name", &token->name);
 
-    std::string iconPath = token->GetIcon();
+    std::string iconPath = token->GetIcon()->filename;
     if (FileLine("ChooseTokenIcon", "Icon", iconPath))
     {
-        for (Token* t : tokens)
-            t->SetIcon(iconPath);
+        for (std::shared_ptr<Token> t : tokens)
+            t->SetIcon(m_resources->GetTexture(iconPath));
     }
 
     if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
     {
-        for (Token* t : tokens)
+        for (std::shared_ptr<Token> t : tokens)
             t->borderWidth = token->borderWidth;
     }
     if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
     {
-        for (Token* t : tokens)
+        for (std::shared_ptr<Token> t : tokens)
             t->borderColor = token->borderColor;
     }
 
-    std::vector<Shape2D*> shapes(tokens.size());
-    std::transform(tokens.begin(), tokens.end(), shapes.begin(), [](Token* t){ return static_cast<Shape2D*>(t); });
+    std::vector<std::shared_ptr<Shape2D>> shapes(tokens.size());
+    std::transform(tokens.begin(), tokens.end(), shapes.begin(), [](std::shared_ptr<Token> t){ return static_cast<std::shared_ptr<Shape2D>>(t); });
     DrawShape2DOptions("Token", shapes, grid, snapToGrid, true);
 }
 
-
-void DrawUI(std::shared_ptr<Scene> scene, UIState* uiState)
+void UIWindow::Draw(std::shared_ptr<UIState> uiState)
 {
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -221,25 +221,21 @@ void DrawUI(std::shared_ptr<Scene> scene, UIState* uiState)
 
         if (ImGui::CollapsingHeader("Background"))
         {
-            if (scene->backgrounds.size() > 0)
-                DrawBackgroundOptions(scene->backgrounds.back(), &scene->bgColor);
+            if (m_scene->backgrounds.size() > 0)
+                DrawBackgroundOptions(m_scene->backgrounds.back(), &m_scene->bgColor);
         }
 
         if (ImGui::CollapsingHeader("Grid"))
-            DrawGridOptions(scene->grid, uiState);
+            DrawGridOptions(m_scene->grid, uiState);
 
-        ImGui::Text("Num selected tokens : %ld / %ld", uiState->selectedTokens.size(), scene->tokens.size());
+        ImGui::Text("Num selected tokens : %ld / %ld", uiState->selectedTokens.size(), m_scene->tokens.size());
         if (ImGui::CollapsingHeader("Token"))
         {
             if (uiState->selectedTokens.size() > 0)
-                DrawTokenOptions(uiState->selectedTokens, scene->grid, uiState->snapToGrid);
+                DrawTokenOptions(uiState->selectedTokens, m_scene->grid, uiState->snapToGrid);
 
             if (ImGui::Button("Add Token"))
-            {
-                uiState->ClearSelection();
-                scene->AddToken();
-                uiState->SelectToken(scene->tokens.back());
-            }
+                addTokenClicked.emit();
         }
 
         // Spacer
@@ -248,12 +244,12 @@ void DrawUI(std::shared_ptr<Scene> scene, UIState* uiState)
         // Save / Load
         std::string path;
         if (FilepathButton("Save", "saveDialog", ".json", path))
-            scene->Save(path);
+            saveClicked.emit(path);
         
         ImGui::SameLine();
 
         if (FilepathButton("Load", "loadDialog", ".json", path))
-            scene->Load(path);
+            loadClicked.emit(path);
 
         // Debug
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);

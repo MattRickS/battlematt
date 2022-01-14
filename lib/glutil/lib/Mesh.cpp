@@ -8,11 +8,6 @@
 #include <Mesh.h>
 
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) : vertices(vertices), indices(indices)
-{
-    setupMesh();
-}
-
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices) : vertices(vertices), indices(indices)
 {
     setupMesh();

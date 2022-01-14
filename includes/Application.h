@@ -2,12 +2,12 @@
 #include <memory>
 
 #include <Buffers.h>
-#include <InputManager.h>
+#include <Controller.h>
 #include <JSONSerializer.h>
 #include <Resources.h>
 #include <Scene.h>
 #include <UIWindow.h>
-#include <Window.h>
+#include <Viewport.h>
 
 
 class Application
@@ -18,9 +18,8 @@ public:
     Application();
     ~Application();
 
-    void LoadDefaultResources();
     bool IsInitialised();
-    void Draw();
+    void Exec();
     
     void Save(std::string path);
     void Load(std::string path);
@@ -30,13 +29,13 @@ private:
     bool m_glad_initialised = false;
 
     float deltaTime, lastFrame = 0.0f;
-    std::shared_ptr<CameraBuffer> cameraBuffer = nullptr;  // Where should this live? Should there be a Renderer class? A Viewport class?
-    std::shared_ptr<Resources> m_resources;
+    std::shared_ptr<Resources> m_resources = nullptr;
     JSONSerializer m_serializer;
     std::shared_ptr<Scene> m_scene = nullptr;
-    std::shared_ptr<InputManager> m_inputManager = nullptr;
-    std::shared_ptr<Window> m_viewport = nullptr;
+    std::shared_ptr<Controller> m_controller = nullptr;
+    std::shared_ptr<Viewport> m_viewport = nullptr;
     std::shared_ptr<UIWindow> m_uiWindow = nullptr;
 
     void InitGL();
+    void LoadDefaultResources();
 };
