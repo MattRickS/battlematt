@@ -36,6 +36,5 @@ private:
     std::shared_ptr<Viewport> m_viewport = nullptr;
     std::shared_ptr<UIWindow> m_uiWindow = nullptr;
 
-    void InitGL();
     void LoadDefaultResources();
 };

@@ -158,7 +158,10 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
             {
                 if (!mods & GLFW_MOD_SHIFT)
                     ClearSelection();
-                uiState->dragSelectRect = std::make_unique<RectOverlay>();
+                uiState->dragSelectRect = std::make_unique<RectOverlay>(
+                    m_resources->GetMesh(Resources::MeshType::Quad2),
+                    m_resources->GetShader(Resources::ShaderType::ScreenRect)
+                );
                 // GL uses inverted Y-axis
                 uiState->dragSelectRect->startCorner = uiState->dragSelectRect->endCorner = glm::vec2(cursorPos.x, m_viewport->Height() - cursorPos.y);
             }

@@ -1,7 +1,8 @@
 #pragma once
+#include <memory>
 #include <glm/glm.hpp>
 
-#include <Primitives.h>
+#include <Mesh.h>
 #include <Shader.h>
 
 
@@ -17,7 +18,7 @@ public:
     glm::vec2 startCorner;
     glm::vec2 endCorner;
 
-    RectOverlay();
+    RectOverlay(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader);
     virtual void Draw();
     void SetColour(glm::vec3 col);
     float MinX();
@@ -26,7 +27,7 @@ public:
     float MaxY();
 
 private:
-    Quad mesh;
-    Shader shader;
+    std::shared_ptr<Mesh> m_mesh;
+    std::shared_ptr<Shader> m_shader;
     glm::vec3 colour = glm::vec3(0, 1, 1);
 };

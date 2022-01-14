@@ -1,6 +1,6 @@
 #include <glm/glm.hpp>
 
-#include <Primitives.h>
+#include <Mesh.h>
 #include <Shader.h>
 #include <Token.h>
 #include <Grid.h>

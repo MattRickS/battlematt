@@ -1,30 +1,31 @@
 #include <iostream>
+#include <memory>
 
 #include <glm/glm.hpp>
 
-#include <Primitives.h>
+#include <Mesh.h>
 #include <Shader.h>
 
 #include <Overlays.h>
 
 
-RectOverlay::RectOverlay() : mesh(2), shader("resources/shaders/Grid.vs", "resources/shaders/Rect.fs")
+RectOverlay::RectOverlay(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader) : m_mesh(mesh), m_shader(shader)
 {
     SetColour(colour);
 }
 
 void RectOverlay::Draw()
 {
-    shader.use();
-    shader.setFloat4("coords", MinX(), MinY(), MaxX(), MaxY());
-    mesh.Draw(shader);
+    m_shader->use();
+    m_shader->setFloat4("coords", MinX(), MinY(), MaxX(), MaxY());
+    m_mesh->Draw(*m_shader);
 }
 
 void RectOverlay::SetColour(glm::vec3 col)
 {
     colour = col;
-    shader.use();
-    shader.setFloat3("colour", colour.x, colour.y, colour.z);
+    m_shader->use();
+    m_shader->setFloat3("colour", colour.x, colour.y, colour.z);
 }
 
 float RectOverlay::MinX() { return std::min(startCorner.x, endCorner.x); }

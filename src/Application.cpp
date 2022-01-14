@@ -13,7 +13,6 @@
 
 #include <Buffers.h>
 #include <Camera.h>
-#include <Primitives.h>
 #include <Shader.h>
 #include <Scene.h>
 #include <Texture.h>
@@ -26,19 +25,42 @@
 
 const int GRID_SHADER = 1;
 
+void glfw_error_callback(int error, const char* description)
+{
+    fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+}
 
 Application::Application() : m_resources(std::make_shared<Resources>()), m_serializer(m_resources)
 {
-    InitGL();
-    if (!IsInitialised())
+    // Setup window
+    glfwSetErrorCallback(glfw_error_callback);
+    if (!glfwInit())
         return;
-    
+
+    m_glfw_initialised = true;
+
     m_scene = std::make_shared<Scene>(m_resources);
     m_uiWindow = std::make_shared<UIWindow>(200, 200, m_scene, m_resources);
     m_viewport = std::make_shared<Viewport>(200, 100, m_scene);
     m_controller = std::make_shared<Controller>(m_scene, m_viewport, m_uiWindow);
 
+    // Initialize GLAD
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return;
+    }
+    m_glad_initialised = true;
+    if (!IsInitialised())
+        return;
+
     LoadDefaultResources();
+}
+
+Application::~Application()
+{
+    if (m_glfw_initialised)
+        glfwTerminate();
 }
 
 void Application::LoadDefaultResources()
@@ -69,12 +91,6 @@ void Application::LoadDefaultResources()
     m_resources->CreateShader(Resources::ShaderType::Token, "resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs");
 
     m_resources->CreateTexture(Resources::TextureType::Default, "resources/images/QuestionMark.jpg");
-}
-
-Application::~Application()
-{
-    if (m_glfw_initialised)
-        glfwTerminate();
 }
 
 bool Application::IsInitialised()
@@ -110,29 +126,6 @@ void Application::Exec()
 
 // =============================================================================
 // Private
-
-void glfw_error_callback(int error, const char* description)
-{
-    fprintf(stderr, "Glfw Error %d: %s\n", error, description);
-}
-
-void Application::InitGL()
-{
-    // Setup window
-    glfwSetErrorCallback(glfw_error_callback);
-    if (!glfwInit())
-        return;
-
-    m_glfw_initialised = true;
-
-    // Initialize GLAD
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return;
-    }
-    m_glad_initialised = true;
-}
 
 void Application::Save(std::string path)
 {

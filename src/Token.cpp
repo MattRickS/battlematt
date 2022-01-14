@@ -5,8 +5,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <Matrix2D.h>
+#include <Mesh.h>
 #include <Token.h>
-#include <Primitives.h>
 #include <TextureCache.h>
 
 Token::Token(std::shared_ptr<Mesh> mesh) : Rect(mesh), name("") {}

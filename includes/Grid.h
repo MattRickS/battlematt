@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 
-#include <Primitives.h>
+#include <Mesh.h>
 #include <Shape2D.h>
 #include <Shader.h>
 #include <Token.h>
