@@ -1,3 +1,6 @@
+#include <iostream>
+
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -38,9 +41,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 // =============================================================================
 
-Window::Window(unsigned int width, unsigned int height, const char* name) : m_width(width), m_height(height)
+Window::Window(unsigned int width, unsigned int height, const char* name, std::shared_ptr<Window> share) : m_width(width), m_height(height)
 {
-    window = glfwCreateWindow(width, height, name, NULL, NULL);
+    window = glfwCreateWindow(width, height, name, NULL, share ? share->window : NULL);
     if (window == NULL)
         return;
     
@@ -54,6 +57,12 @@ Window::Window(unsigned int width, unsigned int height, const char* name) : m_wi
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
+
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return;
+    }
 
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);

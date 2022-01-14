@@ -26,9 +26,7 @@ public:
 
 private:
     bool m_glfw_initialised = false;
-    bool m_glad_initialised = false;
 
-    float deltaTime, lastFrame = 0.0f;
     std::shared_ptr<Resources> m_resources = nullptr;
     JSONSerializer m_serializer;
     std::shared_ptr<Scene> m_scene = nullptr;

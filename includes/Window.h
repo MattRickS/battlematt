@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -14,7 +16,7 @@ public:
     Signal<int, int, int, int> keyChanged;
     Signal<int, int> sizeChanged;
 
-    Window(unsigned int width, unsigned int height, const char* name);
+    Window(unsigned int width, unsigned int height, const char* name, std::shared_ptr<Window> share = NULL);
     ~Window();
 
     void Close();

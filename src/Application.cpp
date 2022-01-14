@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <stdio.h>
 #include <chrono>
@@ -5,11 +6,7 @@
 #include <vector>
 
 #include <glad/glad.h>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
-#include <ImGuiFileDialog.h>
 
 #include <Buffers.h>
 #include <Camera.h>
@@ -41,17 +38,10 @@ Application::Application() : m_resources(std::make_shared<Resources>()), m_seria
 
     m_scene = std::make_shared<Scene>(m_resources);
     m_uiWindow = std::make_shared<UIWindow>(200, 200, m_scene, m_resources);
-    m_viewport = std::make_shared<Viewport>(200, 100, m_scene);
+    m_viewport = std::make_shared<Viewport>(200, 100, m_scene, static_cast<std::shared_ptr<Window>>(m_uiWindow));
     m_controller = std::make_shared<Controller>(m_scene, m_viewport, m_uiWindow);
 
-    // Initialize GLAD
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return;
-    }
-    m_glad_initialised = true;
-    if (!IsInitialised())
+    if (!m_viewport->IsInitialised() || !m_uiWindow->IsInitialised())
         return;
 
     LoadDefaultResources();
@@ -95,7 +85,7 @@ void Application::LoadDefaultResources()
 
 bool Application::IsInitialised()
 {
-    return m_glfw_initialised && m_glad_initialised && m_uiWindow->IsInitialised() && m_viewport->IsInitialised();
+    return m_glfw_initialised && m_uiWindow->IsInitialised() && m_viewport->IsInitialised();
 }
 
 void Application::Exec()
@@ -107,11 +97,7 @@ void Application::Exec()
     while (!m_viewport->IsClosing())
     {
         glfwPollEvents();
-
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-
+    
         // Viewport would need the screenRect logic as well as Renderer
         m_viewport->Draw();
         // m_scene->Draw();

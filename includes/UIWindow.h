@@ -21,7 +21,7 @@ public:
     Signal<std::string> saveClicked;
     Signal<std::string> loadClicked;
 
-    UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Scene> scene, std::shared_ptr<Resources> resources);
+    UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Scene> scene, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share = NULL);
     ~UIWindow();
 
     virtual void Draw(std::shared_ptr<UIState> uiState);

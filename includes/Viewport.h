@@ -9,7 +9,7 @@
 class Viewport : public Window
 {
 public:
-    Viewport(unsigned int width, unsigned int height, std::shared_ptr<Scene> scene);
+    Viewport(unsigned int width, unsigned int height, std::shared_ptr<Scene> scene, std::shared_ptr<Window> share = NULL);
     // ~Viewport();
 
     virtual void Draw();
