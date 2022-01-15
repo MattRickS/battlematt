@@ -23,6 +23,14 @@ Scene::Scene(std::shared_ptr<Resources> resources) : m_resources(resources)
     camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f);
 }
 
+void Scene::AddImage()
+{
+    backgrounds.push_back(std::make_shared<BGImage>(
+        m_resources->GetMesh(Resources::MeshType::Quad),
+        m_resources->GetTexture(Resources::TextureType::Default)
+    ));
+}
+
 void Scene::AddImage(std::string path)
 {
     backgrounds.push_back(std::make_shared<BGImage>(

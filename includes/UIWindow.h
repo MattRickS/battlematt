@@ -17,6 +17,7 @@
 class UIWindow : public Window
 {
 public:
+    Signal<> addImageClicked;
     Signal<> addTokenClicked;
     Signal<std::string> saveClicked;
     Signal<std::string> loadClicked;
@@ -35,7 +36,7 @@ private:
 
     void DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D);
     void DrawShape2DOptions(std::string suffixID, std::vector<std::shared_ptr<Shape2D>>& shapes, std::shared_ptr<Grid> grid, bool snapToGrid = false, bool singleScale = false);
-    void DrawBackgroundOptions(std::shared_ptr<BGImage> background, glm::vec4* bgColor);
+    void DrawBackgroundOptions(std::shared_ptr<BGImage> background);
     void DrawGridOptions(std::shared_ptr<Grid>);
     void DrawTokenOptions(std::vector<std::shared_ptr<Token>> tokens, std::shared_ptr<Grid> grid, bool snapToGrid = false);
 };

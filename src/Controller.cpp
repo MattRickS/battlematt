@@ -27,8 +27,11 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Sce
 
 void Controller::SetScene(std::shared_ptr<Scene> scene)
 {
+    m_uiWindow->addImageClicked.disconnect();
     m_uiWindow->addTokenClicked.disconnect();
+
     m_scene = scene;
+    m_uiWindow->addImageClicked.connect(m_scene.get(), &Scene::AddImage);
     m_uiWindow->addTokenClicked.connect(m_scene.get(), &Scene::AddToken);
 
     m_viewport->SetScene(scene);

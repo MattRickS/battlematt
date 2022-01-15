@@ -26,6 +26,7 @@ public:
     std::vector<std::shared_ptr<Token>> TokensInScreenRect(float minx, float miny, float maxx, float maxy);
     std::shared_ptr<Token> GetTokenAtScreenPos(glm::vec2 screenPos);
 
+    // Have to public for the glfw bound callbacks to access
     void OnViewportMouseMove(double xpos, double ypos);
     void OnViewportMouseButton(int button, int action, int mods);
     void OnViewportMouseScroll(double xoffset, double yoffset);

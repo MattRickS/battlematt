@@ -23,6 +23,7 @@ public:
     std::shared_ptr<Camera> camera = nullptr;
 
     Scene(std::shared_ptr<Resources> resources);
+    void AddImage();
     void AddImage(std::string path);
     void AddToken();
     void AddToken(std::string path);
