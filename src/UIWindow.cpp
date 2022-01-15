@@ -99,15 +99,25 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
     return false;
 }
 
-void UIWindow::DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D)
+void UIWindow::DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D, bool lockScaleRatio)
 {
     glm::vec2 pos = matrix2D->GetPos();
     if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
         matrix2D->SetPos(pos);
 
-    glm::vec2 scale = matrix2D->GetScale();
-    if (ImGui::DragFloat2(("Size##" + suffixID).c_str(), (float*)&scale))
-        matrix2D->SetScale(scale);
+    // TODO: Reset size option to match image ratio
+    if (lockScaleRatio)
+    {
+        float size = matrix2D->GetScalef();
+        if (ImGui::SliderFloat(("Scale##" + suffixID).c_str(), &size, 0.1, 1000, "%.2f", ImGuiSliderFlags_Logarithmic))
+            matrix2D->SetScale(matrix2D->GetScale() * (size / matrix2D->GetScalef()));
+    }
+    else
+    {
+        glm::vec2 scale = matrix2D->GetScale();
+        if (ImGui::DragFloat2(("Size##" + suffixID).c_str(), (float*)&scale))
+            matrix2D->SetScale(scale);
+    }
 
     float rotation = matrix2D->GetRotation();
     if (ImGui::SliderFloat(("Rotation##" + suffixID).c_str(), &rotation, 0, 360, "%.2f"))
@@ -162,7 +172,8 @@ void UIWindow::DrawBackgroundOptions(std::shared_ptr<BGImage> background)
     if (FileLine("ChooseBGImage", "Image", imagePath))
         background->SetImage(m_resources->GetTexture(imagePath));
 
-    DrawMatrix2DOptions("Background", background->GetModel());
+    ImGui::Checkbox("Lock Size Ratio", &background->lockRatio);
+    DrawMatrix2DOptions("Background", background->GetModel(), background->lockRatio);
 }
 
 void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)

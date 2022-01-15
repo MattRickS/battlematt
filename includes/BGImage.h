@@ -12,6 +12,8 @@
 class BGImage: public Rect
 {
 public:
+    bool lockRatio = false;
+
     BGImage(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture);
     void Draw(Shader &shader) override;
     std::shared_ptr<Texture> GetImage();

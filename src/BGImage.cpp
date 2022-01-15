@@ -40,7 +40,7 @@ std::shared_ptr<Texture> BGImage::GetImage()
 
 void BGImage::SetImage(std::shared_ptr<Texture> texture)
 {
-    if (m_texture->IsValid())
+    if (!lockRatio)
     {
         // Resize the incoming image to match the width of the current image
         float hSize = m_texture->width * m_model.GetScale().x;
