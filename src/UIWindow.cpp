@@ -167,7 +167,7 @@ void UIWindow::DrawBackgroundOptions(std::shared_ptr<BGImage> background, glm::v
     DrawMatrix2DOptions("Background", background->GetModel());
 }
 
-void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid, std::shared_ptr<UIState> uiState)
+void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)
 {
     float gridSize = grid->GetScale();
     if (ImGui::SliderFloat("Size##Grid", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
@@ -210,8 +210,10 @@ void UIWindow::DrawTokenOptions(std::vector<std::shared_ptr<Token>> tokens, std:
     DrawShape2DOptions("Token", shapes, grid, snapToGrid, true);
 }
 
-void UIWindow::Draw(std::shared_ptr<UIState> uiState)
+void UIWindow::Draw()
 {
+    glClear(GL_COLOR_BUFFER_BIT);
+
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -228,7 +230,7 @@ void UIWindow::Draw(std::shared_ptr<UIState> uiState)
         }
 
         if (ImGui::CollapsingHeader("Grid"))
-            DrawGridOptions(m_scene->grid, uiState);
+            DrawGridOptions(m_scene->grid);
 
         ImGui::Text("Num selected tokens : %ld / %ld", uiState->selectedTokens.size(), m_scene->tokens.size());
         if (ImGui::CollapsingHeader("Token"))

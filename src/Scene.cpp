@@ -19,7 +19,7 @@ Scene::Scene(std::shared_ptr<Resources> resources) : m_resources(resources)
         m_resources->GetMesh(Resources::MeshType::Quad2),
         m_resources->GetShader(Resources::ShaderType::Grid)
     );
-    camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true);
+    camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f);
 }
 
 void Scene::AddImage(std::string path)

@@ -6,7 +6,12 @@
 #include <Grid.h>
 
 
-Grid::Grid(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader) : m_mesh(mesh), m_shader(shader) {}
+Grid::Grid(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader) : m_mesh(mesh), m_shader(shader)
+{
+    shader->use();
+    shader->setFloat("gridScale", m_scale);
+    shader->setFloat3("gridColour", m_colour.x, m_colour.y, m_colour.z);
+}
 
 void Grid::Draw()
 {

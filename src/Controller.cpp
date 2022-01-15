@@ -23,6 +23,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Sce
 
     m_viewport->SetScene(scene);
     m_uiWindow->SetScene(scene);
+    m_uiWindow->uiState = uiState;
 }
 
 // Selection

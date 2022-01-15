@@ -44,9 +44,6 @@ Application::Application() : m_resources(std::make_shared<Resources>()), m_seria
     LoadDefaultResources();
     m_scene = std::make_shared<Scene>(m_resources);
     m_controller = std::make_shared<Controller>(m_resources, m_scene, m_viewport, m_uiWindow);
-
-    if (!m_viewport->IsInitialised() || !m_uiWindow->IsInitialised())
-        return;
 }
 
 Application::~Application()
@@ -87,7 +84,7 @@ void Application::LoadDefaultResources()
 
 bool Application::IsInitialised()
 {
-    return m_glfw_initialised && m_uiWindow->IsInitialised() && m_viewport->IsInitialised();
+    return m_glfw_initialised && m_viewport->IsInitialised() && m_uiWindow->IsInitialised();
 }
 
 void Application::Exec()
@@ -101,12 +98,11 @@ void Application::Exec()
         glfwPollEvents();
     
         // Viewport would need the screenRect logic as well as Renderer
-        m_viewport->Draw();
-        // m_scene->Draw();
-        // if (m_inputManager.dragSelectRect)
-        //     m_controller.dragSelectRect->Draw();
-        if (!m_uiWindow->IsClosed())
-            m_uiWindow->Draw(m_controller->uiState);
+        m_viewport->Render();
+        if (m_controller->uiState->dragSelectRect)
+            m_controller->uiState->dragSelectRect->Draw();
+        if (m_uiWindow)
+            m_uiWindow->Render();
 
         // Lazy hack to limit frame rate for now
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
