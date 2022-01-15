@@ -13,7 +13,7 @@
 
 
 Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow) :
-    m_resources(resources), m_scene(scene), m_viewport(viewport), m_uiWindow(uiWindow)
+    m_resources(resources), m_viewport(viewport), m_uiWindow(uiWindow)
 {
     m_viewport->cursorMoved.connect(this, &Controller::OnViewportMouseMove);
     m_viewport->keyChanged.connect(this, &Controller::OnViewportKey);
@@ -21,9 +21,18 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Sce
     m_viewport->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
     m_viewport->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
 
+    m_uiWindow->uiState = uiState;
+    SetScene(scene);
+}
+
+void Controller::SetScene(std::shared_ptr<Scene> scene)
+{
+    m_uiWindow->addTokenClicked.disconnect();
+    m_scene = scene;
+    m_uiWindow->addTokenClicked.connect(m_scene.get(), &Scene::AddToken);
+
     m_viewport->SetScene(scene);
     m_uiWindow->SetScene(scene);
-    m_uiWindow->uiState = uiState;
 }
 
 // Selection

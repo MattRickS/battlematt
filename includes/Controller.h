@@ -18,6 +18,8 @@ public:
 
     Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow);
 
+    void SetScene(std::shared_ptr<Scene> scene);
+
     void ClearSelection();
     void SelectToken(std::shared_ptr<Token> token);
 

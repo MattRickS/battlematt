@@ -15,7 +15,7 @@
 class Scene
 {
 public:
-    glm::vec4 bgColor = glm::vec4(1, 0, 0, 1);
+    glm::vec4 bgColor = glm::vec4(0, 0, 0, 1);
     std::vector<std::shared_ptr<BGImage>> backgrounds;
     std::vector<std::shared_ptr<Token>> tokens;
     std::vector<std::shared_ptr<Overlay>> overlays;
