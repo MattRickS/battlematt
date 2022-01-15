@@ -163,7 +163,10 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
     }
 
     if (middleMouseHeld)
+    {
         m_scene->camera->Pan(m_viewport->ScreenToWorldOffset(xoffset, yoffset));
+        m_viewport->RefreshCamera();
+    }
     else if (leftMouseHeld && uiState->tokenUnderCursor)
     {
         if (uiState->snapToGrid)
@@ -226,6 +229,7 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
 void Controller::OnViewportMouseScroll(double xoffset, double yoffset)
 {
     m_scene->camera->Zoom(yoffset);
+    m_viewport->RefreshCamera();
 }
 
 void Controller::OnViewportKey(int key, int scancode, int action, int mods)
