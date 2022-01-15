@@ -25,8 +25,8 @@ namespace ImGui
 }
 
 
-UIWindow::UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Scene> scene, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share) :
-    Window(width, height, "UI", share), m_scene(scene), m_resources(resources)
+UIWindow::UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share) :
+    Window(width, height, "UI", share), m_resources(resources)
 {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -65,6 +65,8 @@ UIWindow::~UIWindow()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
+
+void UIWindow::SetScene(std::shared_ptr<Scene> scene) { m_scene = scene; }
 
 bool FilepathButton(const char* buttonName, const char* dialogName, const char* ext, std::string& path)
 {

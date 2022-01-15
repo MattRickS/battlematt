@@ -17,7 +17,7 @@ void Resources::CreateMesh(MeshType meshType, std::vector<Vertex> vertices, std:
 
 std::shared_ptr<Mesh> Resources::GetMesh(MeshType meshType)
 {
-    return m_meshes[meshType];
+    return m_meshes.at(meshType);
 }
 
 void Resources::CreateShader(ShaderType shaderType, const char* vs, const char* fs)
@@ -27,7 +27,7 @@ void Resources::CreateShader(ShaderType shaderType, const char* vs, const char* 
 
 std::shared_ptr<Shader> Resources::GetShader(ShaderType shaderType)
 {
-    return m_shaders[shaderType];
+    return m_shaders.at(shaderType);
 }
 
 void Resources::CreateTexture(TextureType textureType, std::string path)
@@ -37,7 +37,7 @@ void Resources::CreateTexture(TextureType textureType, std::string path)
 
 std::shared_ptr<Texture> Resources::GetTexture(TextureType textureType)
 {
-    return m_textureTypes[textureType];
+    return m_textureTypes.at(textureType);
 }
 
 std::shared_ptr<Texture> Resources::GetTexture(std::string path)

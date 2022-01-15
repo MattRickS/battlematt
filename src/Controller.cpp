@@ -19,6 +19,9 @@ Controller::Controller(std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> v
     m_viewport->keyChanged.connect(this, &Controller::OnViewportKey);
     m_viewport->mouseButtonChanged.connect(this, &Controller::OnViewportMouseButton);
     m_viewport->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
+
+    m_viewport->SetScene(scene);
+    m_uiWindow->SetScene(scene);
 }
 
 // Selection

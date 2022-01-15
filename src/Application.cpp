@@ -36,15 +36,16 @@ Application::Application() : m_resources(std::make_shared<Resources>()), m_seria
 
     m_glfw_initialised = true;
 
+    m_uiWindow = std::make_shared<UIWindow>(200, 200, m_resources);
+    m_viewport = std::make_shared<Viewport>(200, 100, static_cast<std::shared_ptr<Window>>(m_uiWindow));
+
+    // Resources must be loaded after the GL context is created by the window.
+    LoadDefaultResources();
     m_scene = std::make_shared<Scene>(m_resources);
-    m_uiWindow = std::make_shared<UIWindow>(200, 200, m_scene, m_resources);
-    m_viewport = std::make_shared<Viewport>(200, 100, m_scene, static_cast<std::shared_ptr<Window>>(m_uiWindow));
     m_controller = std::make_shared<Controller>(m_scene, m_viewport, m_uiWindow);
 
     if (!m_viewport->IsInitialised() || !m_uiWindow->IsInitialised())
         return;
-
-    LoadDefaultResources();
 }
 
 Application::~Application()
