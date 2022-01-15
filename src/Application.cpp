@@ -97,10 +97,7 @@ void Application::Exec()
     {
         glfwPollEvents();
     
-        // Viewport would need the screenRect logic as well as Renderer
         m_viewport->Render();
-        if (m_controller->uiState->dragSelectRect)
-            m_controller->uiState->dragSelectRect->Draw();
         if (m_uiWindow)
             m_uiWindow->Render();
 

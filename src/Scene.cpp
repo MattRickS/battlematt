@@ -7,6 +7,7 @@
 #include <BGImage.h>
 #include <Camera.h>
 #include <Grid.h>
+#include <Overlays.h>
 #include <Shader.h>
 #include <Resources.h>
 #include <Token.h>
@@ -51,6 +52,13 @@ void Scene::AddToken(std::shared_ptr<Token> token)
     tokens.push_back(token);
 }
 
+void Scene::RemoveOverlay(std::shared_ptr<Overlay> overlay)
+{
+    auto it = std::find(overlays.begin(), overlays.end(), overlay);
+    if (it != overlays.end())
+        overlays.erase(it);
+}
+
 void Scene::RemoveTokens(std::vector<std::shared_ptr<Token>> toRemove)
 {
     auto pred = [&toRemove](const std::shared_ptr<Token> t) ->bool
@@ -79,4 +87,8 @@ void Scene::Draw()
     tokenShader->use();
     for (std::shared_ptr<Token> token : tokens)
         token->Draw(*tokenShader);
+
+    // Overlays have their own shaders
+    for (std::shared_ptr<Overlay> overlay : overlays)
+        overlay->Draw();
 }

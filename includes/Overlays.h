@@ -8,6 +8,11 @@
 
 class Overlay
 {
+public:
+    std::shared_ptr<Shader> shader;
+
+    Overlay(std::shared_ptr<Shader> shader);
+
     virtual void Draw() = 0;
 };
 
@@ -28,6 +33,5 @@ public:
 
 private:
     std::shared_ptr<Mesh> m_mesh;
-    std::shared_ptr<Shader> m_shader;
     glm::vec3 colour = glm::vec3(0, 1, 1);
 };

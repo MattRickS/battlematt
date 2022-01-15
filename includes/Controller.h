@@ -42,4 +42,9 @@ private:
     float lastMouseX, lastMouseY;
     bool middleMouseHeld = false;
     bool leftMouseHeld = false;
+
+    bool IsDragSelecting();
+    void StartDragSelection(float xpos, float ypos);
+    void UpdateDragSelection(float xpos, float ypos);
+    void FinishDragSelection();
 };

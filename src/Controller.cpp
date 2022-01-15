@@ -76,6 +76,57 @@ std::shared_ptr<Token> Controller::GetTokenAtScreenPos(glm::vec2 screenPos)
     return nullptr;
 }
 
+// Drag Selection
+bool Controller::IsDragSelecting()
+{
+    return static_cast<bool>(uiState->dragSelectRect);
+}
+
+void Controller::StartDragSelection(float xpos, float ypos)
+{
+    uiState->dragSelectRect = std::make_shared<RectOverlay>(
+        m_resources->GetMesh(Resources::MeshType::Quad2),
+        m_resources->GetShader(Resources::ShaderType::ScreenRect)
+    );
+    // GL uses inverted Y-axis
+    uiState->dragSelectRect->startCorner = uiState->dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
+    m_scene->overlays.push_back(static_cast<std::shared_ptr<Overlay>>(uiState->dragSelectRect));
+}
+
+void Controller::UpdateDragSelection(float xpos, float ypos)
+{
+    // GL uses inverted Y-axis
+    uiState->dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
+
+    // Y-axis is inverted on rect, use re-invert for calculating world positions
+    auto selectedTokens = TokensInScreenRect(
+        uiState->dragSelectRect->MinX(),
+        m_viewport->Height() - uiState->dragSelectRect->MinY(),
+        uiState->dragSelectRect->MaxX(),
+        m_viewport->Height() - uiState->dragSelectRect->MaxY()
+    );
+
+    for (std::shared_ptr<Token> token : uiState->selectedTokens)
+        token->isHighlighted = true;
+}
+
+void Controller::FinishDragSelection()
+{
+    // Y-axis is inverted on rect, use re-invert for calculating world positions
+    auto tokensInBounds = TokensInScreenRect(
+        uiState->dragSelectRect->MinX(),
+        m_viewport->Height() - uiState->dragSelectRect->MinY(),
+        uiState->dragSelectRect->MaxX(),
+        m_viewport->Height() - uiState->dragSelectRect->MaxY()
+    );
+
+    for (std::shared_ptr<Token> token : tokensInBounds)
+        SelectToken(token);
+
+    m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(uiState->dragSelectRect));
+    uiState->dragSelectRect.reset();
+}
+
 // Input Callbacks
 void Controller::OnViewportMouseMove(double xpos, double ypos)
 {
@@ -124,22 +175,8 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
                 token->GetModel()->Offset(offset);
         }
     }
-    else if (leftMouseHeld && uiState->dragSelectRect)
-    {
-        // GL uses inverted Y-axis
-        uiState->dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
-
-        // Y-axis is inverted on rect, use re-invert for calculating world positions
-        auto selectedTokens = TokensInScreenRect(
-            uiState->dragSelectRect->MinX(),
-            m_viewport->Height() - uiState->dragSelectRect->MinY(),
-            uiState->dragSelectRect->MaxX(),
-            m_viewport->Height() - uiState->dragSelectRect->MaxY()
-        );
-
-        for (std::shared_ptr<Token> token : uiState->selectedTokens)
-            token->isHighlighted = true;
-    }
+    else if (leftMouseHeld && IsDragSelecting())
+        UpdateDragSelection(xpos, ypos);
 }
 
 void Controller::OnViewportMouseButton(int button, int action, int mods)
@@ -163,32 +200,15 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
             {
                 if (!mods & GLFW_MOD_SHIFT)
                     ClearSelection();
-                uiState->dragSelectRect = std::make_unique<RectOverlay>(
-                    m_resources->GetMesh(Resources::MeshType::Quad2),
-                    m_resources->GetShader(Resources::ShaderType::ScreenRect)
-                );
-                // GL uses inverted Y-axis
-                uiState->dragSelectRect->startCorner = uiState->dragSelectRect->endCorner = glm::vec2(cursorPos.x, m_viewport->Height() - cursorPos.y);
+
+                StartDragSelection(cursorPos.x, cursorPos.y);
             }
         }
         else if (action == GLFW_RELEASE)
         {
             uiState->tokenUnderCursor = nullptr;
-            if (uiState->dragSelectRect)
-            {
-                // Y-axis is inverted on rect, use re-invert for calculating world positions
-                auto tokensInBounds = TokensInScreenRect(
-                    uiState->dragSelectRect->MinX(),
-                    m_viewport->Height() - uiState->dragSelectRect->MinY(),
-                    uiState->dragSelectRect->MaxX(),
-                    m_viewport->Height() - uiState->dragSelectRect->MaxY()
-                );
-
-                for (std::shared_ptr<Token> token : tokensInBounds)
-                    SelectToken(token);
-
-                uiState->dragSelectRect.reset();
-            }
+            if (IsDragSelecting())
+                FinishDragSelection();
         }
         leftMouseHeld = action == GLFW_PRESS;
     }
