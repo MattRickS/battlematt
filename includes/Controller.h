@@ -16,7 +16,7 @@ class Controller
 public:
     std::shared_ptr<UIState> uiState = std::make_shared<UIState>();
 
-    Controller(std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow);
+    Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow);
 
     void ClearSelection();
     void SelectToken(std::shared_ptr<Token> token);
@@ -28,15 +28,15 @@ public:
     void OnViewportMouseButton(int button, int action, int mods);
     void OnViewportMouseScroll(double xoffset, double yoffset);
     void OnViewportKey(int key, int scancode, int action, int mods);
+    void OnViewportSizeChanged(int width, int height);
 
     void OnUIAddTokenClicked();
 
 private:
+    std::shared_ptr<Resources> m_resources = nullptr;
     std::shared_ptr<Scene> m_scene = nullptr;
     std::shared_ptr<Viewport> m_viewport = nullptr;
     std::shared_ptr<UIWindow> m_uiWindow = nullptr;
-
-    std::shared_ptr<Resources> m_resources = nullptr;
 
     bool firstMouse = true;
     float lastMouseX, lastMouseY;

@@ -36,13 +36,14 @@ Application::Application() : m_resources(std::make_shared<Resources>()), m_seria
 
     m_glfw_initialised = true;
 
-    m_uiWindow = std::make_shared<UIWindow>(200, 200, m_resources);
-    m_viewport = std::make_shared<Viewport>(200, 100, static_cast<std::shared_ptr<Window>>(m_uiWindow));
+    // Initialises GL contexts
+    m_uiWindow = std::make_shared<UIWindow>(480, 640, m_resources);
+    m_viewport = std::make_shared<Viewport>(1280, 720, static_cast<std::shared_ptr<Window>>(m_uiWindow));
 
     // Resources must be loaded after the GL context is created by the window.
     LoadDefaultResources();
     m_scene = std::make_shared<Scene>(m_resources);
-    m_controller = std::make_shared<Controller>(m_scene, m_viewport, m_uiWindow);
+    m_controller = std::make_shared<Controller>(m_resources, m_scene, m_viewport, m_uiWindow);
 
     if (!m_viewport->IsInitialised() || !m_uiWindow->IsInitialised())
         return;
@@ -95,7 +96,7 @@ void Application::Exec()
     glEnable( GL_BLEND );
 
     // Main loop
-    while (!m_viewport->IsClosing())
+    while (!m_viewport->IsClosed())
     {
         glfwPollEvents();
     
@@ -104,7 +105,8 @@ void Application::Exec()
         // m_scene->Draw();
         // if (m_inputManager.dragSelectRect)
         //     m_controller.dragSelectRect->Draw();
-        m_uiWindow->Draw(m_controller->uiState);
+        if (!m_uiWindow->IsClosed())
+            m_uiWindow->Draw(m_controller->uiState);
 
         // Lazy hack to limit frame rate for now
         std::this_thread::sleep_for(std::chrono::milliseconds(10));

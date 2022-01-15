@@ -64,12 +64,14 @@ Window::Window(unsigned int width, unsigned int height, const char* name, std::s
         return;
     }
 
+    // Reference: https://www.glfw.org/docs/3.3/window_guide.html
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, key_callback);
+    // glfwSetWindowCloseCallback(window, window_close_callback)
 }
 
 Window::~Window()
@@ -85,6 +87,7 @@ void Window::Resize(unsigned int width, unsigned int height)
 {
     m_width = width;
     m_height = height;
+    sizeChanged.emit(m_width, m_height);
 }
 
 unsigned int Window::Height() { return m_height; }
@@ -99,10 +102,9 @@ glm::vec2 Window::CursorPos()
 
 void Window::Close()
 {
-    DisconnectSignals();
     glfwSetWindowShouldClose(window, true);
 }
-bool Window::IsClosing() { return glfwWindowShouldClose(window); }
+bool Window::IsClosed() { return glfwWindowShouldClose(window); }
 
 void Window::Draw() {}
 void Window::Render()

@@ -20,7 +20,7 @@ public:
     ~Window();
 
     void Close();
-    bool IsClosing();
+    bool IsClosed();
     bool IsInitialised();
 
     void Resize(unsigned int width, unsigned int height);

@@ -12,13 +12,14 @@
 #include <Controller.h>
 
 
-Controller::Controller(std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow) :
-    m_scene(scene), m_viewport(viewport), m_uiWindow(uiWindow)
+Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow) :
+    m_resources(resources), m_scene(scene), m_viewport(viewport), m_uiWindow(uiWindow)
 {
     m_viewport->cursorMoved.connect(this, &Controller::OnViewportMouseMove);
     m_viewport->keyChanged.connect(this, &Controller::OnViewportKey);
     m_viewport->mouseButtonChanged.connect(this, &Controller::OnViewportMouseButton);
     m_viewport->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
+    m_viewport->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
 
     m_viewport->SetScene(scene);
     m_uiWindow->SetScene(scene);
@@ -241,6 +242,11 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
     //     for (uint i = numTokens; i < m_scene->tokens.size(); i++)
     //         uiState.SelectToken(&m_scene->tokens[i]);
     // }
+}
+
+void Controller::OnViewportSizeChanged(int width, int height)
+{
+    m_viewport->RefreshCamera();
 }
 
 void Controller::OnUIAddTokenClicked()
