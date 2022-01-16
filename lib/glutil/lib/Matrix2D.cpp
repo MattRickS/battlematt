@@ -6,7 +6,7 @@
 
 Matrix2D::Matrix2D() : m_pos(0), m_scale(1), m_rot(0) { Rebuild(); }
 
-Matrix2D::Matrix2D(glm::vec2 pos, glm::vec2 scale, float rot) : m_pos(pos), m_scale(scale), m_rot(rot) {}
+Matrix2D::Matrix2D(glm::vec2 pos, glm::vec2 scale, float rot) : m_pos(pos), m_scale(scale), m_rot(rot) { Rebuild(); }
 
 void Matrix2D::Offset(glm::vec2 offset)
 {
