@@ -1,6 +1,9 @@
+#include <fstream>
+#include <iostream>
 #include <memory>
 #include <vector>
 
+#include <JSONSerializer.h>
 #include <Overlays.h>
 #include <Resources.h>
 #include <Scene.h>
@@ -13,7 +16,7 @@
 
 
 Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow) :
-    m_resources(resources), m_viewport(viewport), m_uiWindow(uiWindow)
+    m_resources(resources), m_viewport(viewport), m_uiWindow(uiWindow), m_serializer(m_resources)
 {
     m_viewport->cursorMoved.connect(this, &Controller::OnViewportMouseMove);
     m_viewport->keyChanged.connect(this, &Controller::OnViewportKey);
@@ -21,10 +24,14 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Sce
     m_viewport->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
     m_viewport->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
 
+    m_uiWindow->saveClicked.connect(this, &Controller::Save);
+    m_uiWindow->loadClicked.connect(this, &Controller::Load);
+
     m_uiWindow->uiState = uiState;
     SetScene(scene);
 }
 
+// Scene Management
 void Controller::SetScene(std::shared_ptr<Scene> scene)
 {
     m_uiWindow->addImageClicked.disconnect();
@@ -37,6 +44,35 @@ void Controller::SetScene(std::shared_ptr<Scene> scene)
     m_viewport->SetScene(scene);
     m_uiWindow->SetScene(scene);
 }
+
+void Controller::Save(std::string path)
+{
+    std::cerr << "Saving to " << path << std::endl;
+    std::ofstream myfile (path);
+    if (myfile.is_open())
+    {
+        myfile << m_serializer.SerializeScene(m_scene);
+        myfile.close();
+    }
+    else
+        std::cerr << "Unable to open file" << std::endl;
+}
+
+void Controller::Load(std::string path)
+{
+    std::cerr << "Loading Scene from " << path << std::endl;
+    nlohmann::json j;
+    std::ifstream myfile (path);
+    if (myfile.is_open())
+    {
+        myfile >> j;
+        myfile.close();
+        SetScene(m_serializer.DeserializeScene(j));
+    }
+    else
+        std::cerr << "Unable to open file" << std::endl;
+}
+
 
 // Selection
 void Controller::ClearSelection()

@@ -29,7 +29,7 @@ bool JSONSerializer::SerializeCamera(std::shared_ptr<Camera> camera, nlohmann::j
 std::shared_ptr<Camera> JSONSerializer::DeserializeCamera(nlohmann::json& json)
 {
     return std::make_shared<Camera>(
-        glm::vec3(json["pos"]), glm::vec3(0.0f, 0.0f, -1.0f), true, json["focal"]
+        glm::vec3(json["pos"][0], json["pos"][1], json["pos"][2]), glm::vec3(0.0f, 0.0f, -1.0f), true, json["focal"]
     );
 }
 
@@ -111,7 +111,9 @@ std::shared_ptr<Token> JSONSerializer::DeserializeToken(nlohmann::json& json)
     );
     token->SetModel(*DeserializeMatrix2D(json["matrix2D"]));
     token->borderWidth = json["borderWidth"];
-    token->borderColor = glm::vec4(json["borderColour"]);
+    token->borderColor = glm::vec4(
+        json["borderColour"][0], json["borderColour"][1], json["borderColour"][2], json["borderColour"][3]
+    );
     return token;
 }
 
@@ -120,14 +122,14 @@ bool JSONSerializer::SerializeScene(std::shared_ptr<Scene> scene, nlohmann::json
 {
     std::vector<nlohmann::json> jtokens(scene->tokens.size());
     uint i = 0;
-    std::transform(scene->tokens.begin(), scene->tokens.end(), jtokens.begin(),
-                   [this, &i, &jtokens](const std::shared_ptr<Token> token){ return SerializeToken(token, jtokens[i++]); });
+    std::for_each(scene->tokens.begin(), scene->tokens.end(),
+                  [this, &i, &jtokens](const std::shared_ptr<Token> token){ SerializeToken(token, jtokens[i++]); });
     json["tokens"] = jtokens;
 
-    std::vector<nlohmann::json> jimages(scene->tokens.size());
+    std::vector<nlohmann::json> jimages(scene->backgrounds.size());
     i = 0;
-    std::transform(scene->backgrounds.begin(), scene->backgrounds.end(), jimages.begin(),
-                   [this, &i, &jimages](const std::shared_ptr<BGImage> image){ return SerializeImage(image, jimages[i++]); });
+    std::for_each(scene->backgrounds.begin(), scene->backgrounds.end(),
+                  [this, &i, &jimages](const std::shared_ptr<BGImage> image){ SerializeImage(image, jimages[i++]); });
     json["images"] = jimages;
 
     nlohmann::json jcamera;

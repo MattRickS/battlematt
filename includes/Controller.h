@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 
+#include <JSONSerializer.h>
 #include <Overlays.h>
 #include <Resources.h>
 #include <Scene.h>
@@ -19,6 +20,8 @@ public:
     Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow);
 
     void SetScene(std::shared_ptr<Scene> scene);
+    void Save(std::string path);
+    void Load(std::string path);
 
     void ClearSelection();
     void SelectToken(std::shared_ptr<Token> token);
@@ -40,6 +43,7 @@ private:
     std::shared_ptr<Scene> m_scene = nullptr;
     std::shared_ptr<Viewport> m_viewport = nullptr;
     std::shared_ptr<UIWindow> m_uiWindow = nullptr;
+    JSONSerializer m_serializer;
 
     bool firstMouse = true;
     float lastMouseX, lastMouseY;

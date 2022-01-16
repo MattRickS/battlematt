@@ -1,5 +1,3 @@
-#include <fstream>
-#include <iostream>
 #include <stdio.h>
 #include <chrono>
 #include <thread>
@@ -8,9 +6,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <Buffers.h>
-#include <Camera.h>
-#include <Shader.h>
 #include <Scene.h>
 #include <Texture.h>
 #include <Resources.h>
@@ -27,7 +22,7 @@ void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-Application::Application() : m_resources(std::make_shared<Resources>()), m_serializer(m_resources)
+Application::Application() : m_resources(std::make_shared<Resources>())
 {
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
@@ -104,35 +99,4 @@ void Application::Exec()
         // Lazy hack to limit frame rate for now
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-}
-
-// =============================================================================
-// Private
-
-void Application::Save(std::string path)
-{
-    std::cerr << "Saving to " << path << std::endl;
-    std::ofstream myfile (path);
-    if (myfile.is_open())
-    {
-        myfile << m_serializer.SerializeScene(m_scene);
-        myfile.close();
-    }
-    else
-        std::cerr << "Unable to open file" << std::endl;
-}
-
-void Application::Load(std::string path)
-{
-    std::cerr << "Loading Scene from " << path << std::endl;
-    nlohmann::json j;
-    std::ifstream myfile (path);
-    if (myfile.is_open())
-    {
-        myfile >> j;
-        myfile.close();
-        m_scene = m_serializer.DeserializeScene(j);
-    }
-    else
-        std::cerr << "Unable to open file" << std::endl;
 }
