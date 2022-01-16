@@ -17,7 +17,7 @@ class Controller
 public:
     std::shared_ptr<UIState> uiState = std::make_shared<UIState>();
 
-    Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow);
+    Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow);
 
     void SetScene(std::shared_ptr<Scene> scene);
     void Save(std::string path);

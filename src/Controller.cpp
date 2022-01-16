@@ -15,7 +15,7 @@
 #include <Controller.h>
 
 
-Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Scene> scene, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow) :
+Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow) :
     m_resources(resources), m_viewport(viewport), m_uiWindow(uiWindow), m_serializer(m_resources)
 {
     m_viewport->cursorMoved.connect(this, &Controller::OnViewportMouseMove);
@@ -28,7 +28,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Sce
     m_uiWindow->loadClicked.connect(this, &Controller::Load);
 
     m_uiWindow->uiState = uiState;
-    SetScene(scene);
+    SetScene(std::make_shared<Scene>(m_resources));
 }
 
 // Scene Management
