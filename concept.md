@@ -173,7 +173,9 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] scene file as CLI arg
 - [ ] Esc confirm dialog (once separate UI windows, esc should at worst close the UI window automatically)
     - [ ] Maybe file dialogs closed by Esc if open
+    - [ ] Focus UI window when prompting
 - [ ] Initiative tracker?
 - [ ] Token/Image re-ordering
 - [ ] Token list
 - [ ] Token library (pre-mades, single button to add, button uses token image and name)
+- [ ] Constrain UI to UIWindow

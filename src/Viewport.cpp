@@ -36,6 +36,7 @@ void Viewport::SetScene(std::shared_ptr<Scene> scene)
     m_scene = scene;
     RefreshCamera();
 }
+
 void Viewport::RefreshCamera()
 {
     m_scene->camera->SetAperture((float)m_width / (float)m_height);

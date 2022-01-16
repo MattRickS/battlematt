@@ -43,6 +43,11 @@ Application::Application() : m_resources(std::make_shared<Resources>())
 
 Application::~Application()
 {
+    m_viewport.reset();
+    m_uiWindow.reset();
+    m_controller.reset();
+    m_scene.reset();
+    m_resources.reset();
     if (m_glfw_initialised)
         glfwTerminate();
 }

@@ -90,17 +90,17 @@ void Scene::Draw()
 
     std::shared_ptr<Shader> imageShader = m_resources->GetShader(Resources::ShaderType::Image);
     imageShader->use();
-    for (std::shared_ptr<BGImage>& image: backgrounds)
+    for (const std::shared_ptr<BGImage>& image: backgrounds)
         image->Draw(*imageShader);
 
     grid->Draw();
 
     std::shared_ptr<Shader> tokenShader = m_resources->GetShader(Resources::ShaderType::Token);
     tokenShader->use();
-    for (std::shared_ptr<Token> token : tokens)
+    for (const std::shared_ptr<Token>& token : tokens)
         token->Draw(*tokenShader);
 
     // Overlays have their own shaders
-    for (std::shared_ptr<Overlay> overlay : overlays)
+    for (const std::shared_ptr<Overlay>& overlay : overlays)
         overlay->Draw();
 }
