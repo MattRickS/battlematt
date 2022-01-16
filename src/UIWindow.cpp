@@ -137,55 +137,46 @@ void UIWindow::DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D, boo
 }
 
 // Draw a single set of UI inputs and copy all changes to each Shape2D
-void UIWindow::DrawShape2DOptions(std::string suffixID, std::vector<std::shared_ptr<Shape2D>>& shapes, std::shared_ptr<Grid> grid, bool snapToGrid, bool singleScale)
+void UIWindow::DrawShape2DOptions(std::string suffixID, std::shared_ptr<Shape2D> shape, std::shared_ptr<Grid> grid, bool snapToGrid, bool singleScale)
 {
-    Matrix2D* matrix2D = shapes[0]->GetModel();
+    Matrix2D* matrix2D = shape->GetModel();
 
     glm::vec2 pos = matrix2D->GetPos();
     if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
     {
-        for (std::shared_ptr<Shape2D> shape : shapes)
-        {
-            // TODO: Get relaative offset and apply offset to all shapes rather than move everything on top of each other
-            if (snapToGrid)
-                pos = grid->ShapeSnapPosition(shape, pos);
-            shape->GetModel()->SetPos(pos);
-        }
+        // TODO: Get relaative offset and apply offset to all shapes rather than move everything on top of each other
+        if (snapToGrid)
+            pos = grid->ShapeSnapPosition(shape, pos);
+        shape->GetModel()->SetPos(pos);
     }
 
     glm::vec2 scale = matrix2D->GetScale();
     if (singleScale && ImGui::SliderFloat(("Size##1" + suffixID).c_str(), &scale.x, 0, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
-        for (std::shared_ptr<Shape2D> shape : shapes)
-        {
-            if (snapToGrid)
-                scale = glm::vec2(grid->SnapGridSize(scale.x));
-            shape->GetModel()->SetScalef(scale.x);
-        }
+    {
+        if (snapToGrid)
+            scale = glm::vec2(grid->SnapGridSize(scale.x));
+        shape->GetModel()->SetScalef(scale.x);
+    }
     else if (!singleScale && ImGui::DragFloat2(("Size##2" + suffixID).c_str(), (float*)&scale, 0.5f))
     {
-        for (std::shared_ptr<Shape2D> shape : shapes)
-        {
-            if (snapToGrid)
-                scale = glm::vec2(grid->SnapGridSize(scale.x), grid->SnapGridSize(scale.y));
-            shape->GetModel()->SetScale(scale);
-        }
-
+        if (snapToGrid)
+            scale = glm::vec2(grid->SnapGridSize(scale.x), grid->SnapGridSize(scale.y));
+        shape->GetModel()->SetScale(scale);
     }
 
     float rotation = matrix2D->GetRotation();
     if (ImGui::SliderFloat(("Rotation##" + suffixID).c_str(), &rotation, 0, 360, "%.2f"))
-        for (std::shared_ptr<Shape2D> shape : shapes)
-            shape->GetModel()->SetRotation(rotation);
+        shape->GetModel()->SetRotation(rotation);
 }
 
-void UIWindow::DrawBackgroundOptions(std::shared_ptr<BGImage> background)
+void UIWindow::DrawImageOptions(std::shared_ptr<BGImage> image)
 {
-    std::string imagePath = background->GetImage()->filename;
+    std::string imagePath = image->GetImage()->filename;
     if (FileLine("ChooseBGImage", "Image", imagePath))
-        background->SetImage(m_resources->GetTexture(imagePath));
+        image->SetImage(m_resources->GetTexture(imagePath));
 
-    ImGui::Checkbox("Lock Size Ratio", &background->lockRatio);
-    DrawMatrix2DOptions("Background", background->GetModel(), background->lockRatio);
+    ImGui::Checkbox("Lock Size Ratio", &image->lockRatio);
+    DrawMatrix2DOptions("Background", image->GetModel(), image->lockRatio);
 }
 
 void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)
@@ -202,33 +193,24 @@ void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)
 
 }
 
-void UIWindow::DrawTokenOptions(std::vector<std::shared_ptr<Token>> tokens, std::shared_ptr<Grid> grid, bool snapToGrid)
+void UIWindow::DrawTokenOptions(std::shared_ptr<Token> token, std::shared_ptr<Grid> grid, bool snapToGrid)
 {
-    std::shared_ptr<Token> token = tokens[0];
-
+    // TODO: How to apply to all selected? Pass in the selected? Calculate selected here?
+    //       Emit a signal for each property?
+    //       Generate an action, emit a signal, and let the Controller expand that action to be a list of objects?
     ImGui::InputText("Name", &token->name);
 
     std::string iconPath = token->GetIcon()->filename;
     if (FileLine("ChooseTokenIcon", "Icon", iconPath))
-    {
-        for (std::shared_ptr<Token> t : tokens)
-            t->SetIcon(m_resources->GetTexture(iconPath));
-    }
+        token->SetIcon(m_resources->GetTexture(iconPath));
 
     if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
-    {
-        for (std::shared_ptr<Token> t : tokens)
-            t->borderWidth = token->borderWidth;
-    }
-    if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
-    {
-        for (std::shared_ptr<Token> t : tokens)
-            t->borderColor = token->borderColor;
-    }
+        token->borderWidth = token->borderWidth;
 
-    std::vector<std::shared_ptr<Shape2D>> shapes(tokens.size());
-    std::transform(tokens.begin(), tokens.end(), shapes.begin(), [](std::shared_ptr<Token> t){ return static_cast<std::shared_ptr<Shape2D>>(t); });
-    DrawShape2DOptions("Token", shapes, grid, snapToGrid, true);
+    if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
+        token->borderColor = token->borderColor;
+
+    DrawShape2DOptions("Token", static_cast<std::shared_ptr<Shape2D>>(token), grid, snapToGrid, true);
 }
 
 void UIWindow::Draw()
@@ -274,20 +256,33 @@ void UIWindow::Draw()
                 addImageClicked.emit();
 
             if (selected_image_idx < m_scene->images.size())
-                DrawBackgroundOptions(m_scene->images[selected_image_idx]);
+                DrawImageOptions(m_scene->images[selected_image_idx]);
         }
 
         if (ImGui::CollapsingHeader("Grid"))
             DrawGridOptions(m_scene->grid);
 
-        ImGui::Text("Num selected tokens : %ld / %ld", uiState->selectedTokens.size(), m_scene->tokens.size());
         if (ImGui::CollapsingHeader("Token"))
         {
-            if (uiState->selectedTokens.size() > 0)
-                DrawTokenOptions(uiState->selectedTokens, m_scene->grid, uiState->snapToGrid);
+            std::shared_ptr<Token> lastSelectedToken = nullptr;
+            if (ImGui::BeginListBox("Tokens##List"))
+            {
+                int i = 0;
+                for (std::shared_ptr<Token>& token : m_scene->tokens)
+                {
+                    if (ImGui::Selectable((token->name + "##Item" + std::to_string(i++)).c_str(), token->isSelected))
+                        tokenSelectionChanged.emit(token, false);
+                    if (token->isSelected)
+                        lastSelectedToken = token;
+                }
+                ImGui::EndListBox();
+            }
 
             if (ImGui::Button("Add Token"))
                 addTokenClicked.emit();
+
+            if (lastSelectedToken)
+                DrawTokenOptions(lastSelectedToken, m_scene->grid, uiState->snapToGrid);
         }
 
         // Spacer

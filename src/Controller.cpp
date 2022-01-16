@@ -27,6 +27,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->saveClicked.connect(this, &Controller::Save);
     m_uiWindow->loadClicked.connect(this, &Controller::Load);
     m_uiWindow->promptResponse.connect(this, &Controller::OnPromptResponse);
+    m_uiWindow->tokenSelectionChanged.connect(this, &Controller::SelectToken);
 
     m_uiWindow->uiState = uiState;
     SetScene(std::make_shared<Scene>(m_resources));
@@ -84,23 +85,45 @@ void Controller::Load(std::string path, bool merge)
 
 
 // Selection
-void Controller::ClearSelection()
+std::vector<std::shared_ptr<Token>> Controller::SelectedTokens()
 {
-    for (std::shared_ptr<Token>& token : uiState->selectedTokens)
-        token->isSelected = false;
-    uiState->selectedTokens.clear();
+    // TODO: Could this return an iterator? would be nicer.
+    std::vector<std::shared_ptr<Token>> selectedTokens;
+    for (const auto& token : m_scene->tokens)
+    {
+        if (token->isSelected)
+            selectedTokens.push_back(token);
+    }
+    return selectedTokens;
 }
 
-void Controller::SelectToken(std::shared_ptr<Token> token)
+bool Controller::HasSelectedTokens()
 {
-    uiState->selectedTokens.push_back(token);
+    for (const auto& token : m_scene->tokens)
+    {
+        if (token->isSelected)
+            return true;
+    }
+    return false;
+}
+
+void Controller::ClearSelection()
+{
+    for (std::shared_ptr<Token>& token : m_scene->tokens)
+        token->isSelected = false;
+}
+
+void Controller::SelectToken(std::shared_ptr<Token> token, bool additive)
+{
+    if (!additive)
+        ClearSelection();
     token->isSelected = true;
 }
 
 void Controller::DuplicateSelectedTokens()
 {
     uint numTokens = m_scene->tokens.size();
-    for (std::shared_ptr<Token> token : uiState->selectedTokens)
+    for (std::shared_ptr<Token> token : SelectedTokens())
     {
         std::shared_ptr<Token> duplicate = std::make_shared<Token>(*token);
         duplicate->GetModel()->Offset(glm::vec2(1));
@@ -171,14 +194,14 @@ void Controller::UpdateDragSelection(float xpos, float ypos)
     uiState->dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
 
     // Y-axis is inverted on rect, use re-invert for calculating world positions
-    auto selectedTokens = TokensInScreenRect(
+    auto coveredTokens = TokensInScreenRect(
         uiState->dragSelectRect->MinX(),
         m_viewport->Height() - uiState->dragSelectRect->MinY(),
         uiState->dragSelectRect->MaxX(),
         m_viewport->Height() - uiState->dragSelectRect->MaxY()
     );
 
-    for (std::shared_ptr<Token> token : uiState->selectedTokens)
+    for (std::shared_ptr<Token> token : coveredTokens)
         token->isHighlighted = true;
 }
 
@@ -239,14 +262,14 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
             if (newPos != currPos)
             {
                 glm::vec2 offset = newPos - currPos;
-                for (std::shared_ptr<Token> token : uiState->selectedTokens)
+                for (std::shared_ptr<Token> token : SelectedTokens())
                     token->GetModel()->Offset(offset);
             }
         }
         else
         {
             glm::vec2 offset = m_viewport->ScreenToWorldOffset(xoffset, yoffset);
-            for (std::shared_ptr<Token> token : uiState->selectedTokens)
+            for (std::shared_ptr<Token> token : SelectedTokens())
                 token->GetModel()->Offset(offset);
         }
     }
@@ -265,11 +288,7 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
             glm::vec2 cursorPos = m_viewport->CursorPos();
             uiState->tokenUnderCursor = GetTokenAtScreenPos(cursorPos);
             if (uiState->tokenUnderCursor && !uiState->tokenUnderCursor->isSelected)
-            {
-                if (!mods & GLFW_MOD_SHIFT)
-                    ClearSelection();
-                SelectToken(uiState->tokenUnderCursor);
-            }
+                SelectToken(uiState->tokenUnderCursor, mods & GLFW_MOD_SHIFT);
             // If nothing was immediately selected/being modified, start a drag select
             else if (!uiState->tokenUnderCursor)
             {
@@ -302,28 +321,28 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
         m_uiWindow->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
     if (key == GLFW_KEY_S && action == GLFW_RELEASE)
         uiState->snapToGrid = !uiState->snapToGrid;
-    if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && uiState->selectedTokens.size() > 0)
+    if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && HasSelectedTokens())
     {
-        for (std::shared_ptr<Token> token : uiState->selectedTokens)
+        for (std::shared_ptr<Token> token : SelectedTokens())
         {
             ShapeGridSize gridSize = static_cast<ShapeGridSize>(m_scene->grid->GetShapeGridSize(token) + 1);
             token->GetModel()->SetScalef(m_scene->grid->SnapGridSize(gridSize));
         }
     }
-    if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_RELEASE && uiState->selectedTokens.size() > 0)
+    if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_RELEASE && HasSelectedTokens())
     {
-        for (std::shared_ptr<Token> token : uiState->selectedTokens)
+        for (std::shared_ptr<Token> token : SelectedTokens())
         {
             ShapeGridSize gridSize = static_cast<ShapeGridSize>(m_scene->grid->GetShapeGridSize(token) - 1);
             token->GetModel()->SetScalef(m_scene->grid->SnapGridSize(gridSize));
         }
     }
-    if (key == GLFW_KEY_DELETE && uiState->selectedTokens.size() > 0)
+    if (key == GLFW_KEY_DELETE && HasSelectedTokens())
     {
-        m_scene->RemoveTokens(uiState->selectedTokens);
+        m_scene->RemoveTokens(SelectedTokens());
         ClearSelection();
     }
-    if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && uiState->selectedTokens.size() > 0)
+    if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && HasSelectedTokens())
         DuplicateSelectedTokens();
 }
 
@@ -334,9 +353,8 @@ void Controller::OnViewportSizeChanged(int width, int height)
 
 void Controller::OnUIAddTokenClicked()
 {
-    ClearSelection();
     m_scene->AddToken();
-    SelectToken(m_scene->tokens.back());
+    SelectToken(m_scene->tokens.back(), false);
 }
 
 void Controller::OnPromptResponse(int promptType, bool response)

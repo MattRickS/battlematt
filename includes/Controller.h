@@ -23,8 +23,10 @@ public:
     void Save(std::string path);
     void Load(std::string path, bool merge);
 
+    std::vector<std::shared_ptr<Token>> SelectedTokens();
+    bool HasSelectedTokens();
     void ClearSelection();
-    void SelectToken(std::shared_ptr<Token> token);
+    void SelectToken(std::shared_ptr<Token> token, bool additive=true);
     void DuplicateSelectedTokens();
 
     std::vector<std::shared_ptr<Token>> TokensInScreenRect(float minx, float miny, float maxx, float maxy);
