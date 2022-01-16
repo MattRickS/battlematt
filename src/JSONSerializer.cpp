@@ -126,9 +126,9 @@ bool JSONSerializer::SerializeScene(std::shared_ptr<Scene> scene, nlohmann::json
                   [this, &i, &jtokens](const std::shared_ptr<Token> token){ SerializeToken(token, jtokens[i++]); });
     json["tokens"] = jtokens;
 
-    std::vector<nlohmann::json> jimages(scene->backgrounds.size());
+    std::vector<nlohmann::json> jimages(scene->images.size());
     i = 0;
-    std::for_each(scene->backgrounds.begin(), scene->backgrounds.end(),
+    std::for_each(scene->images.begin(), scene->images.end(),
                   [this, &i, &jimages](const std::shared_ptr<BGImage> image){ SerializeImage(image, jimages[i++]); });
     json["images"] = jimages;
 
@@ -149,9 +149,9 @@ void JSONSerializer::DeserializeScene(nlohmann::json& json, Scene& scene)
     scene.grid = DeserializeGrid(json["grid"]);
 
     nlohmann::json jimages = json["images"];
-    scene.backgrounds.reserve(jimages.size());
+    scene.images.reserve(jimages.size());
     std::for_each(jimages.begin(), jimages.end(),
-                  [this, &scene](nlohmann::json& jimage){ scene.backgrounds.push_back(DeserializeImage(jimage)); });
+                  [this, &scene](nlohmann::json& jimage){ scene.images.push_back(DeserializeImage(jimage)); });
 
     nlohmann::json jtokens = json["tokens"];
     scene.tokens.reserve(jtokens.size());

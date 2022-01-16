@@ -25,7 +25,7 @@ Scene::Scene(std::shared_ptr<Resources> resources) : m_resources(resources)
 
 void Scene::AddImage()
 {
-    backgrounds.push_back(std::make_shared<BGImage>(
+    images.push_back(std::make_shared<BGImage>(
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(Resources::TextureType::Default)
     ));
@@ -33,7 +33,7 @@ void Scene::AddImage()
 
 void Scene::AddImage(std::string path)
 {
-    backgrounds.push_back(std::make_shared<BGImage>(
+    images.push_back(std::make_shared<BGImage>(
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(path)
     ));
@@ -90,7 +90,7 @@ void Scene::Draw()
 
     std::shared_ptr<Shader> imageShader = m_resources->GetShader(Resources::ShaderType::Image);
     imageShader->use();
-    for (const std::shared_ptr<BGImage>& image: backgrounds)
+    for (const std::shared_ptr<BGImage>& image: images)
         image->Draw(*imageShader);
 
     grid->Draw();

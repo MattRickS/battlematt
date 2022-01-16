@@ -71,7 +71,7 @@ void Controller::Load(std::string path, bool merge)
         myfile.close();
         if (!merge)
         {
-            m_scene->backgrounds.clear();
+            m_scene->images.clear();
             m_scene->tokens.clear();
         }
         m_serializer.DeserializeScene(j, *m_scene);

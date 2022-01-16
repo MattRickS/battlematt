@@ -250,17 +250,17 @@ void UIWindow::Draw()
     {
         ImGui::Begin("Mapmaker UI", &p_open, flags);
 
+        ImGui::ColorEdit3("Background Color", (float*)&m_scene->bgColor);
+
         if (ImGui::CollapsingHeader("Images"))
         {
-            ImGui::ColorEdit3("Color##Background", (float*)&m_scene->bgColor);
-
             static unsigned int selected_image_idx = 0;
             if (ImGui::BeginListBox("Images##List"))
             {
-                for (unsigned int i = 0; i < m_scene->backgrounds.size(); i++)
+                for (unsigned int i = 0; i < m_scene->images.size(); i++)
                 {
                     const bool is_selected = (selected_image_idx == i);
-                    if (ImGui::Selectable((m_scene->backgrounds[i]->GetImage()->Name() + "##Item" + std::to_string(i)).c_str(), is_selected))
+                    if (ImGui::Selectable((m_scene->images[i]->GetImage()->Name() + "##Item" + std::to_string(i)).c_str(), is_selected))
                         selected_image_idx = i;
 
                     // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
@@ -273,8 +273,8 @@ void UIWindow::Draw()
             if (ImGui::Button("Add Image"))
                 addImageClicked.emit();
 
-            if (selected_image_idx < m_scene->backgrounds.size())
-                DrawBackgroundOptions(m_scene->backgrounds[selected_image_idx]);
+            if (selected_image_idx < m_scene->images.size())
+                DrawBackgroundOptions(m_scene->images[selected_image_idx]);
         }
 
         if (ImGui::CollapsingHeader("Grid"))
