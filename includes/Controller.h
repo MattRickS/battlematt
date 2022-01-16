@@ -21,7 +21,7 @@ public:
 
     void SetScene(std::shared_ptr<Scene> scene);
     void Save(std::string path);
-    void Load(std::string path);
+    void Load(std::string path, bool merge);
 
     void ClearSelection();
     void SelectToken(std::shared_ptr<Token> token);

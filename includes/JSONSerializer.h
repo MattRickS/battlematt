@@ -35,6 +35,7 @@ public:
     std::shared_ptr<BGImage> DeserializeImage(nlohmann::json& json);
     std::shared_ptr<Matrix2D> DeserializeMatrix2D(nlohmann::json& json);
     // std::shared_ptr<Overlay> DeserializeOverlay(nlohmann::json& json);
+    void DeserializeScene(nlohmann::json& json, Scene& scene);
     std::shared_ptr<Scene> DeserializeScene(nlohmann::json& json);
     std::shared_ptr<Token> DeserializeToken(nlohmann::json& json);
 

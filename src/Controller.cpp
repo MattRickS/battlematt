@@ -54,12 +54,13 @@ void Controller::Save(std::string path)
     {
         myfile << m_serializer.SerializeScene(m_scene);
         myfile.close();
+        m_scene->sourceFile = path;
     }
     else
         std::cerr << "Unable to open file" << std::endl;
 }
 
-void Controller::Load(std::string path)
+void Controller::Load(std::string path, bool merge)
 {
     std::cerr << "Loading Scene from " << path << std::endl;
     nlohmann::json j;
@@ -68,7 +69,14 @@ void Controller::Load(std::string path)
     {
         myfile >> j;
         myfile.close();
-        SetScene(m_serializer.DeserializeScene(j));
+        if (!merge)
+        {
+            m_scene->backgrounds.clear();
+            m_scene->tokens.clear();
+        }
+        m_serializer.DeserializeScene(j, *m_scene);
+        m_scene->sourceFile = path;
+        SetScene(m_scene);
     }
     else
         std::cerr << "Unable to open file" << std::endl;

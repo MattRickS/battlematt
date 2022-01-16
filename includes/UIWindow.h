@@ -20,7 +20,7 @@ public:
     Signal<> addImageClicked;
     Signal<> addTokenClicked;
     Signal<std::string> saveClicked;
-    Signal<std::string> loadClicked;
+    Signal<std::string, bool> loadClicked;
     Signal<int, bool> promptResponse;
 
     std::shared_ptr<UIState> uiState = nullptr;
@@ -38,6 +38,7 @@ private:
     std::shared_ptr<Scene> m_scene = nullptr;
     std::string m_promptMsg = "";
     int m_promptType = 0;
+    bool mergeLoad = false;
 
     void DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D, bool lockScaleRatio=false);
     void DrawShape2DOptions(std::string suffixID, std::vector<std::shared_ptr<Shape2D>>& shapes, std::shared_ptr<Grid> grid, bool snapToGrid = false, bool singleScale = false);

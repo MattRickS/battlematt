@@ -295,13 +295,23 @@ void UIWindow::Draw()
 
         // Save / Load
         std::string path;
-        if (FilepathButton("Save", "saveDialog", ".json", path))
+        if (!m_scene->sourceFile.empty())
+        {
+            ImGui::TextUnformatted(("Current Scene: " + m_scene->sourceFile).c_str());
+            if (ImGui::Button("Save"))
+                saveClicked.emit(m_scene->sourceFile);
+        }
+
+        ImGui::SameLine();
+        if (FilepathButton("Save As", "saveDialog", ".json", path))
             saveClicked.emit(path);
         
         ImGui::SameLine();
-
         if (FilepathButton("Load", "loadDialog", ".json", path))
-            loadClicked.emit(path);
+            loadClicked.emit(path, mergeLoad);
+
+        ImGui::SameLine();
+        ImGui::Checkbox("Merge into current scene", &mergeLoad);
 
         // Debug
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);

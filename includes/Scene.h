@@ -21,6 +21,7 @@ public:
     std::vector<std::shared_ptr<Overlay>> overlays;
     std::shared_ptr<Grid> grid = nullptr;
     std::shared_ptr<Camera> camera = nullptr;
+    std::string sourceFile;
 
     Scene(std::shared_ptr<Resources> resources);
     void AddImage();
