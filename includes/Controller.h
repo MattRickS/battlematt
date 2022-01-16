@@ -38,6 +38,7 @@ public:
     void OnViewportMouseScroll(double xoffset, double yoffset);
     void OnViewportKey(int key, int scancode, int action, int mods);
     void OnViewportSizeChanged(int width, int height);
+    void OnCloseRequested();
 
     void OnUIAddTokenClicked();
 

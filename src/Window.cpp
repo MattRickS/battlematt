@@ -39,6 +39,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     window_->OnKeyChanged(key, scancode, action, mods);
 }
 
+void close_callback(GLFWwindow* window)
+{
+    Window* window_ = (Window*)glfwGetWindowUserPointer(window);
+    window_->OnCloseRequested();
+}
+
 // =============================================================================
 
 Window::Window(unsigned int width, unsigned int height, const char* name, std::shared_ptr<Window> share) : m_width(width), m_height(height)
@@ -71,7 +77,7 @@ Window::Window(unsigned int width, unsigned int height, const char* name, std::s
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, key_callback);
-    // glfwSetWindowCloseCallback(window, window_close_callback)
+    glfwSetWindowCloseCallback(window, close_callback);
 }
 
 Window::~Window()
@@ -140,4 +146,9 @@ void Window::OnWindowResized(int width, int height)
 {
     Resize(width, height);
     sizeChanged.emit(width, height);
+}
+void Window::OnCloseRequested()
+{
+    glfwSetWindowShouldClose(window, GLFW_FALSE);
+    closeRequested.emit();
 }

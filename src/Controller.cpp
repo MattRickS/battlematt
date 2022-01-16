@@ -23,11 +23,13 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_viewport->mouseButtonChanged.connect(this, &Controller::OnViewportMouseButton);
     m_viewport->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
     m_viewport->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
+    m_viewport->closeRequested.connect(this, &Controller::OnCloseRequested);
 
     m_uiWindow->saveClicked.connect(this, &Controller::Save);
     m_uiWindow->loadClicked.connect(this, &Controller::Load);
     m_uiWindow->promptResponse.connect(this, &Controller::OnPromptResponse);
     m_uiWindow->tokenSelectionChanged.connect(this, &Controller::SelectToken);
+    m_uiWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
 
     m_uiWindow->uiState = uiState;
     SetScene(std::make_shared<Scene>(m_resources));
@@ -318,7 +320,7 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 {
     // TODO: Confirmation dialog on escape
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        m_uiWindow->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
+        OnCloseRequested();
     if (key == GLFW_KEY_S && action == GLFW_RELEASE)
         uiState->snapToGrid = !uiState->snapToGrid;
     if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && HasSelectedTokens())
@@ -370,4 +372,9 @@ void Controller::OnPromptResponse(int promptType, bool response)
         std::cerr << "Unknown prompt response: " << promptType << " got " << response << std::endl;
         break;
     }
+}
+
+void Controller::OnCloseRequested()
+{
+    m_uiWindow->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
 }

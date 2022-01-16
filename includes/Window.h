@@ -15,6 +15,7 @@ public:
     Signal<double, double> mouseScrolled;
     Signal<int, int, int, int> keyChanged;
     Signal<int, int> sizeChanged;
+    Signal<> closeRequested;
 
     Window(unsigned int width, unsigned int height, const char* name, std::shared_ptr<Window> share = NULL);
     ~Window();
@@ -38,6 +39,7 @@ public:
     virtual void OnMouseScrolled(double xoffset, double yoffset);
     virtual void OnKeyChanged(int key, int scancode, int action, int mods);
     virtual void OnWindowResized(int width, int height);
+    virtual void OnCloseRequested();
 
 protected:
     GLFWwindow* window;
