@@ -45,6 +45,8 @@ void Scene::AddToken()
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(Resources::TextureType::Default)
     ));
+    // Centers it on the camera view
+    tokens.back()->GetModel()->SetPos(glm::vec2(camera->Position.x, camera->Position.y));
 }
 
 void Scene::AddToken(std::string path)
@@ -53,6 +55,8 @@ void Scene::AddToken(std::string path)
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(path)
     ));
+    // Centers it on the camera view
+    tokens.back()->GetModel()->SetPos(glm::vec2(camera->Position.x, camera->Position.y));
 }
 
 void Scene::AddToken(std::shared_ptr<Token> token)
