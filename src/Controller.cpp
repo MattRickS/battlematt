@@ -89,6 +89,21 @@ void Controller::SelectToken(std::shared_ptr<Token> token)
     token->isSelected = true;
 }
 
+void Controller::DuplicateSelectedTokens()
+{
+    uint numTokens = m_scene->tokens.size();
+    for (std::shared_ptr<Token> token : uiState->selectedTokens)
+    {
+        std::shared_ptr<Token> duplicate = std::make_shared<Token>(*token);
+        duplicate->GetModel()->Offset(glm::vec2(1));
+        m_scene->AddToken(duplicate);
+    }
+
+    ClearSelection();
+    for (uint i = numTokens; i < m_scene->tokens.size(); i++)
+        SelectToken(m_scene->tokens[i]);
+}
+
 // Screen Position
 std::vector<std::shared_ptr<Token>> Controller::TokensInScreenRect(float minx, float miny, float maxx, float maxy)
 {
@@ -300,22 +315,8 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
         m_scene->RemoveTokens(uiState->selectedTokens);
         ClearSelection();
     }
-    // TODO: Scene->DuplicateToken()
-    // if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && m_uiState->selectedTokens.size() > 0)
-    // {
-    //     uint numTokens = m_scene->tokens.size();
-    //     for (Token* token : m_uiState->selectedTokens)
-    //     {
-    //         // Copy the matrix with an offset
-    //         Matrix2D matrix = *token->GetModel();
-    //         matrix.Offset(glm::vec2(1));
-    //         m_scene->AddToken(token->GetIcon(), matrix);
-    //     }
-
-    //     uiState.ClearSelection();
-    //     for (uint i = numTokens; i < m_scene->tokens.size(); i++)
-    //         uiState.SelectToken(&m_scene->tokens[i]);
-    // }
+    if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && uiState->selectedTokens.size() > 0)
+        DuplicateSelectedTokens();
 }
 
 void Controller::OnViewportSizeChanged(int width, int height)

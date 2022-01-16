@@ -25,6 +25,7 @@ public:
 
     void ClearSelection();
     void SelectToken(std::shared_ptr<Token> token);
+    void DuplicateSelectedTokens();
 
     std::vector<std::shared_ptr<Token>> TokensInScreenRect(float minx, float miny, float maxx, float maxy);
     std::shared_ptr<Token> GetTokenAtScreenPos(glm::vec2 screenPos);
