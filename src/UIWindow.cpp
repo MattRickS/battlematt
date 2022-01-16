@@ -240,9 +240,15 @@ void UIWindow::Draw()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+
     // UI window
+    static bool p_open = NULL;
     {
-        ImGui::Begin("Mapmaker UI");
+        ImGui::Begin("Mapmaker UI", &p_open, flags);
 
         if (ImGui::CollapsingHeader("Images"))
         {

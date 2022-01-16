@@ -335,7 +335,8 @@ void Controller::OnPromptResponse(int promptType, bool response)
     switch (promptType)
     {
     case PROMPT_CLOSE:
-        m_viewport->Close();
+        if (response)
+            m_viewport->Close();
         break;
     
     default:

@@ -171,12 +171,14 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [x] Separate windows for viewport and UI (SetWindowSize to match framebuffer)
     - [ ] Hotkey to show/hide UI window
 - [ ] scene file as CLI arg
-- [ ] Esc confirm dialog (once separate UI windows, esc should at worst close the UI window automatically)
+- [x] Esc confirm dialog (once separate UI windows, esc should at worst close the UI window automatically)
     - [ ] Maybe file dialogs closed by Esc if open
-    - [ ] Focus UI window when prompting
+    - [x] Focus UI window when prompting
+    - [ ] Esc on UIWindow should prompt to close
+    - [ ] X-ing off the UIWindow should either prompt to close or hide the UIWindow
 - [ ] Initiative tracker?
 - [ ] Token/Image re-ordering
 - [ ] Token list
 - [ ] Token library (pre-mades, single button to add, button uses token image and name)
-- [ ] Constrain UI to UIWindow
+- [x] Constrain UI to UIWindow
 - [ ] Fullscreen option
