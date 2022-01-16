@@ -93,6 +93,11 @@ void Window::Resize(unsigned int width, unsigned int height)
 unsigned int Window::Height() { return m_height; }
 unsigned int Window::Width() { return m_width; }
 
+void Window::Focus()
+{
+    glfwFocusWindow(window);
+}
+
 glm::vec2 Window::CursorPos()
 {
     double xpos, ypos;

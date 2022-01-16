@@ -54,4 +54,7 @@ private:
     void StartDragSelection(float xpos, float ypos);
     void UpdateDragSelection(float xpos, float ypos);
     void FinishDragSelection();
+
+    static const int PROMPT_CLOSE = 1;
+    void OnPromptResponse(int promptType, bool response);
 };

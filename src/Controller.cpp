@@ -26,6 +26,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
 
     m_uiWindow->saveClicked.connect(this, &Controller::Save);
     m_uiWindow->loadClicked.connect(this, &Controller::Load);
+    m_uiWindow->promptResponse.connect(this, &Controller::OnPromptResponse);
 
     m_uiWindow->uiState = uiState;
     SetScene(std::make_shared<Scene>(m_resources));
@@ -275,7 +276,7 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 {
     // TODO: Confirmation dialog on escape
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        m_viewport->Close();
+        m_uiWindow->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
     if (key == GLFW_KEY_S && action == GLFW_RELEASE)
         uiState->snapToGrid = !uiState->snapToGrid;
     if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && uiState->selectedTokens.size() > 0)
@@ -327,4 +328,18 @@ void Controller::OnUIAddTokenClicked()
     ClearSelection();
     m_scene->AddToken();
     SelectToken(m_scene->tokens.back());
+}
+
+void Controller::OnPromptResponse(int promptType, bool response)
+{
+    switch (promptType)
+    {
+    case PROMPT_CLOSE:
+        m_viewport->Close();
+        break;
+    
+    default:
+        std::cerr << "Unknown prompt response: " << promptType << " got " << response << std::endl;
+        break;
+    }
 }

@@ -68,6 +68,18 @@ UIWindow::~UIWindow()
 
 void UIWindow::SetScene(std::shared_ptr<Scene> scene) { m_scene = scene; }
 
+void UIWindow::Prompt(int promptType, std::string msg)
+{
+    m_promptMsg = msg;
+    m_promptType = promptType;
+    Focus();
+}
+
+bool UIWindow::HasPrompt()
+{
+    return m_promptType != 0;
+}
+
 bool FilepathButton(const char* buttonName, const char* dialogName, const char* ext, std::string& path)
 {
     if (ImGui::Button(buttonName))
@@ -291,7 +303,37 @@ void UIWindow::Draw()
         ImGui::End();
     }
 
+    // Prompt Dialog
+    if (HasPrompt())
+        ImGui::OpenPopup("PromptModal");
+    // Always center this window when appearing
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("PromptModal", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::TextUnformatted(m_promptMsg.c_str());
+        ImGui::Separator();
+
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+            RespondToPrompt(true);
+        ImGui::SetItemDefaultFocus();
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            RespondToPrompt(false);
+        ImGui::EndPopup();
+    }
+
     // Rendering
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void UIWindow::RespondToPrompt(bool response)
+{
+    // Reset internal prompt type before triggering the callback in case another prompt is sent
+    int promptType = m_promptType;
+    ImGui::CloseCurrentPopup();
+    m_promptType = 0;
+    m_promptMsg = "";
+    promptResponse.emit(promptType, response);
 }
