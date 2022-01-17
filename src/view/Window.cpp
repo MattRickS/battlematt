@@ -69,6 +69,8 @@ Window::Window(unsigned int width, unsigned int height, const char* name, std::s
         std::cout << "Failed to initialize GLAD" << std::endl;
         return;
     }
+    
+    monitor = glfwGetPrimaryMonitor();
 
     // Reference: https://www.glfw.org/docs/3.3/window_guide.html
     glfwSetWindowUserPointer(window, this);
@@ -98,6 +100,28 @@ void Window::Resize(unsigned int width, unsigned int height)
 
 unsigned int Window::Height() { return m_height; }
 unsigned int Window::Width() { return m_width; }
+
+bool Window::IsFullscreen() { return glfwGetWindowMonitor(window) != nullptr; }
+void Window::SetFullscreen(bool fullscreen)
+{
+    if (IsFullscreen() == fullscreen)
+        return;
+
+    if (fullscreen)
+    {
+        // backup window position and window size
+        glfwGetWindowPos(window, &m_lastPos[0], &m_lastPos[1]);
+        glfwGetWindowSize(window, &m_lastSize[0], &m_lastSize[1]);
+        
+        const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, 0);
+    }
+    else
+    {
+        // restore last window size and position
+        glfwSetWindowMonitor(window, nullptr,  m_lastPos[0], m_lastPos[1], m_lastSize[0], m_lastSize[1], 0);
+    }
+}
 
 void Window::Focus()
 {

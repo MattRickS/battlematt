@@ -320,10 +320,12 @@ void Controller::OnViewportMouseScroll(double xoffset, double yoffset)
 void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 {
     // TODO: Confirmation dialog on escape
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
         OnCloseRequested();
     if (key == GLFW_KEY_S && action == GLFW_RELEASE)
         uiState->snapToGrid = !uiState->snapToGrid;
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+        m_viewport->SetFullscreen(!m_viewport->IsFullscreen());
     if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && HasSelectedTokens())
     {
         for (std::shared_ptr<Token> token : SelectedTokens())
