@@ -2,8 +2,8 @@
 #include <memory>
 #include <vector>
 
-#include <Overlays.h>
-#include <Token.h>
+#include <model/Overlays.h>
+#include <model/Token.h>
 
 
 struct UIState

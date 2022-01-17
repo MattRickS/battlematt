@@ -4,13 +4,13 @@
 
 #include <glm/glm.hpp>
 
-#include <BGImage.h>
-#include <Camera.h>
-#include <Grid.h>
-#include <Overlays.h>
 #include <Resources.h>
-#include <Shader.h>
-#include <Token.h>
+#include <glutil/Camera.h>
+#include <glutil/Shader.h>
+#include <model/BGImage.h>
+#include <model/Grid.h>
+#include <model/Overlays.h>
+#include <model/Token.h>
 
 class Scene
 {

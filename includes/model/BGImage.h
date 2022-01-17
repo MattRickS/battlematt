@@ -3,10 +3,11 @@
 
 #include <glm/glm.hpp>
 
-#include <Matrix2D.h>
-#include <Mesh.h>
-#include <Shape2D.h>
-#include <Texture.h>
+#include <glutil/Matrix2D.h>
+#include <glutil/Mesh.h>
+#include <glutil/Shader.h>
+#include <glutil/Texture.h>
+#include <model/Shape2D.h>
 
 
 class BGImage: public Rect

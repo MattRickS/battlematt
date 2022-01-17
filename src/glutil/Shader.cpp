@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <Shader.h>
+#include <glutil/Shader.h>
 
 
 std::string LoadFile(const char* filename)

@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-#include <Shader.h>
+#include <glutil/Shader.h>
 
 
 struct Vertex

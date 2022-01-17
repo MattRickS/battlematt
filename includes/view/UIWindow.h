@@ -2,16 +2,16 @@
 #include <memory>
 #include <string>
 
-#include <BGImage.h>
-#include <Grid.h>
-#include <Matrix2D.h>
 #include <Resources.h>
-#include <Scene.h>
-#include <Shape2D.h>
 #include <Signal.hpp>
-#include <Token.h>
-#include <UIState.h>
-#include <Window.h>
+#include <glutil/Matrix2D.h>
+#include <model/BGImage.h>
+#include <model/Grid.h>
+#include <model/Scene.h>
+#include <model/Shape2D.h>
+#include <model/Token.h>
+#include <view/UIState.h>
+#include <view/Window.h>
 
 
 class UIWindow : public Window

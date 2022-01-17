@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 
-#include <Application.h>
+#include <controller/Application.h>
 
 
 int main(int, char**)

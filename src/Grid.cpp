@@ -1,9 +1,9 @@
 #include <glm/glm.hpp>
 
-#include <Mesh.h>
-#include <Shader.h>
-#include <Token.h>
-#include <Grid.h>
+#include <glutil/Mesh.h>
+#include <glutil/Shader.h>
+#include <model/Token.h>
+#include <model/Grid.h>
 
 
 Grid::Grid(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader) : m_mesh(mesh), m_shader(shader)

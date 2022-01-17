@@ -3,10 +3,10 @@
 
 #include <glm/glm.hpp>
 
-#include <Mesh.h>
-#include <Shader.h>
+#include <glutil/Mesh.h>
+#include <glutil/Shader.h>
 
-#include <Overlays.h>
+#include <model/Overlays.h>
 
 
 Overlay::Overlay(std::shared_ptr<Shader> shader) : shader(shader) {}

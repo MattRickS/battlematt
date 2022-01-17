@@ -3,9 +3,9 @@
 
 #include <glm/glm.hpp>
 
-#include <Matrix2D.h>
-#include <Mesh.h>
-#include <Shader.h>
+#include <glutil/Matrix2D.h>
+#include <glutil/Mesh.h>
+#include <glutil/Shader.h>
 
 
 class Shape2D

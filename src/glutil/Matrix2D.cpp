@@ -1,7 +1,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <Matrix2D.h>
+#include <glutil/Matrix2D.h>
 
 
 Matrix2D::Matrix2D() : m_pos(0), m_scale(1), m_rot(0) { Rebuild(); }

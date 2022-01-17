@@ -3,12 +3,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <Matrix2D.h>
-#include <Mesh.h>
-#include <Shape2D.h>
-#include <Texture.h>
+#include <glutil/Matrix2D.h>
+#include <glutil/Mesh.h>
+#include <glutil/Texture.h>
+#include <model/Shape2D.h>
 
-#include <BGImage.h>
+#include <model/BGImage.h>
 
 
 const float DEFAULT_PIXELS_PER_UNIT = 50.0f;

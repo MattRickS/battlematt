@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <Camera.h>
+#include <glutil/Camera.h>
 
 
 class UniformBuffer

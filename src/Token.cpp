@@ -4,10 +4,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <Matrix2D.h>
-#include <Mesh.h>
-#include <Token.h>
-#include <TextureCache.h>
+#include <glutil/Matrix2D.h>
+#include <glutil/Mesh.h>
+#include <model/Token.h>
+
 
 Token::Token(std::shared_ptr<Mesh> mesh) : Rect(mesh), name("") {}
 Token::Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture) : Token(mesh, texture, texture->Name()) {}

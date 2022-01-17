@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
 
-#include <Buffers.h>
-#include <Scene.h>
-#include <Window.h>
+#include <glutil/Buffers.h>
+#include <model/Scene.h>
+#include <view/Window.h>
 
 
 class Viewport : public Window

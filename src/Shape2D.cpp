@@ -1,8 +1,8 @@
 #include <glm/glm.hpp>
 
-#include <Matrix2D.h>
-#include <Shader.h>
-#include <Shape2D.h>
+#include <glutil/Matrix2D.h>
+#include <glutil/Shader.h>
+#include <model/Shape2D.h>
 
 
 // Shape2D

@@ -1,11 +1,11 @@
 #pragma once
 #include <memory>
 
-#include <Controller.h>
 #include <Resources.h>
-#include <Scene.h>
-#include <UIWindow.h>
-#include <Viewport.h>
+#include <controller/Controller.h>
+#include <model/Scene.h>
+#include <view/UIWindow.h>
+#include <view/Viewport.h>
 
 
 class Application

@@ -4,15 +4,15 @@
 #include <vector>
 
 #include <JSONSerializer.h>
-#include <Overlays.h>
 #include <Resources.h>
-#include <Scene.h>
-#include <Token.h>
-#include <UIState.h>
-#include <UIWindow.h>
-#include <Viewport.h>
+#include <model/Overlays.h>
+#include <model/Scene.h>
+#include <model/Token.h>
+#include <view/UIState.h>
+#include <view/UIWindow.h>
+#include <view/Viewport.h>
 
-#include <Controller.h>
+#include <controller/Controller.h>
 
 
 Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow) :

@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <Camera.h>
+#include <glutil/Camera.h>
 
 
 Camera::Camera(glm::vec3 position, glm::vec3 direction, bool isOrtho, float focal, float haperture, float vaperture, glm::vec3 up)

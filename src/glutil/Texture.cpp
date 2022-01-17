@@ -4,7 +4,7 @@
 #include <stb_image.h>
 #include <glad/glad.h>
 
-#include <Texture.h>
+#include <glutil/Texture.h>
 
 
 Texture::Texture(const char *filename) : filename(filename)

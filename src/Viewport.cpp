@@ -1,10 +1,10 @@
 #include <memory>
 
-#include <Buffers.h>
-#include <Scene.h>
-#include <Window.h>
+#include <glutil/Buffers.h>
+#include <model/Scene.h>
+#include <view/Window.h>
 
-#include <Viewport.h>
+#include <view/Viewport.h>
 
 
 Viewport::Viewport(unsigned int width, unsigned int height, std::shared_ptr<Window> share) :

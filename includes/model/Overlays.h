@@ -2,8 +2,8 @@
 #include <memory>
 #include <glm/glm.hpp>
 
-#include <Mesh.h>
-#include <Shader.h>
+#include <glutil/Mesh.h>
+#include <glutil/Shader.h>
 
 
 class Overlay

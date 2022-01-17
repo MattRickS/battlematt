@@ -4,8 +4,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include <Shader.h>
-#include <Mesh.h>
+#include <glutil/Shader.h>
+#include <glutil/Mesh.h>
 
 
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices) : vertices(vertices), indices(indices)

@@ -1,10 +1,10 @@
 #pragma once
 #include <glm/glm.hpp>
 
-#include <Mesh.h>
-#include <Shape2D.h>
-#include <Shader.h>
-#include <Token.h>
+#include <glutil/Mesh.h>
+#include <glutil/Shader.h>
+#include <model/Shape2D.h>
+#include <model/Token.h>
 
 
 enum ShapeGridSize

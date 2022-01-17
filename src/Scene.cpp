@@ -4,14 +4,14 @@
 
 #include <glm/glm.hpp>
 
-#include <BGImage.h>
-#include <Camera.h>
-#include <Grid.h>
-#include <Overlays.h>
-#include <Shader.h>
 #include <Resources.h>
-#include <Token.h>
-#include <Scene.h>
+#include <glutil/Camera.h>
+#include <glutil/Shader.h>
+#include <model/BGImage.h>
+#include <model/Grid.h>
+#include <model/Overlays.h>
+#include <model/Token.h>
+#include <model/Scene.h>
 
 
 Scene::Scene(std::shared_ptr<Resources> resources) : m_resources(resources)

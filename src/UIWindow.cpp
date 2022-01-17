@@ -6,13 +6,13 @@
 #include <imgui_impl_opengl3.h>
 #include <ImGuiFileDialog.h>
 
-#include <Matrix2D.h>
-#include <Shape2D.h>
-#include <Scene.h>
-#include <Token.h>
-#include <UIState.h>
+#include <glutil/Matrix2D.h>
+#include <model/Shape2D.h>
+#include <model/Scene.h>
+#include <model/Token.h>
+#include <view/UIState.h>
 
-#include <UIWindow.h>
+#include <view/UIWindow.h>
 
 
 namespace ImGui

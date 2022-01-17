@@ -6,13 +6,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <Scene.h>
-#include <Texture.h>
 #include <Resources.h>
-#include <UIWindow.h>
-#include <Window.h>
+#include <glutil/Texture.h>
+#include <model/Scene.h>
+#include <view/UIWindow.h>
+#include <view/Window.h>
 
-#include <Application.h>
+#include <controller/Application.h>
 
 
 const int GRID_SHADER = 1;

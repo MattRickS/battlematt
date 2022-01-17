@@ -3,9 +3,9 @@
 #include <memory>
 #include <string>
 
-#include <Mesh.h>
-#include <Shader.h>
-#include <Texture.h>
+#include <glutil/Mesh.h>
+#include <glutil/Shader.h>
+#include <glutil/Texture.h>
 
 
 class Resources
