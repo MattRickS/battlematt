@@ -34,6 +34,8 @@ public:
     void Prompt(int promptType, std::string msg);
     bool HasPrompt();
 
+    virtual void OnKeyChanged(int key, int scancode, int action, int mods);
+
 private:
     std::shared_ptr<Resources> m_resources;
     std::shared_ptr<Scene> m_scene = nullptr;

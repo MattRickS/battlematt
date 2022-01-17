@@ -41,6 +41,7 @@ public:
     void OnCloseRequested();
 
     void OnUIAddTokenClicked();
+    void OnUIKeyChanged(int key, int scancode, int action, int mods);
 
 private:
     std::shared_ptr<Resources> m_resources = nullptr;

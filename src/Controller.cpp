@@ -30,6 +30,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->promptResponse.connect(this, &Controller::OnPromptResponse);
     m_uiWindow->tokenSelectionChanged.connect(this, &Controller::SelectToken);
     m_uiWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
+    m_uiWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
 
     m_uiWindow->uiState = uiState;
     SetScene(std::make_shared<Scene>(m_resources));
@@ -357,6 +358,12 @@ void Controller::OnUIAddTokenClicked()
 {
     m_scene->AddToken();
     SelectToken(m_scene->tokens.back(), false);
+}
+
+void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        OnCloseRequested();
 }
 
 void Controller::OnPromptResponse(int promptType, bool response)

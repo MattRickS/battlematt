@@ -348,3 +348,10 @@ void UIWindow::RespondToPrompt(bool response)
     m_promptMsg = "";
     promptResponse.emit(promptType, response);
 }
+
+void UIWindow::OnKeyChanged(int key, int scancode, int action, int mods)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    if (!io.WantCaptureKeyboard)
+        keyChanged.emit(key, scancode, action, mods);
+}
