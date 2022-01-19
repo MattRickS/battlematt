@@ -38,6 +38,12 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     SetScene(std::make_shared<Scene>(m_resources));
 }
 
+Controller::~Controller()
+{
+    undoQueue.clear();
+    redoQueue.clear();
+}
+
 // Scene Management
 void Controller::SetScene(std::shared_ptr<Scene> scene)
 {
