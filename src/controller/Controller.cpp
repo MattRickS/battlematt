@@ -384,7 +384,6 @@ void Controller::PerformAction(std::shared_ptr<Action> action)
     undoQueue.push_back(std::move(action));
     if (undoQueue.size() > MAX_UNDO_SIZE)
         undoQueue.pop_front();
-    std::cout << "Saved actions: " << undoQueue.size() << std::endl;
     redoQueue.clear();
 }
 
@@ -407,7 +406,7 @@ bool Controller::Redo()
     
     auto action = redoQueue.back();
     action->Redo();
-    redoQueue.push_back(action);
+    undoQueue.push_back(action);
     redoQueue.pop_back();
     return true;
 }
