@@ -31,6 +31,8 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->tokenSelectionChanged.connect(this, &Controller::SelectToken);
     m_uiWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
     m_uiWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
+    // TODO: Fails because the Signal method can't capture unique_ptr by value in the lambda
+    m_uiWindow->actionTaken.connect(this, &Controller::PerformAction);
 
     m_uiWindow->uiState = uiState;
     SetScene(std::make_shared<Scene>(m_resources));
@@ -349,6 +351,10 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
     }
     if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && HasSelectedTokens())
         DuplicateSelectedTokens();
+    if (key == GLFW_KEY_Z && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
+        Undo();
+    if (key == GLFW_KEY_Y && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
+        Redo();
 }
 
 void Controller::OnViewportSizeChanged(int width, int height)
@@ -366,6 +372,44 @@ void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         OnCloseRequested();
+    if (key == GLFW_KEY_Z && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
+        Undo();
+    if (key == GLFW_KEY_Y && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
+        Redo();
+}
+
+void Controller::PerformAction(std::shared_ptr<Action> action)
+{
+    action->Redo();
+    undoQueue.push_back(std::move(action));
+    if (undoQueue.size() > MAX_UNDO_SIZE)
+        undoQueue.pop_front();
+    std::cout << "Saved actions: " << undoQueue.size() << std::endl;
+    redoQueue.clear();
+}
+
+bool Controller::Undo()
+{
+    if (undoQueue.size() == 0)
+        return false;
+    
+    auto action = undoQueue.back();
+    action->Undo();
+    redoQueue.push_back(action);
+    undoQueue.pop_back();
+    return true;
+}
+
+bool Controller::Redo()
+{
+    if (redoQueue.size() == 0)
+        return false;
+    
+    auto action = redoQueue.back();
+    action->Redo();
+    redoQueue.push_back(action);
+    redoQueue.pop_back();
+    return true;
 }
 
 void Controller::OnPromptResponse(int promptType, bool response)

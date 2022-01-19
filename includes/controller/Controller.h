@@ -1,7 +1,9 @@
 #pragma once
+#include <deque>
 #include <memory>
 #include <vector>
 
+#include <Actions.hpp>
 #include <JSONSerializer.h>
 #include <Resources.h>
 #include <model/Overlays.h>
@@ -42,6 +44,10 @@ public:
 
     void OnUIAddTokenClicked();
     void OnUIKeyChanged(int key, int scancode, int action, int mods);
+    void PerformAction(std::shared_ptr<Action> action);
+
+    bool Undo();
+    bool Redo();
 
 private:
     std::shared_ptr<Resources> m_resources = nullptr;
@@ -54,6 +60,10 @@ private:
     float lastMouseX, lastMouseY;
     bool middleMouseHeld = false;
     bool leftMouseHeld = false;
+
+    const size_t MAX_UNDO_SIZE = 10;
+    std::deque<std::shared_ptr<Action>> undoQueue;
+    std::deque<std::shared_ptr<Action>> redoQueue;
 
     bool IsDragSelecting();
     void StartDragSelection(float xpos, float ypos);

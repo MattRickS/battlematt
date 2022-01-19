@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 
+#include <Actions.hpp>
 #include <Resources.h>
 #include <Signal.hpp>
 #include <glutil/Matrix2D.h>
@@ -23,6 +24,8 @@ public:
     Signal<std::string, bool> loadClicked;
     Signal<int, bool> promptResponse;
     Signal<std::shared_ptr<Token>, bool> tokenSelectionChanged;
+    // Signals may call to multiple slots, can't use a unique_ptr
+    Signal<std::shared_ptr<Action>> actionTaken;
 
     std::shared_ptr<UIState> uiState = nullptr;
 
@@ -50,4 +53,7 @@ private:
     void DrawTokenOptions(std::shared_ptr<Token> tokens, std::shared_ptr<Grid> grid, bool snapToGrid = false);
 
     void RespondToPrompt(bool response);
+
+    template <typename argT>
+    bool IsStillEditing(argT& oldVal, const argT& newVal);
 };

@@ -141,6 +141,11 @@ void UIWindow::DrawShape2DOptions(std::string suffixID, std::shared_ptr<Shape2D>
 {
     Matrix2D* matrix2D = shape->GetModel();
 
+    // TODO: Idea is to remove the grid logic from here and simply emit the requested changes
+    //       The Controller then needs to understand this is a modifyX action for Token, read the values,
+    //       and alter them as needed. It can then duplicate the action for each selected token and save as an action group.
+    //       The problem is how to inform the Controller what type of action it is.
+    //       Is it easier to just have a signal for each modification type?
     glm::vec2 pos = matrix2D->GetPos();
     if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
     {
@@ -193,22 +198,50 @@ void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)
 
 }
 
+template <typename argT>
+bool UIWindow::IsStillEditing(argT& oldVal, const argT& newVal)
+{
+    if (ImGui::IsItemActivated())
+    {
+        // here we record the old value for later undo record.
+        oldVal = newVal;
+    }
+
+    if (ImGui::IsItemDeactivatedAfterEdit() && oldVal != newVal)
+    {
+        return false;
+    }
+    return true;
+}
+
 void UIWindow::DrawTokenOptions(std::shared_ptr<Token> token, std::shared_ptr<Grid> grid, bool snapToGrid)
 {
     // TODO: How to apply to all selected? Pass in the selected? Calculate selected here?
     //       Emit a signal for each property?
     //       Generate an action, emit a signal, and let the Controller expand that action to be a list of objects?
-    ImGui::InputText("Name", &token->name);
+    std::string name = token->GetName();
+    if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue))
+        actionTaken.emit(std::make_shared<ModifyMemberAction<Token, std::string>>(token, &Token::SetName, token->GetName(), name));
 
     std::string iconPath = token->GetIcon()->filename;
     if (FileLine("ChooseTokenIcon", "Icon", iconPath))
-        token->SetIcon(m_resources->GetTexture(iconPath));
+        actionTaken.emit(std::make_shared<ModifyMemberAction<Token, std::shared_ptr<Texture>>>(token, &Token::SetIcon, token->GetIcon(), m_resources->GetTexture(iconPath)));
 
-    if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
-        token->borderWidth = token->borderWidth;
+    float borderWidth = token->GetBorderWidth();
+    static float oldBorderWidth;
+    if (ImGui::SliderFloat("Border Width", &borderWidth, 0, 1))
+        token->SetBorderWidth(borderWidth);
 
-    if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
-        token->borderColor = token->borderColor;
+    if (!IsStillEditing(oldBorderWidth, borderWidth))
+        actionTaken.emit(std::make_shared<ModifyMemberAction<Token, float>>(token, &Token::SetBorderWidth, oldBorderWidth, borderWidth));
+
+    glm::vec4 borderColor = token->GetBorderColor();
+    static glm::vec4 oldBorderColor;
+    if (ImGui::ColorEdit3("Border Colour", (float*)&borderColor))
+        token->SetBorderColor(borderColor);
+    
+    if (!IsStillEditing(oldBorderColor, borderColor))
+        actionTaken.emit(std::make_shared<ModifyMemberAction<Token, glm::vec4>>(token, &Token::SetBorderColor, oldBorderColor, borderColor));
 
     DrawShape2DOptions("Token", static_cast<std::shared_ptr<Shape2D>>(token), grid, snapToGrid, true);
 }
@@ -270,7 +303,7 @@ void UIWindow::Draw()
                 int i = 0;
                 for (std::shared_ptr<Token>& token : m_scene->tokens)
                 {
-                    if (ImGui::Selectable((token->name + "##Item" + std::to_string(i++)).c_str(), token->isSelected))
+                    if (ImGui::Selectable((token->GetName() + "##Item" + std::to_string(i++)).c_str(), token->isSelected))
                         tokenSelectionChanged.emit(token, false);
                     if (token->isSelected)
                         lastSelectedToken = token;
