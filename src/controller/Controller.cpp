@@ -389,15 +389,17 @@ void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
 void Controller::PerformAction(const std::shared_ptr<Action>& action)
 {
     action->Redo();
-    if (undoQueue.size() > 0 && undoQueue.back()->CanMerge(action))
+    std::chrono::steady_clock::time_point currActionTime = std::chrono::steady_clock::now();
+    if (undoQueue.size() > 0 && (currActionTime - lastActionTime) < maxTimeBetweenUniqueActions && undoQueue.back()->CanMerge(action))
         undoQueue.back()->Merge(action);
     else
     {
         undoQueue.push_back(std::move(action));
         if (undoQueue.size() > MAX_UNDO_SIZE)
             undoQueue.pop_front();
+        redoQueue.clear();
     }
-    redoQueue.clear();
+    lastActionTime = currActionTime;
 }
 
 void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, TokenProperty property, TokenPropertyValue value)

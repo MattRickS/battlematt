@@ -1,4 +1,5 @@
 #pragma once
+#include <chrono>
 #include <deque>
 #include <memory>
 #include <vector>
@@ -70,6 +71,8 @@ private:
     const size_t MAX_UNDO_SIZE = 10;
     std::deque<std::shared_ptr<Action>> undoQueue;
     std::deque<std::shared_ptr<Action>> redoQueue;
+    const std::chrono::milliseconds maxTimeBetweenUniqueActions{500};
+    std::chrono::steady_clock::time_point lastActionTime = std::chrono::steady_clock::now();
 
     bool IsDragSelecting();
     void StartDragSelection(float xpos, float ypos);
