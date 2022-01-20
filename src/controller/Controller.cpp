@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <variant>
 #include <vector>
 
 #include <JSONSerializer.h>
@@ -31,8 +32,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->tokenSelectionChanged.connect(this, &Controller::SelectToken);
     m_uiWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
     m_uiWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
-    // TODO: Fails because the Signal method can't capture unique_ptr by value in the lambda
-    m_uiWindow->actionTaken.connect(this, &Controller::PerformAction);
+    m_uiWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
 
     m_uiWindow->uiState = uiState;
     SetScene(std::make_shared<Scene>(m_resources));
@@ -384,13 +384,56 @@ void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
         Redo();
 }
 
-void Controller::PerformAction(std::shared_ptr<Action> action)
+void Controller::PerformAction(const std::shared_ptr<Action>& action)
 {
     action->Redo();
     undoQueue.push_back(std::move(action));
     if (undoQueue.size() > MAX_UNDO_SIZE)
         undoQueue.pop_front();
     redoQueue.clear();
+}
+
+
+void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, TokenProperty property, TokenPropertyValue value)
+{
+    switch (property)
+    {
+    case Token_Name:
+        for (const auto& selectedToken: SelectedTokens())
+            selectedToken->SetName(std::get<std::string>(value));
+        break;
+    case Token_Position:
+    {
+        glm::vec2 offset = std::get<glm::vec2>(value) - token->GetModel()->GetPos();
+        for (const auto& selectedToken: SelectedTokens())
+            selectedToken->GetModel()->Offset(offset);
+        break;
+    }
+    case Token_Rotation:
+        for (const auto& selectedToken: SelectedTokens())
+            selectedToken->GetModel()->SetRotation(std::get<float>(value));
+        break;
+    case Token_Scale:
+        for (const auto& selectedToken: SelectedTokens())
+            selectedToken->GetModel()->SetScale(std::get<glm::vec2>(value));
+        break;
+    case Token_BorderWidth:
+        for (const auto& selectedToken: SelectedTokens())
+            selectedToken->SetBorderWidth(std::get<float>(value));
+        break;
+    case Token_BorderColor:
+        for (const auto& selectedToken: SelectedTokens())
+            selectedToken->SetBorderColor(std::get<glm::vec4>(value));
+        break;
+    case Token_Texture:
+        for (const auto& selectedToken: SelectedTokens())
+            selectedToken->SetIcon(m_resources->GetTexture(std::get<std::string>(value)));
+        break;
+    
+    default:
+        std::cerr << "Unknown TokenProperty: " << property << std::endl;
+        break;
+    }
 }
 
 bool Controller::Undo()

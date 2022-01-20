@@ -9,6 +9,7 @@
 #include <model/Overlays.h>
 #include <model/Scene.h>
 #include <model/Token.h>
+#include <view/Properties.h>
 #include <view/UIState.h>
 #include <view/UIWindow.h>
 #include <view/Viewport.h>
@@ -45,10 +46,12 @@ public:
 
     void OnUIAddTokenClicked();
     void OnUIKeyChanged(int key, int scancode, int action, int mods);
-    void PerformAction(std::shared_ptr<Action> action);
+    void PerformAction(const std::shared_ptr<Action>& action);
 
     bool Undo();
     bool Redo();
+
+    void OnTokenPropertyChanged(const std::shared_ptr<Token>& token, TokenProperty property, TokenPropertyValue value);
 
 private:
     std::shared_ptr<Resources> m_resources = nullptr;

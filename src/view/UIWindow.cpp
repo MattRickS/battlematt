@@ -216,34 +216,35 @@ bool UIWindow::IsStillEditing(argT& oldVal, const argT& newVal)
 
 void UIWindow::DrawTokenOptions(std::shared_ptr<Token> token, std::shared_ptr<Grid> grid, bool snapToGrid)
 {
-    // TODO: How to apply to all selected? Pass in the selected? Calculate selected here?
-    //       Emit a signal for each property?
-    //       Generate an action, emit a signal, and let the Controller expand that action to be a list of objects?
     std::string name = token->GetName();
     if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue))
-        actionTaken.emit(std::make_shared<ModifyMemberAction<Token, std::string>>(token, &Token::SetName, token->GetName(), name));
+        tokenPropertyChanged.emit(token, Token_Name, TokenPropertyValue(name));
 
     std::string iconPath = token->GetIcon()->filename;
     if (FileLine("ChooseTokenIcon", "Icon", iconPath))
-        actionTaken.emit(std::make_shared<ModifyMemberAction<Token, std::shared_ptr<Texture>>>(token, &Token::SetIcon, token->GetIcon(), m_resources->GetTexture(iconPath)));
+        tokenPropertyChanged.emit(token, Token_Texture, TokenPropertyValue(iconPath));
 
     float borderWidth = token->GetBorderWidth();
-    static float oldBorderWidth;
     if (ImGui::SliderFloat("Border Width", &borderWidth, 0, 1))
-        token->SetBorderWidth(borderWidth);
-
-    if (!IsStillEditing(oldBorderWidth, borderWidth))
-        actionTaken.emit(std::make_shared<ModifyMemberAction<Token, float>>(token, &Token::SetBorderWidth, oldBorderWidth, borderWidth));
+        tokenPropertyChanged.emit(token, Token_BorderWidth, TokenPropertyValue(borderWidth));
 
     glm::vec4 borderColor = token->GetBorderColor();
-    static glm::vec4 oldBorderColor;
     if (ImGui::ColorEdit3("Border Colour", (float*)&borderColor))
-        token->SetBorderColor(borderColor);
+        tokenPropertyChanged.emit(token, Token_BorderColor, TokenPropertyValue(borderColor));
     
-    if (!IsStillEditing(oldBorderColor, borderColor))
-        actionTaken.emit(std::make_shared<ModifyMemberAction<Token, glm::vec4>>(token, &Token::SetBorderColor, oldBorderColor, borderColor));
+    Matrix2D* matrix2D = token->GetModel();
 
-    DrawShape2DOptions("Token", static_cast<std::shared_ptr<Shape2D>>(token), grid, snapToGrid, true);
+    glm::vec2 pos = matrix2D->GetPos();
+    if (ImGui::DragFloat2("Position##Token", (float*)&pos))
+        tokenPropertyChanged.emit(token, Token_Position, TokenPropertyValue(pos));
+
+    float scale = matrix2D->GetScale().x;
+    if (ImGui::SliderFloat("Size##Token", &scale, 0, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
+        tokenPropertyChanged.emit(token, Token_Scale, TokenPropertyValue(glm::vec2(scale, scale)));
+
+    float rotation = matrix2D->GetRotation();
+    if (ImGui::SliderFloat("Rotation##Token", &rotation, 0, 360, "%.2f"))
+        tokenPropertyChanged.emit(token, Token_Rotation, TokenPropertyValue(rotation));
 }
 
 void UIWindow::Draw()

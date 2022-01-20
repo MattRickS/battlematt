@@ -11,6 +11,7 @@
 #include <model/Scene.h>
 #include <model/Shape2D.h>
 #include <model/Token.h>
+#include <view/Properties.h>
 #include <view/UIState.h>
 #include <view/Window.h>
 
@@ -24,8 +25,7 @@ public:
     Signal<std::string, bool> loadClicked;
     Signal<int, bool> promptResponse;
     Signal<std::shared_ptr<Token>, bool> tokenSelectionChanged;
-    // Signals may call to multiple slots, can't use a unique_ptr
-    Signal<std::shared_ptr<Action>> actionTaken;
+    Signal<const std::shared_ptr<Token>&, TokenProperty, TokenPropertyValue> tokenPropertyChanged;
 
     std::shared_ptr<UIState> uiState = nullptr;
 
