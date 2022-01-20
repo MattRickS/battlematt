@@ -52,6 +52,7 @@ public:
     bool Redo();
 
     void OnTokenPropertyChanged(const std::shared_ptr<Token>& token, TokenProperty property, TokenPropertyValue value);
+    void OnImagePropertyChanged(const std::shared_ptr<BGImage>& image, ImageProperty property, ImagePropertyValue value);
 
 private:
     std::shared_ptr<Resources> m_resources = nullptr;

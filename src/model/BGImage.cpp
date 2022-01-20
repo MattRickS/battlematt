@@ -40,7 +40,7 @@ std::shared_ptr<Texture> BGImage::GetImage()
 
 void BGImage::SetImage(std::shared_ptr<Texture> texture)
 {
-    if (!lockRatio)
+    if (!m_lockRatio)
     {
         // Resize the incoming image to match the width of the current image
         float hSize = m_texture->width * m_model->GetScale().x;
@@ -53,3 +53,7 @@ void BGImage::SetImage(std::shared_ptr<Texture> texture)
         m_model->Rebuild();
     }
 }
+
+bool BGImage::GetLockRatio() { return m_lockRatio; }
+void BGImage::SetLockRatio(bool lockRatio) { m_lockRatio = lockRatio; }
+

@@ -33,6 +33,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
     m_uiWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
     m_uiWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
+    m_uiWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
 
     m_uiWindow->uiState = uiState;
     SetScene(std::make_shared<Scene>(m_resources));
@@ -438,6 +439,36 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
     
     if (actionGroup)
         PerformAction(actionGroup);
+}
+
+void Controller::OnImagePropertyChanged(const std::shared_ptr<BGImage>& image, ImageProperty property, ImagePropertyValue value)
+{
+    std::shared_ptr<Action> action;
+    switch (property)
+    {
+    case Image_Texture:
+        action = std::make_shared<ModifyImageTexture>(image, &BGImage::SetImage, image->GetImage(), m_resources->GetTexture(std::get<std::string>(value)));
+        break;
+    case Image_LockRatio:
+        action = std::make_shared<ModifyImageBool>(image, &BGImage::SetLockRatio, image->GetLockRatio(), std::get<bool>(value));
+        break;
+    case Image_Position:
+        action = std::make_shared<ModifyMatrix2DVec2>(image->GetModel(), &Matrix2D::SetPos, image->GetModel()->GetPos(), std::get<glm::vec2>(value));
+        break;
+    case Image_Rotation:
+        action = std::make_shared<ModifyMatrix2DFloat>(image->GetModel(), &Matrix2D::SetRotation, image->GetModel()->GetRotation(), std::get<float>(value));
+        break;
+    case Image_Scale:
+        action = std::make_shared<ModifyMatrix2DVec2>(image->GetModel(), &Matrix2D::SetScale, image->GetModel()->GetScale(), std::get<glm::vec2>(value));
+        break;
+    
+    default:
+        std::cerr << "Unknown ImageProperty: " << property << std::endl;
+        break;
+    }
+    
+    if (action)
+        PerformAction(action);
 }
 
 bool Controller::Undo()

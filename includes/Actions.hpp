@@ -67,16 +67,15 @@ private:
     argT m_oldVal, m_newVal;
 };
 
-template class ModifyMemberAction<BGImage, bool>;  // lockRatio
-template class ModifyMemberAction<BGImage, float>;  // rotation
-template class ModifyMemberAction<BGImage, glm::vec2>;  // pos, size
-template class ModifyMemberAction<BGImage, std::shared_ptr<Texture>>;  // image
 
-template class ModifyMemberAction<Grid, float>;  // size
-template class ModifyMemberAction<Grid, glm::vec4>;  // colour
+typedef ModifyMemberAction<Grid, float> ModifyGridFloat;  // size
+typedef ModifyMemberAction<Grid, glm::vec4> ModifyGridVec4;  // colour
 
 typedef ModifyMemberAction<Matrix2D, glm::vec2> ModifyMatrix2DVec2;  // pos, scale
 typedef ModifyMemberAction<Matrix2D, float> ModifyMatrix2DFloat;  // rotation
+
+typedef ModifyMemberAction<BGImage, bool> ModifyImageBool;  // lockRatio
+typedef ModifyMemberAction<BGImage, std::shared_ptr<Texture>> ModifyImageTexture;  // image
 
 typedef ModifyMemberAction<Token, float> ModifyTokenFloat;  // borderWidth
 typedef ModifyMemberAction<Token, glm::vec4> ModifyTokenVec4;  // borderColour

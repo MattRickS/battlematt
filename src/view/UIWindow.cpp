@@ -174,14 +174,29 @@ void UIWindow::DrawShape2DOptions(std::string suffixID, std::shared_ptr<Shape2D>
         shape->GetModel()->SetRotation(rotation);
 }
 
-void UIWindow::DrawImageOptions(std::shared_ptr<BGImage> image)
+void UIWindow::DrawImageOptions(const std::shared_ptr<BGImage>& image)
 {
     std::string imagePath = image->GetImage()->filename;
     if (FileLine("ChooseBGImage", "Image", imagePath))
-        image->SetImage(m_resources->GetTexture(imagePath));
+        imagePropertyChanged.emit(image, Image_Texture, ImagePropertyValue(imagePath));
 
-    ImGui::Checkbox("Lock Size Ratio", &image->lockRatio);
-    DrawMatrix2DOptions("Background", image->GetModel(), image->lockRatio);
+    bool lockRatio = image->GetLockRatio();
+    if (ImGui::Checkbox("Lock Size Ratio", &lockRatio))
+        imagePropertyChanged.emit(image, Image_LockRatio, ImagePropertyValue(lockRatio));
+
+    const std::shared_ptr<Matrix2D>& matrix2D = image->GetModel();
+
+    glm::vec2 pos = matrix2D->GetPos();
+    if (ImGui::DragFloat2("Position##Image", (float*)&pos))
+        imagePropertyChanged.emit(image, Image_Position, ImagePropertyValue(pos));
+
+    float scale = matrix2D->GetScale().x;
+    if (ImGui::SliderFloat("Size##Image", &scale, 0, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
+        imagePropertyChanged.emit(image, Image_Scale, ImagePropertyValue(glm::vec2(scale, scale)));
+
+    float rotation = matrix2D->GetRotation();
+    if (ImGui::SliderFloat("Rotation##Image", &rotation, 0, 360, "%.2f"))
+        imagePropertyChanged.emit(image, Image_Rotation, ImagePropertyValue(rotation));
 }
 
 void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)

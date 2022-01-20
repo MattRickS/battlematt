@@ -22,8 +22,9 @@ enum ImageProperty
     Image_Position,
     Image_Rotation,
     Image_Scale,
-    Image_Texture
+    Image_Texture,
+    Image_LockRatio
 };
 
 typedef std::variant<float, glm::vec2, glm::vec4, std::string> TokenPropertyValue;
-typedef std::variant<float, glm::vec2, std::string> ImagePropertyValue;
+typedef std::variant<float, glm::vec2, bool, std::string> ImagePropertyValue;
