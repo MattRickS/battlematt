@@ -27,6 +27,7 @@ public:
     Signal<std::shared_ptr<Token>, bool> tokenSelectionChanged;
     Signal<const std::shared_ptr<Token>&, TokenProperty, TokenPropertyValue> tokenPropertyChanged;
     Signal<const std::shared_ptr<BGImage>&, ImageProperty, ImagePropertyValue> imagePropertyChanged;
+    Signal<const std::shared_ptr<Grid>&, GridProperty, GridPropertyValue> gridPropertyChanged;
 
     std::shared_ptr<UIState> uiState = nullptr;
 

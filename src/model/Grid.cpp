@@ -37,6 +37,8 @@ void Grid::SetColour(glm::vec3 colour)
 
 glm::vec3 Grid::GetColour() { return m_colour; }
 
+void Grid::SetSnapEnabled(bool snap) { m_snap = snap; }
+bool Grid::GetSnapEnabled() { return m_snap; }
 
 glm::vec2 Grid::NearestCenter(float shapeSize, glm::vec2 pos)
 {

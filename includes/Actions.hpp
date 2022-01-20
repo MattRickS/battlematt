@@ -68,8 +68,9 @@ private:
 };
 
 
+typedef ModifyMemberAction<Grid, bool> ModifyGridBool;  // snap
 typedef ModifyMemberAction<Grid, float> ModifyGridFloat;  // size
-typedef ModifyMemberAction<Grid, glm::vec4> ModifyGridVec4;  // colour
+typedef ModifyMemberAction<Grid, glm::vec3> ModifyGridVec3;  // colour
 
 typedef ModifyMemberAction<Matrix2D, glm::vec2> ModifyMatrix2DVec2;  // pos, scale
 typedef ModifyMemberAction<Matrix2D, float> ModifyMatrix2DFloat;  // rotation

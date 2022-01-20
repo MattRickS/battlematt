@@ -203,14 +203,15 @@ void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)
 {
     float gridSize = grid->GetScale();
     if (ImGui::SliderFloat("Size##Grid", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
-        grid->SetScale(gridSize);
+        gridPropertyChanged.emit(grid, Grid_Scale, GridPropertyValue(gridSize));
     
     glm::vec3 gridColour = grid->GetColour();
     if (ImGui::ColorEdit3("Color##Grid", (float*)&gridColour))
-        grid->SetColour(gridColour);
+        gridPropertyChanged.emit(grid, Grid_Color, GridPropertyValue(gridColour));
     
-    ImGui::Checkbox("Snap to Grid", &uiState->snapToGrid);
-
+    bool snapToGrid = grid->GetSnapEnabled();
+    if (ImGui::Checkbox("Snap to Grid", &snapToGrid))
+        gridPropertyChanged.emit(grid, Grid_Snap, GridPropertyValue(snapToGrid));
 }
 
 template <typename argT>

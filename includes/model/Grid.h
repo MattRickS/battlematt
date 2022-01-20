@@ -31,6 +31,8 @@ public:
     float GetScale();
     void SetColour(glm::vec3 colour);
     glm::vec3 GetColour();
+    void SetSnapEnabled(bool snap);
+    bool GetSnapEnabled();
     glm::vec2 NearestCenter(float tokenSize, glm::vec2 pos);
     glm::vec2 NearestCorner(float tokenSize, glm::vec2 pos);
     ShapeGridSize GetShapeGridSize(std::shared_ptr<Shape2D> token);
@@ -43,4 +45,5 @@ private:
     std::shared_ptr<Shader> m_shader;
     float m_scale = 1.0f;
     glm::vec3 m_colour = glm::vec3(0.2);
+    bool m_snap = false;
 };

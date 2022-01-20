@@ -34,6 +34,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
     m_uiWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
     m_uiWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
+    m_uiWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
 
     m_uiWindow->uiState = uiState;
     SetScene(std::make_shared<Scene>(m_resources));
@@ -464,6 +465,30 @@ void Controller::OnImagePropertyChanged(const std::shared_ptr<BGImage>& image, I
     
     default:
         std::cerr << "Unknown ImageProperty: " << property << std::endl;
+        break;
+    }
+    
+    if (action)
+        PerformAction(action);
+}
+
+void Controller::OnGridPropertyChanged(const std::shared_ptr<Grid>& grid, GridProperty property, GridPropertyValue value)
+{
+    std::shared_ptr<Action> action;
+    switch (property)
+    {
+    case Grid_Scale:
+        action = std::make_shared<ModifyGridFloat>(grid, &Grid::SetScale, grid->GetScale(), std::get<float>(value));
+        break;
+    case Grid_Snap:
+        action = std::make_shared<ModifyGridBool>(grid, &Grid::SetSnapEnabled, grid->GetSnapEnabled(), std::get<bool>(value));
+        break;
+    case Grid_Color:
+        action = std::make_shared<ModifyGridVec3>(grid, &Grid::SetColour, grid->GetColour(), std::get<glm::vec3>(value));
+        break;
+    
+    default:
+        std::cerr << "Unknown GridProperty: " << property << std::endl;
         break;
     }
     
