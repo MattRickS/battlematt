@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 
+#include <glutil/Matrix2D.h>
 #include <glutil/Texture.h>
 #include <model/BGImage.h>
 #include <model/Grid.h>
@@ -20,21 +21,27 @@ public:
 class ActionGroup: public Action
 {
 public:
-    ActionGroup(std::vector<Action> actions) : m_actions(actions) {}
+    ActionGroup() {}
+    ActionGroup(std::vector<std::shared_ptr<Action>> actions) : m_actions(actions) {}
 
     virtual void Undo()
     {
         for (auto& action: m_actions)
-            action.Undo();
+            action->Undo();
     }
     virtual void Redo()
     {
         for (auto& action: m_actions)
-            action.Redo();
+            action->Redo();
+    }
+
+    void Add(const std::shared_ptr<Action>& action)
+    {
+        m_actions.push_back(action);
     }
 
 private:
-    std::vector<Action> m_actions;
+    std::vector<std::shared_ptr<Action>> m_actions;
 };
 
 
@@ -42,7 +49,7 @@ template <typename T, typename argT>
 class ModifyMemberAction: public Action
 {
 public:
-    ModifyMemberAction(std::shared_ptr<T> inst, void (T::*func)(argT), argT oldVal, argT newVal) :
+    ModifyMemberAction(const std::shared_ptr<T>& inst, void (T::*func)(argT), argT oldVal, argT newVal) :
         m_inst(inst), m_func(func), m_oldVal(oldVal), m_newVal(newVal) {}
 
     virtual void Undo()
@@ -60,12 +67,6 @@ private:
     argT m_oldVal, m_newVal;
 };
 
-template class ModifyMemberAction<Token, float>;  // rotation, borderWidth
-template class ModifyMemberAction<Token, glm::vec2>;  // pos, size
-template class ModifyMemberAction<Token, glm::vec4>;  // borderColour
-template class ModifyMemberAction<Token, std::shared_ptr<Texture>>;  // icon
-template class ModifyMemberAction<Token, std::string>;  // name
-
 template class ModifyMemberAction<BGImage, bool>;  // lockRatio
 template class ModifyMemberAction<BGImage, float>;  // rotation
 template class ModifyMemberAction<BGImage, glm::vec2>;  // pos, size
@@ -73,3 +74,11 @@ template class ModifyMemberAction<BGImage, std::shared_ptr<Texture>>;  // image
 
 template class ModifyMemberAction<Grid, float>;  // size
 template class ModifyMemberAction<Grid, glm::vec4>;  // colour
+
+typedef ModifyMemberAction<Matrix2D, glm::vec2> ModifyMatrix2DVec2;  // pos, scale
+typedef ModifyMemberAction<Matrix2D, float> ModifyMatrix2DFloat;  // rotation
+
+typedef ModifyMemberAction<Token, float> ModifyTokenFloat;  // borderWidth
+typedef ModifyMemberAction<Token, glm::vec4> ModifyTokenVec4;  // borderColour
+typedef ModifyMemberAction<Token, std::shared_ptr<Texture>> ModifyTokenTexture;  // icon
+typedef ModifyMemberAction<Token, std::string> ModifyTokenString;  // name

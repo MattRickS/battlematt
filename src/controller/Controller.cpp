@@ -393,47 +393,51 @@ void Controller::PerformAction(const std::shared_ptr<Action>& action)
     redoQueue.clear();
 }
 
-
 void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, TokenProperty property, TokenPropertyValue value)
 {
+    auto actionGroup = std::make_shared<ActionGroup>();
     switch (property)
     {
     case Token_Name:
         for (const auto& selectedToken: SelectedTokens())
-            selectedToken->SetName(std::get<std::string>(value));
+            actionGroup->Add(std::make_shared<ModifyTokenString>(selectedToken, &Token::SetName, selectedToken->GetName(), std::get<std::string>(value)));
         break;
     case Token_Position:
     {
         glm::vec2 offset = std::get<glm::vec2>(value) - token->GetModel()->GetPos();
         for (const auto& selectedToken: SelectedTokens())
-            selectedToken->GetModel()->Offset(offset);
+            actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(selectedToken->GetModel(), &Matrix2D::Offset, -offset, offset));
         break;
     }
     case Token_Rotation:
         for (const auto& selectedToken: SelectedTokens())
-            selectedToken->GetModel()->SetRotation(std::get<float>(value));
+            actionGroup->Add(std::make_shared<ModifyMatrix2DFloat>(selectedToken->GetModel(), &Matrix2D::SetRotation, selectedToken->GetModel()->GetRotation(), std::get<float>(value)));
         break;
     case Token_Scale:
         for (const auto& selectedToken: SelectedTokens())
-            selectedToken->GetModel()->SetScale(std::get<glm::vec2>(value));
+            actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(selectedToken->GetModel(), &Matrix2D::SetScale, selectedToken->GetModel()->GetScale(), std::get<glm::vec2>(value)));
         break;
     case Token_BorderWidth:
         for (const auto& selectedToken: SelectedTokens())
-            selectedToken->SetBorderWidth(std::get<float>(value));
+            actionGroup->Add(std::make_shared<ModifyTokenFloat>(selectedToken, &Token::SetBorderWidth, selectedToken->GetBorderWidth(), std::get<float>(value)));
         break;
     case Token_BorderColor:
         for (const auto& selectedToken: SelectedTokens())
-            selectedToken->SetBorderColor(std::get<glm::vec4>(value));
+            actionGroup->Add(std::make_shared<ModifyTokenVec4>(selectedToken, &Token::SetBorderColor, selectedToken->GetBorderColor(), std::get<glm::vec4>(value)));
         break;
     case Token_Texture:
         for (const auto& selectedToken: SelectedTokens())
-            selectedToken->SetIcon(m_resources->GetTexture(std::get<std::string>(value)));
+            actionGroup->Add(std::make_shared<ModifyTokenTexture>(selectedToken, &Token::SetIcon, selectedToken->GetIcon(), m_resources->GetTexture(std::get<std::string>(value))));
         break;
     
     default:
         std::cerr << "Unknown TokenProperty: " << property << std::endl;
+        actionGroup.reset();
         break;
     }
+    
+    if (actionGroup)
+        PerformAction(actionGroup);
 }
 
 bool Controller::Undo()

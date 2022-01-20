@@ -23,7 +23,7 @@ public:
     bool SerializeCamera(std::shared_ptr<Camera> camera, nlohmann::json& json);
     bool SerializeGrid(std::shared_ptr<Grid> grid, nlohmann::json& json);
     bool SerializeImage(std::shared_ptr<BGImage> image, nlohmann::json& json);
-    bool SerializeMatrix2D(Matrix2D* matrix, nlohmann::json& json);
+    bool SerializeMatrix2D(std::shared_ptr<Matrix2D> matrix, nlohmann::json& json);
     // bool SerializeOverlay(std::shared_ptr<Overlay> overlay, nlohmann::json& json);
     bool SerializeScene(std::shared_ptr<Scene> scene, nlohmann::json& json);
     bool SerializeToken(std::shared_ptr<Token> token, nlohmann::json& json);

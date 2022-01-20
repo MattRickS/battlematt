@@ -24,7 +24,7 @@ std::string Token::GetName() { return m_name; }
 
 void Token::Draw(Shader &shader)
 {
-    shader.setMat4("model", *m_model.Value());
+    shader.setMat4("model", *m_model->Value());
 
     glm::vec4 highlight;
     if (isSelected)
@@ -56,5 +56,5 @@ bool Token::Contains(float x, float y) const
 bool Token::Contains(glm::vec2 pt) const
 {
     // Scale is the diameter, use radius for comparison
-    return glm::length(m_model.GetPos() - pt) < (m_model.GetScalef() * 0.5f);
+    return glm::length(m_model->GetPos() - pt) < (m_model->GetScalef() * 0.5f);
 }

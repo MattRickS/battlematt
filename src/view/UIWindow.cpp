@@ -111,7 +111,7 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
     return false;
 }
 
-void UIWindow::DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D, bool lockScaleRatio)
+void UIWindow::DrawMatrix2DOptions(std::string suffixID, const std::shared_ptr<Matrix2D>& matrix2D, bool lockScaleRatio)
 {
     glm::vec2 pos = matrix2D->GetPos();
     if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
@@ -139,7 +139,7 @@ void UIWindow::DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D, boo
 // Draw a single set of UI inputs and copy all changes to each Shape2D
 void UIWindow::DrawShape2DOptions(std::string suffixID, std::shared_ptr<Shape2D> shape, std::shared_ptr<Grid> grid, bool snapToGrid, bool singleScale)
 {
-    Matrix2D* matrix2D = shape->GetModel();
+    const std::shared_ptr<Matrix2D>& matrix2D = shape->GetModel();
 
     // TODO: Idea is to remove the grid logic from here and simply emit the requested changes
     //       The Controller then needs to understand this is a modifyX action for Token, read the values,
@@ -232,7 +232,7 @@ void UIWindow::DrawTokenOptions(std::shared_ptr<Token> token, std::shared_ptr<Gr
     if (ImGui::ColorEdit3("Border Colour", (float*)&borderColor))
         tokenPropertyChanged.emit(token, Token_BorderColor, TokenPropertyValue(borderColor));
     
-    Matrix2D* matrix2D = token->GetModel();
+    const std::shared_ptr<Matrix2D>& matrix2D = token->GetModel();
 
     glm::vec2 pos = matrix2D->GetPos();
     if (ImGui::DragFloat2("Position##Token", (float*)&pos))
