@@ -111,69 +111,6 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
     return false;
 }
 
-void UIWindow::DrawMatrix2DOptions(std::string suffixID, const std::shared_ptr<Matrix2D>& matrix2D, bool lockScaleRatio)
-{
-    glm::vec2 pos = matrix2D->GetPos();
-    if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
-        matrix2D->SetPos(pos);
-
-    // TODO: Reset size option to match image ratio
-    if (lockScaleRatio)
-    {
-        float size = matrix2D->GetScalef();
-        if (ImGui::SliderFloat(("Scale##" + suffixID).c_str(), &size, 0.1, 1000, "%.2f", ImGuiSliderFlags_Logarithmic))
-            matrix2D->SetScale(matrix2D->GetScale() * (size / matrix2D->GetScalef()));
-    }
-    else
-    {
-        glm::vec2 scale = matrix2D->GetScale();
-        if (ImGui::DragFloat2(("Size##" + suffixID).c_str(), (float*)&scale))
-            matrix2D->SetScale(scale);
-    }
-
-    float rotation = matrix2D->GetRotation();
-    if (ImGui::SliderFloat(("Rotation##" + suffixID).c_str(), &rotation, 0, 360, "%.2f"))
-        matrix2D->SetRotation(rotation);
-}
-
-// Draw a single set of UI inputs and copy all changes to each Shape2D
-void UIWindow::DrawShape2DOptions(std::string suffixID, std::shared_ptr<Shape2D> shape, std::shared_ptr<Grid> grid, bool snapToGrid, bool singleScale)
-{
-    const std::shared_ptr<Matrix2D>& matrix2D = shape->GetModel();
-
-    // TODO: Idea is to remove the grid logic from here and simply emit the requested changes
-    //       The Controller then needs to understand this is a modifyX action for Token, read the values,
-    //       and alter them as needed. It can then duplicate the action for each selected token and save as an action group.
-    //       The problem is how to inform the Controller what type of action it is.
-    //       Is it easier to just have a signal for each modification type?
-    glm::vec2 pos = matrix2D->GetPos();
-    if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
-    {
-        // TODO: Get relaative offset and apply offset to all shapes rather than move everything on top of each other
-        if (snapToGrid)
-            pos = grid->ShapeSnapPosition(shape, pos);
-        shape->GetModel()->SetPos(pos);
-    }
-
-    glm::vec2 scale = matrix2D->GetScale();
-    if (singleScale && ImGui::SliderFloat(("Size##1" + suffixID).c_str(), &scale.x, 0, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
-    {
-        if (snapToGrid)
-            scale = glm::vec2(grid->SnapGridSize(scale.x));
-        shape->GetModel()->SetScalef(scale.x);
-    }
-    else if (!singleScale && ImGui::DragFloat2(("Size##2" + suffixID).c_str(), (float*)&scale, 0.5f))
-    {
-        if (snapToGrid)
-            scale = glm::vec2(grid->SnapGridSize(scale.x), grid->SnapGridSize(scale.y));
-        shape->GetModel()->SetScale(scale);
-    }
-
-    float rotation = matrix2D->GetRotation();
-    if (ImGui::SliderFloat(("Rotation##" + suffixID).c_str(), &rotation, 0, 360, "%.2f"))
-        shape->GetModel()->SetRotation(rotation);
-}
-
 void UIWindow::DrawImageOptions(const std::shared_ptr<BGImage>& image)
 {
     std::string imagePath = image->GetImage()->filename;
@@ -212,22 +149,6 @@ void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)
     bool snapToGrid = grid->GetSnapEnabled();
     if (ImGui::Checkbox("Snap to Grid", &snapToGrid))
         gridPropertyChanged.emit(grid, Grid_Snap, GridPropertyValue(snapToGrid));
-}
-
-template <typename argT>
-bool UIWindow::IsStillEditing(argT& oldVal, const argT& newVal)
-{
-    if (ImGui::IsItemActivated())
-    {
-        // here we record the old value for later undo record.
-        oldVal = newVal;
-    }
-
-    if (ImGui::IsItemDeactivatedAfterEdit() && oldVal != newVal)
-    {
-        return false;
-    }
-    return true;
 }
 
 void UIWindow::DrawTokenOptions(std::shared_ptr<Token> token, std::shared_ptr<Grid> grid, bool snapToGrid)

@@ -13,8 +13,11 @@
 class Action
 {
 public:
-    virtual void Undo() {}
-    virtual void Redo() {}
+    virtual void Undo() = 0;
+    virtual void Redo() = 0;
+    // Merge tries to combine Actions of the same type.
+    virtual bool CanMerge(const std::shared_ptr<Action>& action) { return false; }
+    virtual void Merge(const std::shared_ptr<Action>& action) {}
 };
 
 
@@ -40,6 +43,26 @@ public:
         m_actions.push_back(action);
     }
 
+    virtual bool CanMerge(const std::shared_ptr<Action>& action)
+    {
+        auto actionGroup = std::dynamic_pointer_cast<ActionGroup>(action);
+        if (!actionGroup || actionGroup->m_actions.size() != m_actions.size())
+            return false;
+
+        for (unsigned int i = 0; i < m_actions.size(); i++)
+        {
+            if (!m_actions[i]->CanMerge(actionGroup->m_actions[i]))
+                return false;
+        }
+        return true;
+    }
+    virtual void Merge(const std::shared_ptr<Action>& action)
+    {
+        auto actionGroup = std::dynamic_pointer_cast<ActionGroup>(action);
+        for (unsigned int i = 0; i < m_actions.size(); i++)
+            m_actions[i]->Merge(actionGroup->m_actions[i]);
+    }
+
 private:
     std::vector<std::shared_ptr<Action>> m_actions;
 };
@@ -59,6 +82,19 @@ public:
     virtual void Redo()
     {
         (m_inst.get()->*m_func)(m_newVal);
+    }
+    virtual bool CanMerge(const std::shared_ptr<Action>& action)
+    {
+        auto modifyAction = std::dynamic_pointer_cast<ModifyMemberAction>(action);
+        if (modifyAction && modifyAction->m_inst == m_inst && modifyAction->m_func == m_func)
+            return true;
+
+        return false;
+    }
+    virtual void Merge(const std::shared_ptr<Action>& action)
+    {
+        auto modifyAction = std::dynamic_pointer_cast<ModifyMemberAction>(action);
+        m_newVal = modifyAction->m_newVal;
     }
 
 private:

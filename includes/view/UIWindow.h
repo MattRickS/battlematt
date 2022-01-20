@@ -48,14 +48,10 @@ private:
     int m_promptType = 0;
     bool mergeLoad = false;
 
-    void DrawMatrix2DOptions(std::string suffixID, const std::shared_ptr<Matrix2D>& matrix2D, bool lockScaleRatio=false);
-    void DrawShape2DOptions(std::string suffixID, std::shared_ptr<Shape2D> shapes, std::shared_ptr<Grid> grid, bool snapToGrid = false, bool singleScale = false);
     void DrawImageOptions(const std::shared_ptr<BGImage>& image);
     void DrawGridOptions(std::shared_ptr<Grid>);
     void DrawTokenOptions(std::shared_ptr<Token> tokens, std::shared_ptr<Grid> grid, bool snapToGrid = false);
 
     void RespondToPrompt(bool response);
 
-    template <typename argT>
-    bool IsStillEditing(argT& oldVal, const argT& newVal);
 };
