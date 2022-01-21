@@ -118,3 +118,43 @@ typedef ModifyMemberAction<Token, float> ModifyTokenFloat;  // borderWidth
 typedef ModifyMemberAction<Token, glm::vec4> ModifyTokenVec4;  // borderColour
 typedef ModifyMemberAction<Token, std::shared_ptr<Texture>> ModifyTokenTexture;  // icon
 typedef ModifyMemberAction<Token, std::string> ModifyTokenString;  // name
+
+
+class SelectTokensAction : public Action
+{
+public:
+    SelectTokensAction(std::vector<std::shared_ptr<Token>> selected) : selectedTokens(selected) {}
+    SelectTokensAction(std::vector<std::shared_ptr<Token>> selected, const std::shared_ptr<Token>& token, bool add=false) : selectedTokens(selected), m_additive(add)
+    {
+        tokensToSelect.push_back(token);
+    }
+    SelectTokensAction(std::vector<std::shared_ptr<Token>> selected, std::vector<std::shared_ptr<Token>> toSelect, bool add=false) : selectedTokens(selected), tokensToSelect(toSelect), m_additive(add) {}
+
+    virtual void Undo()
+    {
+        if (m_additive)
+            Select(tokensToSelect, false);
+        else
+        {
+            Select(tokensToSelect, false);
+            Select(selectedTokens, true);
+        }
+    }
+    virtual void Redo()
+    {
+        if (!m_additive)
+            Select(selectedTokens, false);
+        Select(tokensToSelect, true);
+    }
+
+private:
+    std::vector<std::shared_ptr<Token>> selectedTokens;
+    std::vector<std::shared_ptr<Token>> tokensToSelect;
+    bool m_additive = false;
+
+    void Select(const std::vector<std::shared_ptr<Token>>& tokens, bool select)
+    {
+        for (const auto& token: tokens)
+            token->isSelected = select;
+    }
+};

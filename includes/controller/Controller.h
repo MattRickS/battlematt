@@ -28,7 +28,8 @@ public:
     std::vector<std::shared_ptr<Token>> SelectedTokens();
     bool HasSelectedTokens();
     void ClearSelection();
-    void SelectToken(std::shared_ptr<Token> token, bool additive=true);
+    void SelectToken(std::shared_ptr<Token> token, bool additive=false);
+    void SelectTokens(std::vector<std::shared_ptr<Token>> tokens, bool additive=false);
     void DuplicateSelectedTokens();
 
     std::vector<std::shared_ptr<Token>> TokensInScreenRect(float minx, float miny, float maxx, float maxy);
@@ -77,7 +78,7 @@ private:
     bool IsDragSelecting();
     void StartDragSelection(float xpos, float ypos);
     void UpdateDragSelection(float xpos, float ypos);
-    void FinishDragSelection();
+    void FinishDragSelection(bool additive);
 
     static const int PROMPT_CLOSE = 1;
     void OnPromptResponse(int promptType, bool response);

@@ -121,31 +121,32 @@ bool Controller::HasSelectedTokens()
 
 void Controller::ClearSelection()
 {
-    for (std::shared_ptr<Token>& token : m_scene->tokens)
-        token->isSelected = false;
+    PerformAction(std::make_shared<SelectTokensAction>(SelectedTokens()));
 }
 
 void Controller::SelectToken(std::shared_ptr<Token> token, bool additive)
 {
-    if (!additive)
-        ClearSelection();
-    token->isSelected = true;
+    PerformAction(std::make_shared<SelectTokensAction>(SelectedTokens(), token, additive));
+}
+
+void Controller::SelectTokens(std::vector<std::shared_ptr<Token>> tokens, bool additive)
+{
+    PerformAction(std::make_shared<SelectTokensAction>(SelectedTokens(), tokens, additive));
 }
 
 void Controller::DuplicateSelectedTokens()
 {
     // TODO: Add Token Action / Select Token action
-    uint numTokens = m_scene->tokens.size();
+    std::vector<std::shared_ptr<Token>> toSelect;
     for (std::shared_ptr<Token> token : SelectedTokens())
     {
         std::shared_ptr<Token> duplicate = std::make_shared<Token>(*token);
         duplicate->GetModel()->Offset(glm::vec2(1));
         m_scene->AddToken(duplicate);
+        toSelect.push_back(duplicate);
     }
 
-    ClearSelection();
-    for (uint i = numTokens; i < m_scene->tokens.size(); i++)
-        SelectToken(m_scene->tokens[i]);
+    SelectTokens(toSelect);
 }
 
 // Screen Position
@@ -218,7 +219,7 @@ void Controller::UpdateDragSelection(float xpos, float ypos)
         token->isHighlighted = true;
 }
 
-void Controller::FinishDragSelection()
+void Controller::FinishDragSelection(bool additive)
 {
     // Y-axis is inverted on rect, use re-invert for calculating world positions
     auto tokensInBounds = TokensInScreenRect(
@@ -228,8 +229,7 @@ void Controller::FinishDragSelection()
         m_viewport->Height() - dragSelectRect->MaxY()
     );
 
-    for (std::shared_ptr<Token> token : tokensInBounds)
-        SelectToken(token);
+    SelectTokens(tokensInBounds, additive);
 
     m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
     dragSelectRect.reset();
@@ -304,25 +304,20 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
     {
         if (action == GLFW_PRESS)
         {
-            // TODO: Selection action
+            // TODO: Selection action should be combined with move action, ie, undo undoes the selection and the movement
             glm::vec2 cursorPos = m_viewport->CursorPos();
             tokenUnderCursor = GetTokenAtScreenPos(cursorPos);
             if (tokenUnderCursor && !tokenUnderCursor->isSelected)
                 SelectToken(tokenUnderCursor, mods & GLFW_MOD_SHIFT);
             // If nothing was immediately selected/being modified, start a drag select
             else if (!tokenUnderCursor)
-            {
-                if (!mods & GLFW_MOD_SHIFT)
-                    ClearSelection();
-
                 StartDragSelection(cursorPos.x, cursorPos.y);
-            }
         }
         else if (action == GLFW_RELEASE)
         {
             tokenUnderCursor = nullptr;
             if (IsDragSelecting())
-                FinishDragSelection();
+                FinishDragSelection(mods & GLFW_MOD_SHIFT);
         }
         leftMouseHeld = action == GLFW_PRESS;
     }
