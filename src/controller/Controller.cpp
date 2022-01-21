@@ -9,7 +9,6 @@
 #include <model/Overlays.h>
 #include <model/Scene.h>
 #include <model/Token.h>
-#include <view/UIState.h>
 #include <view/UIWindow.h>
 #include <view/Viewport.h>
 
@@ -188,31 +187,31 @@ std::shared_ptr<Token> Controller::GetTokenAtScreenPos(glm::vec2 screenPos)
 // Drag Selection
 bool Controller::IsDragSelecting()
 {
-    return static_cast<bool>(uiState->dragSelectRect);
+    return static_cast<bool>(dragSelectRect);
 }
 
 void Controller::StartDragSelection(float xpos, float ypos)
 {
-    uiState->dragSelectRect = std::make_shared<RectOverlay>(
+    dragSelectRect = std::make_shared<RectOverlay>(
         m_resources->GetMesh(Resources::MeshType::Quad2),
         m_resources->GetShader(Resources::ShaderType::ScreenRect)
     );
     // GL uses inverted Y-axis
-    uiState->dragSelectRect->startCorner = uiState->dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
-    m_scene->overlays.push_back(static_cast<std::shared_ptr<Overlay>>(uiState->dragSelectRect));
+    dragSelectRect->startCorner = dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
+    m_scene->overlays.push_back(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
 }
 
 void Controller::UpdateDragSelection(float xpos, float ypos)
 {
     // GL uses inverted Y-axis
-    uiState->dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
+    dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
 
     // Y-axis is inverted on rect, use re-invert for calculating world positions
     auto coveredTokens = TokensInScreenRect(
-        uiState->dragSelectRect->MinX(),
-        m_viewport->Height() - uiState->dragSelectRect->MinY(),
-        uiState->dragSelectRect->MaxX(),
-        m_viewport->Height() - uiState->dragSelectRect->MaxY()
+        dragSelectRect->MinX(),
+        m_viewport->Height() - dragSelectRect->MinY(),
+        dragSelectRect->MaxX(),
+        m_viewport->Height() - dragSelectRect->MaxY()
     );
 
     for (std::shared_ptr<Token> token : coveredTokens)
@@ -223,17 +222,17 @@ void Controller::FinishDragSelection()
 {
     // Y-axis is inverted on rect, use re-invert for calculating world positions
     auto tokensInBounds = TokensInScreenRect(
-        uiState->dragSelectRect->MinX(),
-        m_viewport->Height() - uiState->dragSelectRect->MinY(),
-        uiState->dragSelectRect->MaxX(),
-        m_viewport->Height() - uiState->dragSelectRect->MaxY()
+        dragSelectRect->MinX(),
+        m_viewport->Height() - dragSelectRect->MinY(),
+        dragSelectRect->MaxX(),
+        m_viewport->Height() - dragSelectRect->MaxY()
     );
 
     for (std::shared_ptr<Token> token : tokensInBounds)
         SelectToken(token);
 
-    m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(uiState->dragSelectRect));
-    uiState->dragSelectRect.reset();
+    m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
+    dragSelectRect.reset();
 }
 
 // Input Callbacks
@@ -267,12 +266,12 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
         m_scene->camera->Pan(m_viewport->ScreenToWorldOffset(xoffset, yoffset));
         m_viewport->RefreshCamera();
     }
-    else if (leftMouseHeld && uiState->tokenUnderCursor)
+    else if (leftMouseHeld && tokenUnderCursor)
     {
         if (m_scene->grid->GetSnapEnabled())
         {
-            glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(uiState->tokenUnderCursor, m_viewport->ScreenToWorldPos(xpos, ypos));
-            glm::vec2 currPos = uiState->tokenUnderCursor->GetModel()->GetPos();
+            glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(tokenUnderCursor, m_viewport->ScreenToWorldPos(xpos, ypos));
+            glm::vec2 currPos = tokenUnderCursor->GetModel()->GetPos();
             if (newPos != currPos)
             {
                 std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
@@ -307,11 +306,11 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
         {
             // TODO: Selection action
             glm::vec2 cursorPos = m_viewport->CursorPos();
-            uiState->tokenUnderCursor = GetTokenAtScreenPos(cursorPos);
-            if (uiState->tokenUnderCursor && !uiState->tokenUnderCursor->isSelected)
-                SelectToken(uiState->tokenUnderCursor, mods & GLFW_MOD_SHIFT);
+            tokenUnderCursor = GetTokenAtScreenPos(cursorPos);
+            if (tokenUnderCursor && !tokenUnderCursor->isSelected)
+                SelectToken(tokenUnderCursor, mods & GLFW_MOD_SHIFT);
             // If nothing was immediately selected/being modified, start a drag select
-            else if (!uiState->tokenUnderCursor)
+            else if (!tokenUnderCursor)
             {
                 if (!mods & GLFW_MOD_SHIFT)
                     ClearSelection();
@@ -321,7 +320,7 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
         }
         else if (action == GLFW_RELEASE)
         {
-            uiState->tokenUnderCursor = nullptr;
+            tokenUnderCursor = nullptr;
             if (IsDragSelecting())
                 FinishDragSelection();
         }

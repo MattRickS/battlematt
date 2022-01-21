@@ -11,7 +11,6 @@
 #include <model/Scene.h>
 #include <model/Token.h>
 #include <view/Properties.h>
-#include <view/UIState.h>
 #include <view/UIWindow.h>
 #include <view/Viewport.h>
 
@@ -19,8 +18,6 @@
 class Controller
 {
 public:
-    std::shared_ptr<UIState> uiState = std::make_shared<UIState>();
-
     Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow);
     ~Controller();
 
@@ -73,6 +70,9 @@ private:
     std::deque<std::shared_ptr<Action>> redoQueue;
     const std::chrono::milliseconds maxTimeBetweenUniqueActions{500};
     std::chrono::steady_clock::time_point lastActionTime = std::chrono::steady_clock::now();
+
+    std::shared_ptr<RectOverlay> dragSelectRect = nullptr;
+    std::shared_ptr<Token> tokenUnderCursor = nullptr;
 
     bool IsDragSelecting();
     void StartDragSelection(float xpos, float ypos);
