@@ -22,6 +22,8 @@ public:
     Token(std::shared_ptr<Mesh> mesh);
     Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture);
     Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture, std::string name);
+    Token(const Token& token);
+
     void SetIcon(std::shared_ptr<Texture> texture);
     std::shared_ptr<Texture> GetIcon();
     void SetBorderWidth(float width);

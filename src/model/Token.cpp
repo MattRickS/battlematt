@@ -12,6 +12,15 @@
 Token::Token(std::shared_ptr<Mesh> mesh) : Rect(mesh), m_name("") {}
 Token::Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture) : Token(mesh, texture, texture->Name()) {}
 Token::Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture, std::string name) : Rect(mesh), m_name(name), m_texture(texture) {}
+// TODO: Rule of five
+Token::Token(const Token& token) : Rect(token)
+{
+    m_name = token.m_name;
+    m_texture = token.m_texture;
+    m_model = std::make_shared<Matrix2D>(*token.m_model);
+    m_borderColor = token.m_borderColor;
+    m_borderWidth = token.m_borderWidth;
+}
 
 void Token::SetIcon(std::shared_ptr<Texture> texture) { m_texture = texture; }
 std::shared_ptr<Texture> Token::GetIcon() { return m_texture; }

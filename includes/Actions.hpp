@@ -158,3 +158,34 @@ private:
             token->isSelected = select;
     }
 };
+
+
+class AddTokensAction : public Action
+{
+public:
+    AddTokensAction(const std::shared_ptr<Scene>& scene) : m_scene(scene) {}
+    AddTokensAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Token>& token) : m_scene(scene)
+    {
+        m_tokens.push_back(token);
+    }
+    AddTokensAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<Token>> tokens) : m_scene(scene), m_tokens(tokens) {}
+
+    void Add(const std::shared_ptr<Token>& token)
+    {
+        m_tokens.push_back(token);
+    }
+
+    virtual void Undo()
+    {
+        m_scene->RemoveTokens(m_tokens);
+    }
+    virtual void Redo()
+    {
+        for (const auto& token: m_tokens)
+            m_scene->AddToken(token);
+    }
+
+private:
+    std::shared_ptr<Scene> m_scene;
+    std::vector<std::shared_ptr<Token>> m_tokens;
+};

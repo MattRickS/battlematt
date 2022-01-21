@@ -34,6 +34,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
     m_uiWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
     m_uiWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
+    m_uiWindow->addTokenClicked.connect(this, &Controller::OnUIAddTokenClicked);
 
     SetScene(std::make_shared<Scene>(m_resources));
 }
@@ -48,12 +49,10 @@ Controller::~Controller()
 void Controller::SetScene(std::shared_ptr<Scene> scene)
 {
     m_uiWindow->addImageClicked.disconnect();
-    m_uiWindow->addTokenClicked.disconnect();
 
     m_scene = scene;
-    // TODO: Add token actions
+    // TODO: Add image actions
     m_uiWindow->addImageClicked.connect(m_scene.get(), &Scene::AddImage);
-    m_uiWindow->addTokenClicked.connect(m_scene.get(), &Scene::AddToken);
 
     m_viewport->SetScene(scene);
     m_uiWindow->SetScene(scene);
@@ -136,16 +135,20 @@ void Controller::SelectTokens(std::vector<std::shared_ptr<Token>> tokens, bool a
 
 void Controller::DuplicateSelectedTokens()
 {
-    // TODO: Add Token Action / Select Token action
+    std::shared_ptr<AddTokensAction> action = std::make_shared<AddTokensAction>(m_scene);
+
     std::vector<std::shared_ptr<Token>> toSelect;
-    for (std::shared_ptr<Token> token : SelectedTokens())
+    for (const std::shared_ptr<Token>& token : SelectedTokens())
     {
+        // The model is being shared since it became a shared_ptr... fuck
         std::shared_ptr<Token> duplicate = std::make_shared<Token>(*token);
         duplicate->GetModel()->Offset(glm::vec2(1));
-        m_scene->AddToken(duplicate);
+        action->Add(duplicate);
         toSelect.push_back(duplicate);
     }
 
+    // TODO: Add Token Action / Select Token action
+    PerformAction(action);
     SelectTokens(toSelect);
 }
 
@@ -229,7 +232,8 @@ void Controller::FinishDragSelection(bool additive)
         m_viewport->Height() - dragSelectRect->MaxY()
     );
 
-    SelectTokens(tokensInBounds, additive);
+    if (tokensInBounds.size() > 0)
+        SelectTokens(tokensInBounds, additive);
 
     m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
     dragSelectRect.reset();
@@ -375,8 +379,15 @@ void Controller::OnViewportSizeChanged(int width, int height)
 
 void Controller::OnUIAddTokenClicked()
 {
-    m_scene->AddToken();
-    SelectToken(m_scene->tokens.back(), false);
+    auto token = std::make_shared<Token>(
+        m_resources->GetMesh(Resources::MeshType::Quad),
+        m_resources->GetTexture(Resources::TextureType::Default)
+    );
+    // Centers it on the camera view
+    token->GetModel()->SetPos(glm::vec2(m_scene->camera->Position.x, m_scene->camera->Position.y));
+    std::shared_ptr<AddTokensAction> action = std::make_shared<AddTokensAction>(m_scene, token);
+    // TODO: Include selection
+    PerformAction(action);
 }
 
 void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
