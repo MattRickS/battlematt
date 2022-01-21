@@ -36,7 +36,6 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
     m_uiWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
 
-    m_uiWindow->uiState = uiState;
     SetScene(std::make_shared<Scene>(m_resources));
 }
 
@@ -53,6 +52,7 @@ void Controller::SetScene(std::shared_ptr<Scene> scene)
     m_uiWindow->addTokenClicked.disconnect();
 
     m_scene = scene;
+    // TODO: Add token actions
     m_uiWindow->addImageClicked.connect(m_scene.get(), &Scene::AddImage);
     m_uiWindow->addTokenClicked.connect(m_scene.get(), &Scene::AddToken);
 
@@ -135,6 +135,7 @@ void Controller::SelectToken(std::shared_ptr<Token> token, bool additive)
 
 void Controller::DuplicateSelectedTokens()
 {
+    // TODO: Add Token Action / Select Token action
     uint numTokens = m_scene->tokens.size();
     for (std::shared_ptr<Token> token : SelectedTokens())
     {
@@ -268,22 +269,28 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
     }
     else if (leftMouseHeld && uiState->tokenUnderCursor)
     {
-        if (uiState->snapToGrid)
+        if (m_scene->grid->GetSnapEnabled())
         {
             glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(uiState->tokenUnderCursor, m_viewport->ScreenToWorldPos(xpos, ypos));
             glm::vec2 currPos = uiState->tokenUnderCursor->GetModel()->GetPos();
             if (newPos != currPos)
             {
+                std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
                 glm::vec2 offset = newPos - currPos;
-                for (std::shared_ptr<Token> token : SelectedTokens())
-                    token->GetModel()->Offset(offset);
+                for (const std::shared_ptr<Token>& token : SelectedTokens())
+                    actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(token->GetModel(), &Matrix2D::SetPos, token->GetModel()->GetPos(), token->GetModel()->GetPos() + offset));
+
+                PerformAction(actionGroup);
             }
         }
         else
         {
+            std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
             glm::vec2 offset = m_viewport->ScreenToWorldOffset(xoffset, yoffset);
             for (std::shared_ptr<Token> token : SelectedTokens())
-                token->GetModel()->Offset(offset);
+                actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(token->GetModel(), &Matrix2D::SetPos, token->GetModel()->GetPos(), token->GetModel()->GetPos() + offset));
+
+            PerformAction(actionGroup);
         }
     }
     else if (leftMouseHeld && IsDragSelecting())
@@ -298,6 +305,7 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
     {
         if (action == GLFW_PRESS)
         {
+            // TODO: Selection action
             glm::vec2 cursorPos = m_viewport->CursorPos();
             uiState->tokenUnderCursor = GetTokenAtScreenPos(cursorPos);
             if (uiState->tokenUnderCursor && !uiState->tokenUnderCursor->isSelected)
@@ -333,7 +341,7 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
     if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
         OnCloseRequested();
     if (key == GLFW_KEY_S && action == GLFW_RELEASE)
-        uiState->snapToGrid = !uiState->snapToGrid;
+        m_scene->grid->SetSnapEnabled(!m_scene->grid->GetSnapEnabled());
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         m_viewport->SetFullscreen(!m_viewport->IsFullscreen());
     if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && HasSelectedTokens())
@@ -354,6 +362,7 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
     }
     if (key == GLFW_KEY_DELETE && HasSelectedTokens())
     {
+        // TODO: Delete action
         m_scene->RemoveTokens(SelectedTokens());
         ClearSelection();
     }
@@ -413,9 +422,12 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
         break;
     case Token_Position:
     {
-        glm::vec2 offset = std::get<glm::vec2>(value) - token->GetModel()->GetPos();
+        glm::vec2 pos = std::get<glm::vec2>(value);
+        if (m_scene->grid->GetSnapEnabled())
+            pos = m_scene->grid->ShapeSnapPosition(token, pos);
+        glm::vec2 offset = pos - token->GetModel()->GetPos();
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(selectedToken->GetModel(), &Matrix2D::Offset, -offset, offset));
+            actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(selectedToken->GetModel(), &Matrix2D::SetPos, selectedToken->GetModel()->GetPos(), selectedToken->GetModel()->GetPos() + offset));
         break;
     }
     case Token_Rotation:

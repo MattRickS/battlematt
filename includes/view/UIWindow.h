@@ -12,7 +12,6 @@
 #include <model/Shape2D.h>
 #include <model/Token.h>
 #include <view/Properties.h>
-#include <view/UIState.h>
 #include <view/Window.h>
 
 
@@ -28,8 +27,6 @@ public:
     Signal<const std::shared_ptr<Token>&, TokenProperty, TokenPropertyValue> tokenPropertyChanged;
     Signal<const std::shared_ptr<BGImage>&, ImageProperty, ImagePropertyValue> imagePropertyChanged;
     Signal<const std::shared_ptr<Grid>&, GridProperty, GridPropertyValue> gridPropertyChanged;
-
-    std::shared_ptr<UIState> uiState = nullptr;
 
     UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share = NULL);
     ~UIWindow();
@@ -49,8 +46,8 @@ private:
     bool mergeLoad = false;
 
     void DrawImageOptions(const std::shared_ptr<BGImage>& image);
-    void DrawGridOptions(std::shared_ptr<Grid>);
-    void DrawTokenOptions(std::shared_ptr<Token> tokens, std::shared_ptr<Grid> grid, bool snapToGrid = false);
+    void DrawGridOptions(const std::shared_ptr<Grid>&);
+    void DrawTokenOptions(const std::shared_ptr<Token>& tokens);
 
     void RespondToPrompt(bool response);
 

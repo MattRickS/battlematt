@@ -10,7 +10,6 @@
 #include <model/Shape2D.h>
 #include <model/Scene.h>
 #include <model/Token.h>
-#include <view/UIState.h>
 
 #include <view/UIWindow.h>
 
@@ -136,7 +135,7 @@ void UIWindow::DrawImageOptions(const std::shared_ptr<BGImage>& image)
         imagePropertyChanged.emit(image, Image_Rotation, ImagePropertyValue(rotation));
 }
 
-void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)
+void UIWindow::DrawGridOptions(const std::shared_ptr<Grid>& grid)
 {
     float gridSize = grid->GetScale();
     if (ImGui::SliderFloat("Size##Grid", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
@@ -151,7 +150,7 @@ void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)
         gridPropertyChanged.emit(grid, Grid_Snap, GridPropertyValue(snapToGrid));
 }
 
-void UIWindow::DrawTokenOptions(std::shared_ptr<Token> token, std::shared_ptr<Grid> grid, bool snapToGrid)
+void UIWindow::DrawTokenOptions(const std::shared_ptr<Token>& token)
 {
     std::string name = token->GetName();
     if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue))
@@ -253,7 +252,7 @@ void UIWindow::Draw()
                 addTokenClicked.emit();
 
             if (lastSelectedToken)
-                DrawTokenOptions(lastSelectedToken, m_scene->grid, uiState->snapToGrid);
+                DrawTokenOptions(lastSelectedToken);
         }
 
         // Spacer
