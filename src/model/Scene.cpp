@@ -148,11 +148,11 @@ void Scene::Draw()
             {
                 if (!statuses[i])
                     continue;
+
+                float degree = glm::radians(90 - 360.0f * i / statuses.size());
                 
                 glm::mat4 matrix = glm::mat4(1.0f);
-                matrix = glm::translate(matrix, glm::vec3(token->GetModel()->GetPos(), 0.0f));
-                matrix = glm::rotate(matrix, glm::radians(360.0f * i / statuses.size()), glm::vec3(0, 0, 1));
-                matrix = glm::translate(matrix, glm::vec3(0.0f, token->GetModel()->GetScale().y * 0.35f, 0.0f));
+                matrix = glm::translate(matrix, glm::vec3(token->GetModel()->GetPos() + glm::vec2(glm::cos(degree), glm::sin(degree)) * token->GetModel()->GetScale() * 0.35f, 0.0f));
                 matrix = glm::scale(matrix, glm::vec3(token->GetModel()->GetScalef() * 0.15f));
                 statusShader->setMat4("model", matrix);
                 statusShader->setFloat4("color", statusColors[i].x, statusColors[i].y, statusColors[i].z, 1.0f);
