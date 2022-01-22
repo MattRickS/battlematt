@@ -35,6 +35,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
     m_uiWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
     m_uiWindow->addTokenClicked.connect(this, &Controller::OnUIAddTokenClicked);
+    m_uiWindow->addImageClicked.connect(this, &Controller::OnUIAddImageClicked);
 
     SetScene(std::make_shared<Scene>(m_resources));
 }
@@ -48,12 +49,7 @@ Controller::~Controller()
 // Scene Management
 void Controller::SetScene(std::shared_ptr<Scene> scene)
 {
-    m_uiWindow->addImageClicked.disconnect();
-
     m_scene = scene;
-    // TODO: Add image actions
-    m_uiWindow->addImageClicked.connect(m_scene.get(), &Scene::AddImage);
-
     m_viewport->SetScene(scene);
     m_uiWindow->SetScene(scene);
 }
@@ -389,6 +385,14 @@ void Controller::OnUIAddTokenClicked()
     std::shared_ptr<AddTokensAction> action = std::make_shared<AddTokensAction>(m_scene, token);
     // TODO: Include selection
     PerformAction(action);
+}
+
+void Controller::OnUIAddImageClicked()
+{
+    PerformAction(std::make_shared<AddImagesAction>(m_scene, std::make_shared<BGImage>(
+        m_resources->GetMesh(Resources::MeshType::Quad),
+        m_resources->GetTexture(Resources::TextureType::Default)
+    )));
 }
 
 void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)

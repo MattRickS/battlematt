@@ -26,11 +26,13 @@ public:
     Scene(std::shared_ptr<Resources> resources);
     void AddImage();
     void AddImage(std::string path);
+    void AddImage(const std::shared_ptr<BGImage>& image);
     void AddToken();
     void AddToken(std::string path);
-    void AddToken(std::shared_ptr<Token> token);
+    void AddToken(const std::shared_ptr<Token>& token);
     void RemoveOverlay(std::shared_ptr<Overlay> overlay);
     void RemoveTokens(std::vector<std::shared_ptr<Token>> toRemove);
+    void RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove);
     void Draw();
 
 private:

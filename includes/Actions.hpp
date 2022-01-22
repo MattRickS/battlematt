@@ -234,3 +234,33 @@ private:
     std::shared_ptr<Scene> m_scene;
     std::vector<std::shared_ptr<Token>> m_tokens;
 };
+
+class AddImagesAction : public Action
+{
+public:
+    AddImagesAction(const std::shared_ptr<Scene>& scene) : m_scene(scene) {}
+    AddImagesAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<BGImage>& image) : m_scene(scene)
+    {
+        m_images.push_back(image);
+    }
+    AddImagesAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<BGImage>> images) : m_scene(scene), m_images(images) {}
+
+    void Add(const std::shared_ptr<BGImage>& image)
+    {
+        m_images.push_back(image);
+    }
+
+    virtual void Undo()
+    {
+        m_scene->RemoveImages(m_images);
+    }
+    virtual void Redo()
+    {
+        for (const auto& image: m_images)
+            m_scene->AddImage(image);
+    }
+
+private:
+    std::shared_ptr<Scene> m_scene;
+    std::vector<std::shared_ptr<BGImage>> m_images;
+};

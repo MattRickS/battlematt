@@ -44,6 +44,7 @@ public:
     void OnCloseRequested();
 
     void OnUIAddTokenClicked();
+    void OnUIAddImageClicked();
     void OnUIKeyChanged(int key, int scancode, int action, int mods);
     void PerformAction(const std::shared_ptr<Action>& action);
 
