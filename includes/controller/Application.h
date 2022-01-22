@@ -12,6 +12,7 @@ class Application
 {
 public:
     const char* glsl_version = "#version 330";
+    std::shared_ptr<Controller> controller = nullptr;
 
     Application();
     ~Application();
@@ -23,7 +24,6 @@ private:
     bool m_glfw_initialised = false;
 
     std::shared_ptr<Resources> m_resources = nullptr;
-    std::shared_ptr<Controller> m_controller = nullptr;
     std::shared_ptr<Viewport> m_viewport = nullptr;
     std::shared_ptr<UIWindow> m_uiWindow = nullptr;
 

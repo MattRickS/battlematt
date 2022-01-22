@@ -160,7 +160,7 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [x] Add Token
 - [x] Duplicate Token
 - [x] Save/Load
-- [ ] Undo Queue (Actions)
+- [x] Undo Queue (Actions)
 - [ ] Images not loading with correct sizes/distortion. Likely the wrong stbi options.
 - [x] Background image offset
 - [x] Clean up structure. Global shaders, Window logic separated, single quad mesh that's shared, InputManager. Proper memory management.
@@ -170,7 +170,7 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Token statuses (multiple predefined effects that can be toggled)
 - [x] Separate windows for viewport and UI (SetWindowSize to match framebuffer)
     - [ ] Hotkey to show/hide UI window
-- [ ] scene file as CLI arg
+- [x] scene file as CLI arg
 - [x] Esc confirm dialog (once separate UI windows, esc should at worst close the UI window automatically)
     - [ ] Maybe file dialogs closed by Esc if open
     - [x] Focus UI window when prompting

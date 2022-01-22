@@ -37,14 +37,14 @@ Application::Application() : m_resources(std::make_shared<Resources>())
 
     // Resources must be loaded after the GL context is created by the window.
     LoadDefaultResources();
-    m_controller = std::make_shared<Controller>(m_resources, m_viewport, m_uiWindow);
+    controller = std::make_shared<Controller>(m_resources, m_viewport, m_uiWindow);
 }
 
 Application::~Application()
 {
     m_viewport.reset();
     m_uiWindow.reset();
-    m_controller.reset();
+    controller.reset();
     m_resources.reset();
     if (m_glfw_initialised)
         glfwTerminate();

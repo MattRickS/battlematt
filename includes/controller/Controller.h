@@ -22,7 +22,7 @@ public:
 
     void SetScene(std::shared_ptr<Scene> scene);
     void Save(std::string path);
-    void Load(std::string path, bool merge);
+    void Load(std::string path, bool merge = false);
 
     std::vector<std::shared_ptr<Token>> SelectedTokens();
     bool HasSelectedTokens();
