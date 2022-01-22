@@ -20,6 +20,9 @@ Token::Token(const Token& token) : Rect(token)
     m_model = std::make_shared<Matrix2D>(*token.m_model);
     m_borderColor = token.m_borderColor;
     m_borderWidth = token.m_borderWidth;
+    m_statuses = token.m_statuses;
+    m_opacity = token.m_opacity;
+    m_xStatus = token.m_xStatus;
 }
 
 void Token::SetIcon(std::shared_ptr<Texture> texture) { m_texture = texture; }

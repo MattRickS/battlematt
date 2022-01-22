@@ -182,6 +182,7 @@ void UIWindow::DrawTokenOptions(const std::shared_ptr<Token>& token)
     if (ImGui::SliderFloat("Rotation##Token", &rotation, 0, 360, "%.2f"))
         tokenPropertyChanged.emit(token, Token_Rotation, TokenPropertyValue(rotation));
 
+    // TODO: Mixed status for multiple tokens? Ideally only add/remove one if changed
     bool enabled = token->GetXStatus();
     if (ImGui::Checkbox("X", &enabled))
         tokenPropertyChanged.emit(token, Token_XStatus, TokenPropertyValue(enabled));
