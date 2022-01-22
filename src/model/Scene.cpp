@@ -133,7 +133,33 @@ void Scene::Draw()
     tokenShader->use();
     for (const std::shared_ptr<Token>& token : tokens)
     {
+        tokenShader->use();
         token->Draw(*tokenShader);
+
+        auto statuses = token->GetStatuses();
+        if (statuses.any())
+        {
+            statusShader->use();
+            statusTexture->activate(GL_TEXTURE0);
+            statusShader->setInt("diffuse", 0);
+            glBindTexture(GL_TEXTURE_2D, statusTexture->ID);
+
+            for (unsigned int i=0; i < statuses.size(); i++)
+            {
+                if (!statuses[i])
+                    continue;
+                
+                glm::mat4 matrix = glm::mat4(1.0f);
+                matrix = glm::translate(matrix, glm::vec3(token->GetModel()->GetPos(), 0.0f));
+                matrix = glm::rotate(matrix, glm::radians(360.0f * i / statuses.size()), glm::vec3(0, 0, 1));
+                matrix = glm::translate(matrix, glm::vec3(0.0f, token->GetModel()->GetScale().y * 0.35f, 0.0f));
+                matrix = glm::scale(matrix, glm::vec3(token->GetModel()->GetScalef() * 0.15f));
+                statusShader->setMat4("model", matrix);
+                statusShader->setFloat4("color", statusColors[i].x, statusColors[i].y, statusColors[i].z, 1.0f);
+
+                quad->Draw(*statusShader);
+            }
+        }
 
         if (token->GetXStatus())
         {
@@ -145,36 +171,6 @@ void Scene::Draw()
             glBindTexture(GL_TEXTURE_2D, xStatusTexture->ID);
             quad->Draw(*statusShader);
         }
-
-        auto statuses = token->GetStatuses();
-        if (statuses.none())
-            continue;
-
-        statusShader->use();
-        statusTexture->activate(GL_TEXTURE0);
-        statusShader->setInt("diffuse", 0);
-        glBindTexture(GL_TEXTURE_2D, statusTexture->ID);
-
-        for (unsigned int i=0; i < statuses.size(); i++)
-        {
-            if (!statuses[i])
-                continue;
-            
-            Matrix2D matrix = Matrix2D(
-                glm::vec2(
-                    token->GetModel()->GetPos().x - token->GetModel()->GetScale().x * 0.5f + (i * token->GetModel()->GetScale().x) / (statuses.size() - 1),
-                    token->GetModel()->GetPos().y + token->GetModel()->GetScale().y * 0.6f
-                ),
-                token->GetModel()->GetScale() * 0.15f,
-                0.0f
-            );
-            statusShader->setMat4("model", *matrix.Value());
-            statusShader->setFloat4("color", statusColors[i].x, statusColors[i].y, statusColors[i].z, 1.0f);
-
-            quad->Draw(*statusShader);
-        }
-
-        tokenShader->use();
     }
 
     // Overlays have their own shaders
