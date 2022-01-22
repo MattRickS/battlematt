@@ -39,7 +39,6 @@ void Scene::AddImage(std::string path)
     ));
 }
 
-
 void Scene::AddImage(const std::shared_ptr<BGImage>& image)
 {
     images.push_back(image);
@@ -94,6 +93,42 @@ void Scene::RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove)
         return std::find(toRemove.begin(), toRemove.end(), t) != toRemove.end();
     };
     images.erase(std::remove_if(images.begin(), images.end(), pred), images.end());
+}
+
+Bounds Scene::GetBounds()
+{
+    Bounds bounds;
+    if (!images.empty())
+    {
+        bounds.min = images[0]->GetModel()->GetPos() - images[0]->GetModel()->GetScale() * 0.5f;
+        bounds.max = images[0]->GetModel()->GetPos() + images[0]->GetModel()->GetScale() * 0.5f;
+    }
+    else if (!tokens.empty())
+    {
+        bounds.min = tokens[0]->GetModel()->GetPos() - tokens[0]->GetModel()->GetScale() * 0.5f;
+        bounds.max = tokens[0]->GetModel()->GetPos() + tokens[0]->GetModel()->GetScale() * 0.5f;
+    }
+    else
+        return bounds;
+
+    for (const std::shared_ptr<Token>& token: tokens)
+    {
+        // TODO: Doesn't account for rotation...
+        glm::vec2 lo = token->GetModel()->GetPos() - token->GetModel()->GetScale() * 0.5f;
+        glm::vec2 hi = token->GetModel()->GetPos() + token->GetModel()->GetScale() * 0.5f;
+        bounds.min = glm::vec2(std::min(bounds.min.x, lo.x), std::min(bounds.min.y, lo.y));
+        bounds.max = glm::vec2(std::max(bounds.max.x, hi.x), std::max(bounds.max.y, hi.y));
+    }
+    for (const std::shared_ptr<BGImage>& image: images)
+    {
+        // TODO: Doesn't account for rotation...
+        glm::vec2 lo = image->GetModel()->GetPos() - image->GetModel()->GetScale() * 0.5f;
+        glm::vec2 hi = image->GetModel()->GetPos() + image->GetModel()->GetScale() * 0.5f;
+        bounds.min = glm::vec2(std::min(bounds.min.x, lo.x), std::min(bounds.min.y, lo.y));
+        bounds.max = glm::vec2(std::max(bounds.max.x, hi.x), std::max(bounds.max.y, hi.y));
+    }
+
+    return bounds;
 }
 
 // TODO: Move to renderer class

@@ -83,10 +83,6 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
 void Camera::Zoom(float yoffset)
 {
     Focal *= (1.0f - yoffset * 0.1f);
-    if (Focal < 0.01f)
-        Focal = 0.01f;
-    if (Focal > 90.0f)
-        Focal = 90.0f;
     updateProjectionMatrix();
 }
 
@@ -94,6 +90,13 @@ void Camera::SetAperture(float haperture)
 {
     hAperture = haperture;
     updateProjectionMatrix();
+}
+
+void Camera::RefreshMatrices()
+{
+    updateCameraVectors();
+    updateProjectionMatrix();
+    updateViewMatrix();
 }
 
 // calculates the front vector from the Camera's (updated) Euler Angles
@@ -121,7 +124,6 @@ void Camera::updateProjectionMatrix()
     
     invProjectionMatrix = glm::inverse(projectionMatrix);
 }
-
 
 void Camera::updateViewMatrix()
 {

@@ -12,6 +12,19 @@
 #include <model/Overlays.h>
 #include <model/Token.h>
 
+struct Bounds
+{
+    glm::vec2 min = glm::vec2(0);
+    glm::vec2 max = glm::vec2(0);
+
+    Bounds() {}
+    Bounds(glm::vec2 min, glm::vec2 max) : min(min), max(max) {}
+
+    glm::vec2 Center() const { return min + (max - min) * 0.5f; }
+    glm::vec2 Size() const { return max - min; }
+};
+
+
 class Scene
 {
 public:
@@ -33,6 +46,7 @@ public:
     void RemoveOverlay(std::shared_ptr<Overlay> overlay);
     void RemoveTokens(std::vector<std::shared_ptr<Token>> toRemove);
     void RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove);
+    Bounds GetBounds();
     void Draw();
 
 private:

@@ -152,6 +152,12 @@ void Controller::DeleteSelectedTokens()
     PerformAction(std::make_shared<RemoveTokensAction>(m_scene, SelectedTokens()));
 }
 
+// Viewport
+void Controller::Focus()
+{
+    m_viewport->Focus(m_scene->GetBounds());
+}
+
 // Screen Position
 std::vector<std::shared_ptr<Token>> Controller::TokensInScreenRect(float minx, float miny, float maxx, float maxy)
 {
@@ -368,6 +374,8 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
         Undo();
     if (key == GLFW_KEY_Y && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
         Redo();
+    if (key == GLFW_KEY_F && action == GLFW_RELEASE)
+        Focus();
 }
 
 void Controller::OnViewportSizeChanged(int width, int height)
