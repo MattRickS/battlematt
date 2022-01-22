@@ -46,7 +46,8 @@ void Viewport::RefreshCamera()
 
 void Viewport::Focus(const Bounds2D& bounds)
 {
-    glm::vec2 ratios = bounds.Size() / (ScreenToWorldPos(m_width, m_height) - ScreenToWorldPos(0, 0));
+    // Inverted GL y position. TODO: Change methods so inversion is handled inside these methods
+    glm::vec2 ratios = bounds.Size() / (ScreenToWorldPos(m_width, 0) - ScreenToWorldPos(0, m_height));
     m_scene->camera->Focal *= std::max(ratios.x, ratios.y);
     m_scene->camera->Focal *= 1.1f;  // padding
     m_scene->camera->Position = glm::vec3(bounds.Center().x, bounds.Center().y, m_scene->camera->Position.z);
