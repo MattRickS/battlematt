@@ -333,7 +333,7 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
             glm::vec2 cursorPos = m_viewport->CursorPos();
             tokenUnderCursor = GetTokenAtScreenPos(cursorPos);
             if (tokenUnderCursor && !tokenUnderCursor->isSelected)
-                SelectToken(tokenUnderCursor, mods & GLFW_MOD_SHIFT);
+                SelectToken(tokenUnderCursor, mods & (GLFW_MOD_SHIFT | GLFW_MOD_CONTROL));
             // If nothing was immediately selected/being modified, start a drag select
             else if (!tokenUnderCursor)
                 StartDragSelection(cursorPos.x, cursorPos.y);

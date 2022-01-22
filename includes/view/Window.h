@@ -50,4 +50,5 @@ protected:
     int m_lastPos[2], m_lastSize[2];
 
     void DisconnectSignals();
+    bool HasKeyPressed(int key);
 };

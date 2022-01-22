@@ -159,6 +159,8 @@ void Window::DisconnectSignals()
     sizeChanged.disconnect();
 }
 
+bool Window::HasKeyPressed(int key) { return glfwGetKey(window, key) == GLFW_PRESS; }
+
 // =============================================================================
 // Callbacks
 
