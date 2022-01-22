@@ -150,6 +150,11 @@ void Controller::DuplicateSelectedTokens()
     PerformAction(actionGroup);
 }
 
+void Controller::DeleteSelectedTokens()
+{
+    PerformAction(std::make_shared<RemoveTokensAction>(m_scene, SelectedTokens()));
+}
+
 // Screen Position
 std::vector<std::shared_ptr<Token>> Controller::TokensInScreenRect(float minx, float miny, float maxx, float maxy)
 {
@@ -359,11 +364,7 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
         }
     }
     if (key == GLFW_KEY_DELETE && HasSelectedTokens())
-    {
-        // TODO: Delete action
-        m_scene->RemoveTokens(SelectedTokens());
-        ClearSelection();
-    }
+        DeleteSelectedTokens();
     if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && HasSelectedTokens())
         DuplicateSelectedTokens();
     if (key == GLFW_KEY_Z && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)

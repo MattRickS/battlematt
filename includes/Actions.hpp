@@ -70,6 +70,7 @@ private:
 };
 
 
+// Modify Properties
 template <typename T, typename argT>
 class ModifyMemberAction: public Action
 {
@@ -107,7 +108,6 @@ private:
     std::chrono::steady_clock::time_point occurredAt = std::chrono::steady_clock::now();
 };
 
-
 typedef ModifyMemberAction<Grid, bool> ModifyGridBool;  // snap
 typedef ModifyMemberAction<Grid, float> ModifyGridFloat;  // size
 typedef ModifyMemberAction<Grid, glm::vec3> ModifyGridVec3;  // colour
@@ -123,7 +123,7 @@ typedef ModifyMemberAction<Token, glm::vec4> ModifyTokenVec4;  // borderColour
 typedef ModifyMemberAction<Token, std::shared_ptr<Texture>> ModifyTokenTexture;  // icon
 typedef ModifyMemberAction<Token, std::string> ModifyTokenString;  // name
 
-
+// Selection
 class SelectTokensAction : public Action
 {
 public:
@@ -174,7 +174,7 @@ private:
     }
 };
 
-
+// Add/Remove
 class AddTokensAction : public Action
 {
 public:
@@ -198,6 +198,36 @@ public:
     {
         for (const auto& token: m_tokens)
             m_scene->AddToken(token);
+    }
+
+private:
+    std::shared_ptr<Scene> m_scene;
+    std::vector<std::shared_ptr<Token>> m_tokens;
+};
+
+class RemoveTokensAction : public Action
+{
+public:
+    RemoveTokensAction(const std::shared_ptr<Scene>& scene) : m_scene(scene) {}
+    RemoveTokensAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Token>& token) : m_scene(scene)
+    {
+        m_tokens.push_back(token);
+    }
+    RemoveTokensAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<Token>> tokens) : m_scene(scene), m_tokens(tokens) {}
+
+    void Add(const std::shared_ptr<Token>& token)
+    {
+        m_tokens.push_back(token);
+    }
+
+    virtual void Undo()
+    {
+        for (const auto& token: m_tokens)
+            m_scene->AddToken(token);
+    }
+    virtual void Redo()
+    {
+        m_scene->RemoveTokens(m_tokens);
     }
 
 private:
