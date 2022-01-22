@@ -1,4 +1,5 @@
 #pragma once
+#include <chrono>
 #include <memory>
 
 #include <glm/glm.hpp>
@@ -7,6 +8,7 @@
 #include <glutil/Texture.h>
 #include <model/BGImage.h>
 #include <model/Grid.h>
+#include <model/Scene.h>
 #include <model/Token.h>
 
 
@@ -86,7 +88,7 @@ public:
     virtual bool CanMerge(const std::shared_ptr<Action>& action)
     {
         auto modifyAction = std::dynamic_pointer_cast<ModifyMemberAction>(action);
-        if (modifyAction && modifyAction->m_inst == m_inst && modifyAction->m_func == m_func)
+        if (modifyAction && modifyAction->m_inst == m_inst && modifyAction->m_func == m_func && occurredAt - modifyAction->occurredAt < maxTimeBetweenUniqueActions)
             return true;
 
         return false;
@@ -101,6 +103,8 @@ private:
     std::shared_ptr<T> m_inst;
     void (T::*m_func)(argT);
     argT m_oldVal, m_newVal;
+    const std::chrono::milliseconds maxTimeBetweenUniqueActions{500};
+    std::chrono::steady_clock::time_point occurredAt = std::chrono::steady_clock::now();
 };
 
 
@@ -146,6 +150,17 @@ public:
             Select(selectedTokens, false);
         Select(tokensToSelect, true);
     }
+
+    // If selecting the same thing / selecting nothing, then the actions can be combined
+    virtual bool CanMerge(const std::shared_ptr<Action>& action)
+    {
+        auto selectionAction = std::dynamic_pointer_cast<SelectTokensAction>(action);
+        if (selectionAction && selectionAction->tokensToSelect == tokensToSelect)
+            return true;
+
+        return false;
+    }
+    virtual void Merge(const std::shared_ptr<Action>& action) {}
 
 private:
     std::vector<std::shared_ptr<Token>> selectedTokens;

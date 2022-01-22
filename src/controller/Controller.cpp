@@ -234,6 +234,8 @@ void Controller::FinishDragSelection(bool additive)
 
     if (tokensInBounds.size() > 0)
         SelectTokens(tokensInBounds, additive);
+    else
+        ClearSelection();
 
     m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
     dragSelectRect.reset();
@@ -403,8 +405,7 @@ void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
 void Controller::PerformAction(const std::shared_ptr<Action>& action)
 {
     action->Redo();
-    std::chrono::steady_clock::time_point currActionTime = std::chrono::steady_clock::now();
-    if (undoQueue.size() > 0 && (currActionTime - lastActionTime) < maxTimeBetweenUniqueActions && undoQueue.back()->CanMerge(action))
+    if (undoQueue.size() > 0 && undoQueue.back()->CanMerge(action))
         undoQueue.back()->Merge(action);
     else
     {
@@ -413,7 +414,6 @@ void Controller::PerformAction(const std::shared_ptr<Action>& action)
             undoQueue.pop_front();
         redoQueue.clear();
     }
-    lastActionTime = currActionTime;
 }
 
 void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, TokenProperty property, TokenPropertyValue value)
