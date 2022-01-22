@@ -51,6 +51,8 @@ public:
     bool IsStatusEnabled(int status);
     void SetXStatus(bool enabled);
     bool GetXStatus();
+    void SetOpacity(float opacity);
+    float GetOpacity();
     virtual void Draw(Shader &shader);
     virtual bool Contains(glm::vec2 pt) const;
     virtual bool Contains(float x, float y) const;
@@ -62,4 +64,5 @@ private:
     float m_borderWidth = 0.15f;
     TokenStatuses m_statuses;
     bool m_xStatus = false;
+    float m_opacity = 1.0f;
 };

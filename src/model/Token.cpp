@@ -36,6 +36,8 @@ void Token::SetStatusEnabled(int status, bool enabled) { m_statuses[status] = en
 bool Token::IsStatusEnabled(int status) { return m_statuses[status]; }
 void Token::SetXStatus(bool enabled) { m_xStatus = enabled; }
 bool Token::GetXStatus() { return m_xStatus; }
+void Token::SetOpacity(float opacity) { m_opacity = opacity; }
+float Token::GetOpacity() { return m_opacity; }
 
 void Token::Draw(Shader &shader)
 {
@@ -59,6 +61,7 @@ void Token::Draw(Shader &shader)
     shader.setFloat4("highlightColor", highlight.x, highlight.y, highlight.z, highlight.w);
     shader.setFloat4("borderColor", m_borderColor.x, m_borderColor.y, m_borderColor.z, m_borderColor.w);
     shader.setFloat("borderWidth", m_borderWidth);
+    shader.setFloat("opacity", m_opacity);
     Rect::Draw(shader);
 }
 

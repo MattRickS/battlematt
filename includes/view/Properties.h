@@ -18,7 +18,8 @@ enum TokenProperty
     Token_Name,
     Token_Texture,
     Token_Statuses,
-    Token_XStatus
+    Token_XStatus,
+    Token_Opacity
 };
 
 enum ImageProperty

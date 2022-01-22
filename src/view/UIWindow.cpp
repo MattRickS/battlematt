@@ -197,6 +197,10 @@ void UIWindow::DrawTokenOptions(const std::shared_ptr<Token>& token)
 
     if (token->GetStatuses() != statuses)
         tokenPropertyChanged.emit(token, Token_Statuses, TokenPropertyValue(statuses));
+
+    float opacity = token->GetOpacity();
+    if (ImGui::SliderFloat("Opacity##Token", &opacity, 0.0f, 1.0f, "%.3f"))
+        tokenPropertyChanged.emit(token, Token_Opacity, TokenPropertyValue(opacity));
 }
 
 void UIWindow::Draw()
