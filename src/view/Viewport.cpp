@@ -44,7 +44,7 @@ void Viewport::RefreshCamera()
     m_cameraBuffer->SetCamera(m_scene->camera);
 }
 
-void Viewport::Focus(const Bounds& bounds)
+void Viewport::Focus(const Bounds2D& bounds)
 {
     glm::vec2 ratios = bounds.Size() / (ScreenToWorldPos(m_width, m_height) - ScreenToWorldPos(0, 0));
     m_scene->camera->Focal *= std::max(ratios.x, ratios.y);

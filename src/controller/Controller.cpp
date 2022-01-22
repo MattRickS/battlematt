@@ -155,6 +155,8 @@ void Controller::DeleteSelectedTokens()
 // Viewport
 void Controller::Focus()
 {
+    if (m_scene->IsEmpty())
+        return;
     m_viewport->Focus(m_scene->GetBounds());
 }
 

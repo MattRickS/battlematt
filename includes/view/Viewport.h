@@ -20,7 +20,7 @@ public:
     glm::vec2 ScreenToWorldOffset(float x, float y);
 
     void RefreshCamera();
-    void Focus(const Bounds& bounds);
+    void Focus(const Bounds2D& bounds);
 
     virtual void OnWindowResized(int width, int height);
 private:

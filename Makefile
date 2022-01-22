@@ -10,7 +10,7 @@ VIEW_DIR = ${SRC_DIR}/view
 BUILD_DIR = build
 SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/JSONSerializer.cpp $(SRC_DIR)/Resources.cpp $(SRC_DIR)/stb_image.cpp $(SRC_DIR)/glad.c \
 		  $(CONTROLLER_DIR)/Application.cpp $(CONTROLLER_DIR)/Controller.cpp \
-          $(MODEL_DIR)/BGImage.cpp $(MODEL_DIR)/Grid.cpp $(MODEL_DIR)/Overlays.cpp $(MODEL_DIR)/Scene.cpp $(MODEL_DIR)/Shape2D.cpp $(MODEL_DIR)/Token.cpp \
+          $(MODEL_DIR)/BGImage.cpp $(MODEL_DIR)/Bounds.cpp $(MODEL_DIR)/Grid.cpp $(MODEL_DIR)/Overlays.cpp $(MODEL_DIR)/Scene.cpp $(MODEL_DIR)/Shape2D.cpp $(MODEL_DIR)/Token.cpp \
 		  $(VIEW_DIR)/Window.cpp $(SRC_DIR)/view/Viewport.cpp $(SRC_DIR)/view/UIWindow.cpp
 SOURCES += $(FILEDIALOG_DIR)/ImGuiFileDialog.cpp
 SOURCES += $(GLUTIL_DIR)/Camera.cpp $(GLUTIL_DIR)/Mesh.cpp $(GLUTIL_DIR)/Matrix2D.cpp $(GLUTIL_DIR)/Shader.cpp $(GLUTIL_DIR)/Texture.cpp

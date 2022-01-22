@@ -95,40 +95,21 @@ void Scene::RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove)
     images.erase(std::remove_if(images.begin(), images.end(), pred), images.end());
 }
 
-Bounds Scene::GetBounds()
+bool Scene::IsEmpty() { return tokens.empty() && images.empty(); }
+
+Bounds2D Scene::GetBounds()
 {
-    Bounds bounds;
-    if (!images.empty())
-    {
-        bounds.min = images[0]->GetModel()->GetPos() - images[0]->GetModel()->GetScale() * 0.5f;
-        bounds.max = images[0]->GetModel()->GetPos() + images[0]->GetModel()->GetScale() * 0.5f;
-    }
-    else if (!tokens.empty())
-    {
-        bounds.min = tokens[0]->GetModel()->GetPos() - tokens[0]->GetModel()->GetScale() * 0.5f;
-        bounds.max = tokens[0]->GetModel()->GetPos() + tokens[0]->GetModel()->GetScale() * 0.5f;
-    }
-    else
-        return bounds;
+    if (IsEmpty())
+        return Bounds2D();
+    
+    std::vector<std::shared_ptr<Shape2D>> shapes {tokens.size() + images.size()};
+    int i = 0;
+    for (const auto& token: tokens)
+        shapes[i++] = static_cast<std::shared_ptr<Shape2D>>(token);
+    for (const auto& image: images)
+        shapes[i++] = static_cast<std::shared_ptr<Shape2D>>(image);
 
-    for (const std::shared_ptr<Token>& token: tokens)
-    {
-        // TODO: Doesn't account for rotation...
-        glm::vec2 lo = token->GetModel()->GetPos() - token->GetModel()->GetScale() * 0.5f;
-        glm::vec2 hi = token->GetModel()->GetPos() + token->GetModel()->GetScale() * 0.5f;
-        bounds.min = glm::vec2(std::min(bounds.min.x, lo.x), std::min(bounds.min.y, lo.y));
-        bounds.max = glm::vec2(std::max(bounds.max.x, hi.x), std::max(bounds.max.y, hi.y));
-    }
-    for (const std::shared_ptr<BGImage>& image: images)
-    {
-        // TODO: Doesn't account for rotation...
-        glm::vec2 lo = image->GetModel()->GetPos() - image->GetModel()->GetScale() * 0.5f;
-        glm::vec2 hi = image->GetModel()->GetPos() + image->GetModel()->GetScale() * 0.5f;
-        bounds.min = glm::vec2(std::min(bounds.min.x, lo.x), std::min(bounds.min.y, lo.y));
-        bounds.max = glm::vec2(std::max(bounds.max.x, hi.x), std::max(bounds.max.y, hi.y));
-    }
-
-    return bounds;
+    return Bounds2D::BoundsForShapes(shapes);
 }
 
 // TODO: Move to renderer class
