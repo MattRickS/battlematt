@@ -75,6 +75,7 @@ void Application::LoadDefaultResources()
     m_resources->CreateShader(Resources::ShaderType::Grid, "resources/shaders/Grid.vs", "resources/shaders/Grid.fs");
     m_resources->CreateShader(Resources::ShaderType::ScreenRect, "resources/shaders/Grid.vs", "resources/shaders/Rect.fs");
     m_resources->CreateShader(Resources::ShaderType::Image, "resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
+    m_resources->CreateShader(Resources::ShaderType::Status, "resources/shaders/SimpleTexture.vs", "resources/shaders/Status.fs");
     m_resources->CreateShader(Resources::ShaderType::Token, "resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs");
 
     m_resources->CreateTexture(Resources::TextureType::Default, "resources/images/QuestionMark.jpg");
@@ -89,7 +90,7 @@ bool Application::IsInitialised()
 void Application::Exec()
 {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable( GL_BLEND );
+    glEnable(GL_BLEND);
 
     // Main loop
     while (!m_viewport->IsClosed())

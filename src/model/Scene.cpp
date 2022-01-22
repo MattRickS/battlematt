@@ -128,7 +128,7 @@ void Scene::Draw()
     auto quad = m_resources->GetMesh(Resources::MeshType::Quad);
     auto statusTexture = m_resources->GetTexture(Resources::TextureType::Status);
     std::shared_ptr<Shader> tokenShader = m_resources->GetShader(Resources::ShaderType::Token);
-    std::shared_ptr<Shader> statusShader = m_resources->GetShader(Resources::ShaderType::Image);
+    std::shared_ptr<Shader> statusShader = m_resources->GetShader(Resources::ShaderType::Status);
     tokenShader->use();
     for (const std::shared_ptr<Token>& token : tokens)
     {
@@ -157,6 +157,7 @@ void Scene::Draw()
                 0.0f
             );
             statusShader->setMat4("model", *matrix.Value());
+            statusShader->setFloat4("color", statusColors[i].x, statusColors[i].y, statusColors[i].z, 1.0f);
 
             quad->Draw(*statusShader);
         }

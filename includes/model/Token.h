@@ -13,8 +13,18 @@
 
 
 const glm::vec4 highlightColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+
+// TODO: Want this to be configurable
 const unsigned int NUM_TOKEN_STATUSES = 6;
 typedef std::bitset<NUM_TOKEN_STATUSES> TokenStatuses;
+const glm::vec3 statusColors[NUM_TOKEN_STATUSES] {
+    glm::vec3(1.0f, 0.6f, 0.6f),
+    glm::vec3(0.6f, 1.0f, 0.6f),
+    glm::vec3(0.6f, 0.6f, 1.0f),
+    glm::vec3(1.0f, 1.0f, 0.6f),
+    glm::vec3(0.6f, 1.0f, 1.0f),
+    glm::vec3(1.0f, 0.6f, 1.0f)
+};
 
 class Token : public Rect
 {
