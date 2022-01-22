@@ -137,11 +137,13 @@ void Scene::Draw()
 
         if (token->GetXStatus())
         {
-            imageShader->setMat4("model", *token->GetModel()->Value());
+            statusShader->use();
+            statusShader->setMat4("model", *token->GetModel()->Value());
             xStatusTexture->activate(GL_TEXTURE0);
-            imageShader->setInt("diffuse", 0);
+            statusShader->setInt("diffuse", 0);
+            statusShader->setFloat4("color", 1.0f, 1.0f, 1.0f, 1.0f);
             glBindTexture(GL_TEXTURE_2D, xStatusTexture->ID);
-            quad->Draw(*imageShader);
+            quad->Draw(*statusShader);
         }
 
         auto statuses = token->GetStatuses();
