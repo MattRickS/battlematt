@@ -135,21 +135,19 @@ void Controller::SelectTokens(std::vector<std::shared_ptr<Token>> tokens, bool a
 
 void Controller::DuplicateSelectedTokens()
 {
-    std::shared_ptr<AddTokensAction> action = std::make_shared<AddTokensAction>(m_scene);
-
-    std::vector<std::shared_ptr<Token>> toSelect;
+    std::vector<std::shared_ptr<Token>> duplicates;
     for (const std::shared_ptr<Token>& token : SelectedTokens())
     {
-        // The model is being shared since it became a shared_ptr... fuck
         std::shared_ptr<Token> duplicate = std::make_shared<Token>(*token);
         duplicate->GetModel()->Offset(glm::vec2(1));
-        action->Add(duplicate);
-        toSelect.push_back(duplicate);
+        duplicates.push_back(duplicate);
     }
 
-    // TODO: Add Token Action / Select Token action
-    PerformAction(action);
-    SelectTokens(toSelect);
+    // Add them to the scene and select them in the one action
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    actionGroup->Add(std::make_shared<AddTokensAction>(m_scene, duplicates));
+    actionGroup->Add(std::make_shared<SelectTokensAction>(SelectedTokens(), duplicates));
+    PerformAction(actionGroup);
 }
 
 // Screen Position
