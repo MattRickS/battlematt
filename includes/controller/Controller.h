@@ -45,6 +45,7 @@ public:
 
     void OnUIAddTokenClicked();
     void OnUIAddImageClicked();
+    void OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image);
     void OnUIKeyChanged(int key, int scancode, int action, int mods);
     void PerformAction(const std::shared_ptr<Action>& action);
 

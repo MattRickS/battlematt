@@ -264,3 +264,33 @@ private:
     std::shared_ptr<Scene> m_scene;
     std::vector<std::shared_ptr<BGImage>> m_images;
 };
+
+class RemoveImagesAction : public Action
+{
+public:
+    RemoveImagesAction(const std::shared_ptr<Scene>& scene) : m_scene(scene) {}
+    RemoveImagesAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<BGImage>& image) : m_scene(scene)
+    {
+        m_images.push_back(image);
+    }
+    RemoveImagesAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<BGImage>> images) : m_scene(scene), m_images(images) {}
+
+    void Add(const std::shared_ptr<BGImage>& image)
+    {
+        m_images.push_back(image);
+    }
+
+    virtual void Undo()
+    {
+        for (const auto& image: m_images)
+            m_scene->AddImage(image);
+    }
+    virtual void Redo()
+    {
+        m_scene->RemoveImages(m_images);
+    }
+
+private:
+    std::shared_ptr<Scene> m_scene;
+    std::vector<std::shared_ptr<BGImage>> m_images;
+};

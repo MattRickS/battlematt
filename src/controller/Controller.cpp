@@ -36,6 +36,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
     m_uiWindow->addTokenClicked.connect(this, &Controller::OnUIAddTokenClicked);
     m_uiWindow->addImageClicked.connect(this, &Controller::OnUIAddImageClicked);
+    m_uiWindow->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
 
     SetScene(std::make_shared<Scene>(m_resources));
 }
@@ -393,6 +394,11 @@ void Controller::OnUIAddImageClicked()
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(Resources::TextureType::Default)
     )));
+}
+
+void Controller::OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image)
+{
+    PerformAction(std::make_shared<RemoveImagesAction>(m_scene, image));
 }
 
 void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)

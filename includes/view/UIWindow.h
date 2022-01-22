@@ -19,6 +19,7 @@ class UIWindow : public Window
 {
 public:
     Signal<> addImageClicked;
+    Signal<const std::shared_ptr<BGImage>&> removeImageClicked;
     Signal<> addTokenClicked;
     Signal<std::string> saveClicked;
     Signal<std::string, bool> loadClicked;

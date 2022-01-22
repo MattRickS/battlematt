@@ -226,7 +226,13 @@ void UIWindow::Draw()
                 addImageClicked.emit();
 
             if (selected_image_idx < m_scene->images.size())
+            {
+                ImGui::SameLine();
+                if (ImGui::Button("Delete Image"))
+                    removeImageClicked.emit(m_scene->images[selected_image_idx]);
+
                 DrawImageOptions(m_scene->images[selected_image_idx]);
+            }
         }
 
         if (ImGui::CollapsingHeader("Grid"))
