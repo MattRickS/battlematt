@@ -181,6 +181,20 @@ void UIWindow::DrawTokenOptions(const std::shared_ptr<Token>& token)
     float rotation = matrix2D->GetRotation();
     if (ImGui::SliderFloat("Rotation##Token", &rotation, 0, 360, "%.2f"))
         tokenPropertyChanged.emit(token, Token_Rotation, TokenPropertyValue(rotation));
+
+    TokenStatuses statuses = token->GetStatuses();
+    bool enabled;
+    for (size_t i = 0; i < statuses.size(); i++)
+    {
+        if (i > 0)
+            ImGui::SameLine();
+        enabled = token->IsStatusEnabled(i);
+        if (ImGui::Checkbox(tokenNames[i].c_str(), &enabled))
+            statuses.set(i, enabled);
+    }
+
+    if (token->GetStatuses() != statuses)
+        tokenPropertyChanged.emit(token, Token_Statuses, TokenPropertyValue(statuses));
 }
 
 void UIWindow::Draw()

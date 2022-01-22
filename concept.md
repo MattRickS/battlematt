@@ -168,6 +168,10 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Fog of War
 - [ ] Lighting effects
 - [ ] Token statuses (multiple predefined effects that can be toggled)
+    - [ ] Tint / Opacity
+    - [ ] X symbol (ideally without rotation)
+    - [ ] Ring of coloured dots around a token (like numbers on a clock) for arbitrary effects
+    - [ ] User config for naming each status
 - [x] Separate windows for viewport and UI (SetWindowSize to match framebuffer)
     - [ ] Hotkey to show/hide UI window
 - [x] scene file as CLI arg
@@ -185,3 +189,4 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Memory management
 - [ ] Profiling
 - [ ] Tests
+- [ ] Threaded windows

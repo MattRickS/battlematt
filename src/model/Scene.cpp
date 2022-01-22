@@ -125,10 +125,44 @@ void Scene::Draw()
 
     grid->Draw();
 
+    auto quad = m_resources->GetMesh(Resources::MeshType::Quad);
+    auto statusTexture = m_resources->GetTexture(Resources::TextureType::Status);
     std::shared_ptr<Shader> tokenShader = m_resources->GetShader(Resources::ShaderType::Token);
+    std::shared_ptr<Shader> statusShader = m_resources->GetShader(Resources::ShaderType::Image);
     tokenShader->use();
     for (const std::shared_ptr<Token>& token : tokens)
+    {
         token->Draw(*tokenShader);
+        
+        auto statuses = token->GetStatuses();
+        if (statuses.none())
+            continue;
+
+        statusShader->use();
+        statusTexture->activate(GL_TEXTURE0);
+        statusShader->setInt("diffuse", 0);
+        glBindTexture(GL_TEXTURE_2D, statusTexture->ID);
+
+        for (unsigned int i=0; i < statuses.size(); i++)
+        {
+            if (!statuses[i])
+                continue;
+            
+            Matrix2D matrix = Matrix2D(
+                glm::vec2(
+                    token->GetModel()->GetPos().x - token->GetModel()->GetScale().x * 0.5f + (i * token->GetModel()->GetScale().x) / (statuses.size() - 1),
+                    token->GetModel()->GetPos().y + token->GetModel()->GetScale().y * 0.6f
+                ),
+                token->GetModel()->GetScale() * 0.15f,
+                0.0f
+            );
+            statusShader->setMat4("model", *matrix.Value());
+
+            quad->Draw(*statusShader);
+        }
+
+        tokenShader->use();
+    }
 
     // Overlays have their own shaders
     for (const std::shared_ptr<Overlay>& overlay : overlays)

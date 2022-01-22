@@ -1,4 +1,5 @@
 #pragma once
+#include <bitset>
 #include <memory>
 #include <string>
 
@@ -12,6 +13,8 @@
 
 
 const glm::vec4 highlightColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+const unsigned int NUM_TOKEN_STATUSES = 6;
+typedef std::bitset<NUM_TOKEN_STATUSES> TokenStatuses;
 
 class Token : public Rect
 {
@@ -32,6 +35,10 @@ public:
     glm::vec4 GetBorderColor();
     void SetName(std::string name);
     std::string GetName();
+    void SetStatuses(TokenStatuses statuses);
+    TokenStatuses GetStatuses();
+    void SetStatusEnabled(int status, bool enabled);
+    bool IsStatusEnabled(int status);
     virtual void Draw(Shader &shader);
     virtual bool Contains(glm::vec2 pt) const;
     virtual bool Contains(float x, float y) const;
@@ -41,4 +48,5 @@ private:
     std::shared_ptr<Texture> m_texture;
     glm::vec4 m_borderColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
     float m_borderWidth = 0.15f;
+    TokenStatuses m_statuses;
 };

@@ -78,6 +78,7 @@ void Application::LoadDefaultResources()
     m_resources->CreateShader(Resources::ShaderType::Token, "resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs");
 
     m_resources->CreateTexture(Resources::TextureType::Default, "resources/images/QuestionMark.jpg");
+    m_resources->CreateTexture(Resources::TextureType::Status, "resources/images/StatusDot.png");
 }
 
 bool Application::IsInitialised()
