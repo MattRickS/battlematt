@@ -28,6 +28,8 @@ public:
     void Resize(unsigned int width, unsigned int height);
     unsigned int Height();
     unsigned int Width();
+    bool IsFullscreen();
+    void SetFullscreen(bool fullscreen);
 
     glm::vec2 CursorPos();
 
@@ -43,7 +45,9 @@ public:
 
 protected:
     GLFWwindow* window;
+    GLFWmonitor* monitor = nullptr;
     unsigned int m_width, m_height;
+    int m_lastPos[2], m_lastSize[2];
 
     void DisconnectSignals();
 };

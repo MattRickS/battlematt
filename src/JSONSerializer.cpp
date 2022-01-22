@@ -66,12 +66,12 @@ std::shared_ptr<BGImage> JSONSerializer::DeserializeImage(nlohmann::json& json)
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(std::string(json["texture"]))
     );
-    image->SetModel(*DeserializeMatrix2D(json["matrix2D"]));
+    image->SetModel(DeserializeMatrix2D(json["matrix2D"]));
     return image;
 }
 
 // Matrix2D
-bool JSONSerializer::SerializeMatrix2D(Matrix2D* matrix, nlohmann::json& json)
+bool JSONSerializer::SerializeMatrix2D(std::shared_ptr<Matrix2D> matrix, nlohmann::json& json)
 {
     json["pos"] = {matrix->GetPos().x, matrix->GetPos().y};
     json["scale"] = {matrix->GetScale().x, matrix->GetScale().y};
@@ -95,9 +95,9 @@ bool JSONSerializer::SerializeToken(std::shared_ptr<Token> token, nlohmann::json
     SerializeMatrix2D(token->GetModel(), matrix);
     json["matrix2D"] = matrix;
     json["texture"] = token->GetIcon()->filename;
-    json["name"] = token->name;
-    json["borderColour"] = {token->borderColor.x, token->borderColor.y, token->borderColor.z, token->borderColor.w};
-    json["borderWidth"] = token->borderWidth;
+    json["name"] = token->GetName();
+    json["borderColour"] = {token->GetBorderColor().x, token->GetBorderColor().y, token->GetBorderColor().z, token->GetBorderColor().w};
+    json["borderWidth"] = token->GetBorderWidth();
 
     return true;
 }
@@ -109,11 +109,11 @@ std::shared_ptr<Token> JSONSerializer::DeserializeToken(nlohmann::json& json)
         m_resources->GetTexture(std::string(json["texture"])),
         json["name"]
     );
-    token->SetModel(*DeserializeMatrix2D(json["matrix2D"]));
-    token->borderWidth = json["borderWidth"];
-    token->borderColor = glm::vec4(
+    token->SetModel(DeserializeMatrix2D(json["matrix2D"]));
+    token->SetBorderWidth(json["borderWidth"]);
+    token->SetBorderColor(glm::vec4(
         json["borderColour"][0], json["borderColour"][1], json["borderColour"][2], json["borderColour"][3]
-    );
+    ));
     return token;
 }
 

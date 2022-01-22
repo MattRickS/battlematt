@@ -39,6 +39,12 @@ void Scene::AddImage(std::string path)
     ));
 }
 
+
+void Scene::AddImage(const std::shared_ptr<BGImage>& image)
+{
+    images.push_back(image);
+}
+
 void Scene::AddToken()
 {
     tokens.push_back(std::make_shared<Token>(
@@ -59,7 +65,7 @@ void Scene::AddToken(std::string path)
     tokens.back()->GetModel()->SetPos(glm::vec2(camera->Position.x, camera->Position.y));
 }
 
-void Scene::AddToken(std::shared_ptr<Token> token)
+void Scene::AddToken(const std::shared_ptr<Token>& token)
 {
     tokens.push_back(token);
 }
@@ -73,7 +79,7 @@ void Scene::RemoveOverlay(std::shared_ptr<Overlay> overlay)
 
 void Scene::RemoveTokens(std::vector<std::shared_ptr<Token>> toRemove)
 {
-    auto pred = [&toRemove](const std::shared_ptr<Token> t) ->bool
+    auto pred = [&toRemove](const std::shared_ptr<Token>& t) ->bool
     {
         return std::find(toRemove.begin(), toRemove.end(), t) != toRemove.end();
     };
@@ -81,6 +87,14 @@ void Scene::RemoveTokens(std::vector<std::shared_ptr<Token>> toRemove)
     tokens.erase(std::remove_if(tokens.begin(), tokens.end(), pred), tokens.end());
 }
 
+void Scene::RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove)
+{
+    auto pred = [&toRemove](const std::shared_ptr<BGImage>& t) ->bool
+    {
+        return std::find(toRemove.begin(), toRemove.end(), t) != toRemove.end();
+    };
+    images.erase(std::remove_if(images.begin(), images.end(), pred), images.end());
+}
 
 // TODO: Move to renderer class
 void Scene::Draw()

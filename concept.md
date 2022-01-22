@@ -174,11 +174,11 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [x] Esc confirm dialog (once separate UI windows, esc should at worst close the UI window automatically)
     - [ ] Maybe file dialogs closed by Esc if open
     - [x] Focus UI window when prompting
-    - [ ] Esc on UIWindow should prompt to close
+    - [x] Esc on UIWindow should prompt to close
     - [x] X-ing off the UIWindow should either prompt to close or hide the UIWindow
 - [ ] Initiative tracker?
 - [ ] Token/Image re-ordering
 - [x] Token list
 - [ ] Token library (pre-mades, single button to add, button uses token image and name)
 - [x] Constrain UI to UIWindow
-- [ ] Fullscreen option
+- [x] Fullscreen option

@@ -10,7 +10,6 @@
 #include <model/Shape2D.h>
 #include <model/Scene.h>
 #include <model/Token.h>
-#include <view/UIState.h>
 
 #include <view/UIWindow.h>
 
@@ -111,106 +110,77 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
     return false;
 }
 
-void UIWindow::DrawMatrix2DOptions(std::string suffixID, Matrix2D* matrix2D, bool lockScaleRatio)
-{
-    glm::vec2 pos = matrix2D->GetPos();
-    if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
-        matrix2D->SetPos(pos);
-
-    // TODO: Reset size option to match image ratio
-    if (lockScaleRatio)
-    {
-        float size = matrix2D->GetScalef();
-        if (ImGui::SliderFloat(("Scale##" + suffixID).c_str(), &size, 0.1, 1000, "%.2f", ImGuiSliderFlags_Logarithmic))
-            matrix2D->SetScale(matrix2D->GetScale() * (size / matrix2D->GetScalef()));
-    }
-    else
-    {
-        glm::vec2 scale = matrix2D->GetScale();
-        if (ImGui::DragFloat2(("Size##" + suffixID).c_str(), (float*)&scale))
-            matrix2D->SetScale(scale);
-    }
-
-    float rotation = matrix2D->GetRotation();
-    if (ImGui::SliderFloat(("Rotation##" + suffixID).c_str(), &rotation, 0, 360, "%.2f"))
-        matrix2D->SetRotation(rotation);
-}
-
-// Draw a single set of UI inputs and copy all changes to each Shape2D
-void UIWindow::DrawShape2DOptions(std::string suffixID, std::shared_ptr<Shape2D> shape, std::shared_ptr<Grid> grid, bool snapToGrid, bool singleScale)
-{
-    Matrix2D* matrix2D = shape->GetModel();
-
-    glm::vec2 pos = matrix2D->GetPos();
-    if (ImGui::DragFloat2(("Position##" + suffixID).c_str(), (float*)&pos))
-    {
-        // TODO: Get relaative offset and apply offset to all shapes rather than move everything on top of each other
-        if (snapToGrid)
-            pos = grid->ShapeSnapPosition(shape, pos);
-        shape->GetModel()->SetPos(pos);
-    }
-
-    glm::vec2 scale = matrix2D->GetScale();
-    if (singleScale && ImGui::SliderFloat(("Size##1" + suffixID).c_str(), &scale.x, 0, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
-    {
-        if (snapToGrid)
-            scale = glm::vec2(grid->SnapGridSize(scale.x));
-        shape->GetModel()->SetScalef(scale.x);
-    }
-    else if (!singleScale && ImGui::DragFloat2(("Size##2" + suffixID).c_str(), (float*)&scale, 0.5f))
-    {
-        if (snapToGrid)
-            scale = glm::vec2(grid->SnapGridSize(scale.x), grid->SnapGridSize(scale.y));
-        shape->GetModel()->SetScale(scale);
-    }
-
-    float rotation = matrix2D->GetRotation();
-    if (ImGui::SliderFloat(("Rotation##" + suffixID).c_str(), &rotation, 0, 360, "%.2f"))
-        shape->GetModel()->SetRotation(rotation);
-}
-
-void UIWindow::DrawImageOptions(std::shared_ptr<BGImage> image)
+void UIWindow::DrawImageOptions(const std::shared_ptr<BGImage>& image)
 {
     std::string imagePath = image->GetImage()->filename;
     if (FileLine("ChooseBGImage", "Image", imagePath))
-        image->SetImage(m_resources->GetTexture(imagePath));
+        imagePropertyChanged.emit(image, Image_Texture, ImagePropertyValue(imagePath));
 
-    ImGui::Checkbox("Lock Size Ratio", &image->lockRatio);
-    DrawMatrix2DOptions("Background", image->GetModel(), image->lockRatio);
+    bool lockRatio = image->GetLockRatio();
+    if (ImGui::Checkbox("Lock Size Ratio", &lockRatio))
+        imagePropertyChanged.emit(image, Image_LockRatio, ImagePropertyValue(lockRatio));
+
+    const std::shared_ptr<Matrix2D>& matrix2D = image->GetModel();
+
+    glm::vec2 pos = matrix2D->GetPos();
+    if (ImGui::DragFloat2("Position##Image", (float*)&pos))
+        imagePropertyChanged.emit(image, Image_Position, ImagePropertyValue(pos));
+
+    float scale = matrix2D->GetScale().x;
+    if (ImGui::SliderFloat("Size##Image", &scale, 0, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
+        imagePropertyChanged.emit(image, Image_Scale, ImagePropertyValue(glm::vec2(scale, scale)));
+
+    float rotation = matrix2D->GetRotation();
+    if (ImGui::SliderFloat("Rotation##Image", &rotation, 0, 360, "%.2f"))
+        imagePropertyChanged.emit(image, Image_Rotation, ImagePropertyValue(rotation));
 }
 
-void UIWindow::DrawGridOptions(std::shared_ptr<Grid> grid)
+void UIWindow::DrawGridOptions(const std::shared_ptr<Grid>& grid)
 {
     float gridSize = grid->GetScale();
     if (ImGui::SliderFloat("Size##Grid", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
-        grid->SetScale(gridSize);
+        gridPropertyChanged.emit(grid, Grid_Scale, GridPropertyValue(gridSize));
     
     glm::vec3 gridColour = grid->GetColour();
     if (ImGui::ColorEdit3("Color##Grid", (float*)&gridColour))
-        grid->SetColour(gridColour);
+        gridPropertyChanged.emit(grid, Grid_Color, GridPropertyValue(gridColour));
     
-    ImGui::Checkbox("Snap to Grid", &uiState->snapToGrid);
-
+    bool snapToGrid = grid->GetSnapEnabled();
+    if (ImGui::Checkbox("Snap to Grid", &snapToGrid))
+        gridPropertyChanged.emit(grid, Grid_Snap, GridPropertyValue(snapToGrid));
 }
 
-void UIWindow::DrawTokenOptions(std::shared_ptr<Token> token, std::shared_ptr<Grid> grid, bool snapToGrid)
+void UIWindow::DrawTokenOptions(const std::shared_ptr<Token>& token)
 {
-    // TODO: How to apply to all selected? Pass in the selected? Calculate selected here?
-    //       Emit a signal for each property?
-    //       Generate an action, emit a signal, and let the Controller expand that action to be a list of objects?
-    ImGui::InputText("Name", &token->name);
+    std::string name = token->GetName();
+    if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue))
+        tokenPropertyChanged.emit(token, Token_Name, TokenPropertyValue(name));
 
     std::string iconPath = token->GetIcon()->filename;
     if (FileLine("ChooseTokenIcon", "Icon", iconPath))
-        token->SetIcon(m_resources->GetTexture(iconPath));
+        tokenPropertyChanged.emit(token, Token_Texture, TokenPropertyValue(iconPath));
 
-    if (ImGui::SliderFloat("Border Width", &token->borderWidth, 0, 1))
-        token->borderWidth = token->borderWidth;
+    float borderWidth = token->GetBorderWidth();
+    if (ImGui::SliderFloat("Border Width", &borderWidth, 0, 1))
+        tokenPropertyChanged.emit(token, Token_BorderWidth, TokenPropertyValue(borderWidth));
 
-    if (ImGui::ColorEdit3("Border Colour", (float*)&token->borderColor))
-        token->borderColor = token->borderColor;
+    glm::vec4 borderColor = token->GetBorderColor();
+    if (ImGui::ColorEdit3("Border Colour", (float*)&borderColor))
+        tokenPropertyChanged.emit(token, Token_BorderColor, TokenPropertyValue(borderColor));
+    
+    const std::shared_ptr<Matrix2D>& matrix2D = token->GetModel();
 
-    DrawShape2DOptions("Token", static_cast<std::shared_ptr<Shape2D>>(token), grid, snapToGrid, true);
+    glm::vec2 pos = matrix2D->GetPos();
+    if (ImGui::DragFloat2("Position##Token", (float*)&pos))
+        tokenPropertyChanged.emit(token, Token_Position, TokenPropertyValue(pos));
+
+    float scale = matrix2D->GetScale().x;
+    if (ImGui::SliderFloat("Size##Token", &scale, 0, 100, "%.3f", ImGuiSliderFlags_Logarithmic))
+        tokenPropertyChanged.emit(token, Token_Scale, TokenPropertyValue(glm::vec2(scale, scale)));
+
+    float rotation = matrix2D->GetRotation();
+    if (ImGui::SliderFloat("Rotation##Token", &rotation, 0, 360, "%.2f"))
+        tokenPropertyChanged.emit(token, Token_Rotation, TokenPropertyValue(rotation));
 }
 
 void UIWindow::Draw()
@@ -256,7 +226,13 @@ void UIWindow::Draw()
                 addImageClicked.emit();
 
             if (selected_image_idx < m_scene->images.size())
+            {
+                ImGui::SameLine();
+                if (ImGui::Button("Delete Image"))
+                    removeImageClicked.emit(m_scene->images[selected_image_idx]);
+
                 DrawImageOptions(m_scene->images[selected_image_idx]);
+            }
         }
 
         if (ImGui::CollapsingHeader("Grid"))
@@ -270,7 +246,7 @@ void UIWindow::Draw()
                 int i = 0;
                 for (std::shared_ptr<Token>& token : m_scene->tokens)
                 {
-                    if (ImGui::Selectable((token->name + "##Item" + std::to_string(i++)).c_str(), token->isSelected))
+                    if (ImGui::Selectable((token->GetName() + "##Item" + std::to_string(i++)).c_str(), token->isSelected))
                         tokenSelectionChanged.emit(token, false);
                     if (token->isSelected)
                         lastSelectedToken = token;
@@ -282,7 +258,7 @@ void UIWindow::Draw()
                 addTokenClicked.emit();
 
             if (lastSelectedToken)
-                DrawTokenOptions(lastSelectedToken, m_scene->grid, uiState->snapToGrid);
+                DrawTokenOptions(lastSelectedToken);
         }
 
         // Spacer

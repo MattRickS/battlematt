@@ -11,14 +11,14 @@
 class Shape2D
 {
 public:
-    Matrix2D* GetModel();
-    void SetModel(Matrix2D matrix);
+    std::shared_ptr<Matrix2D> GetModel();
+    void SetModel(const std::shared_ptr<Matrix2D>& matrix);
     virtual bool Contains(float x, float y) = 0;
     virtual bool Contains(glm::vec2 pt);
     virtual void Draw(Shader& shader) = 0;
 
 protected:
-    Matrix2D m_model;
+    std::shared_ptr<Matrix2D> m_model = std::make_shared<Matrix2D>();
 };
 
 

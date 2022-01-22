@@ -17,12 +17,12 @@ const float DEFAULT_PIXELS_PER_UNIT = 50.0f;
 BGImage::BGImage(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture) : Rect(mesh), m_texture(texture)
 {
     if (m_texture->IsValid())
-        m_model.SetScale(glm::vec2(m_texture->width / DEFAULT_PIXELS_PER_UNIT, m_texture->width / DEFAULT_PIXELS_PER_UNIT));
+        m_model->SetScale(glm::vec2(m_texture->width / DEFAULT_PIXELS_PER_UNIT, m_texture->width / DEFAULT_PIXELS_PER_UNIT));
 }
 
 void BGImage::Draw(Shader &shader)
 {
-    shader.setMat4("model", *m_model.Value());
+    shader.setMat4("model", *m_model->Value());
 
     if (m_texture && m_texture->IsValid())
     {
@@ -40,16 +40,20 @@ std::shared_ptr<Texture> BGImage::GetImage()
 
 void BGImage::SetImage(std::shared_ptr<Texture> texture)
 {
-    if (!lockRatio)
+    if (!m_lockRatio)
     {
         // Resize the incoming image to match the width of the current image
-        float hSize = m_texture->width * m_model.GetScale().x;
+        float hSize = m_texture->width * m_model->GetScale().x;
         m_texture = texture;
-        m_model.SetScale(glm::vec2(hSize / texture->width, hSize / texture->height));
+        m_model->SetScale(glm::vec2(hSize / texture->width, hSize / texture->height));
     }
     else
     {
         m_texture = texture;
-        m_model.Rebuild();
+        m_model->Rebuild();
     }
 }
+
+bool BGImage::GetLockRatio() { return m_lockRatio; }
+void BGImage::SetLockRatio(bool lockRatio) { m_lockRatio = lockRatio; }
+
