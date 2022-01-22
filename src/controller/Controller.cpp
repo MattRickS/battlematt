@@ -234,7 +234,7 @@ void Controller::FinishDragSelection(bool additive)
 
     if (tokensInBounds.size() > 0)
         SelectTokens(tokensInBounds, additive);
-    else
+    else if (HasSelectedTokens())
         ClearSelection();
 
     m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
