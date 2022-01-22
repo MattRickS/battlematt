@@ -8,9 +8,11 @@
 #include <glutil/Camera.h>
 #include <glutil/Shader.h>
 #include <model/BGImage.h>
+#include <model/Bounds.h>
 #include <model/Grid.h>
 #include <model/Overlays.h>
 #include <model/Token.h>
+
 
 class Scene
 {
@@ -33,6 +35,8 @@ public:
     void RemoveOverlay(std::shared_ptr<Overlay> overlay);
     void RemoveTokens(std::vector<std::shared_ptr<Token>> toRemove);
     void RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove);
+    bool IsEmpty();
+    Bounds2D GetBounds();
     void Draw();
 
 private:

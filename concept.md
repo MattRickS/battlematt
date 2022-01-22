@@ -182,3 +182,6 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Token library (pre-mades, single button to add, button uses token image and name)
 - [x] Constrain UI to UIWindow
 - [x] Fullscreen option
+- [ ] Memory management
+- [ ] Profiling
+- [ ] Tests

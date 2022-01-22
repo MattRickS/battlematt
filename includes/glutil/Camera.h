@@ -67,6 +67,7 @@ public:
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
     void Zoom(float yoffset);
     void SetAperture(float haperture);
+    void RefreshMatrices();
 
 private:
     void updateCameraVectors();

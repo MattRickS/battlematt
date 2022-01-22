@@ -39,8 +39,20 @@ void Viewport::SetScene(std::shared_ptr<Scene> scene)
 
 void Viewport::RefreshCamera()
 {
+    // TODO: Move this aperture setting out to Controller window resizing
     m_scene->camera->SetAperture((float)m_width / (float)m_height);
     m_cameraBuffer->SetCamera(m_scene->camera);
+}
+
+void Viewport::Focus(const Bounds2D& bounds)
+{
+    // Inverted GL y position. TODO: Change methods so inversion is handled inside these methods
+    glm::vec2 ratios = bounds.Size() / (ScreenToWorldPos(m_width, 0) - ScreenToWorldPos(0, m_height));
+    m_scene->camera->Focal *= std::max(ratios.x, ratios.y);
+    m_scene->camera->Focal *= 1.1f;  // padding
+    m_scene->camera->Position = glm::vec3(bounds.Center().x, bounds.Center().y, m_scene->camera->Position.z);
+    m_scene->camera->RefreshMatrices();
+    RefreshCamera();
 }
 
 void Viewport::Draw()

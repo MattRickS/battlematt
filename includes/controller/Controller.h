@@ -32,6 +32,9 @@ public:
     void DuplicateSelectedTokens();
     void DeleteSelectedTokens();
 
+    void Focus();
+    void FocusSelected();
+
     std::vector<std::shared_ptr<Token>> TokensInScreenRect(float minx, float miny, float maxx, float maxy);
     std::shared_ptr<Token> GetTokenAtScreenPos(glm::vec2 screenPos);
 
@@ -82,4 +85,7 @@ private:
 
     static const int PROMPT_CLOSE = 1;
     void OnPromptResponse(int promptType, bool response);
+
+    // Shared key change behaviour
+    void OnKeyChanged(int key, int scancode, int action, int mods);
 };

@@ -39,7 +39,6 @@ void Scene::AddImage(std::string path)
     ));
 }
 
-
 void Scene::AddImage(const std::shared_ptr<BGImage>& image)
 {
     images.push_back(image);
@@ -94,6 +93,23 @@ void Scene::RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove)
         return std::find(toRemove.begin(), toRemove.end(), t) != toRemove.end();
     };
     images.erase(std::remove_if(images.begin(), images.end(), pred), images.end());
+}
+
+bool Scene::IsEmpty() { return tokens.empty() && images.empty(); }
+
+Bounds2D Scene::GetBounds()
+{
+    if (IsEmpty())
+        return Bounds2D();
+    
+    std::vector<std::shared_ptr<Shape2D>> shapes {tokens.size() + images.size()};
+    int i = 0;
+    for (const auto& token: tokens)
+        shapes[i++] = static_cast<std::shared_ptr<Shape2D>>(token);
+    for (const auto& image: images)
+        shapes[i++] = static_cast<std::shared_ptr<Shape2D>>(image);
+
+    return Bounds2D::BoundsForShapes(shapes);
 }
 
 // TODO: Move to renderer class

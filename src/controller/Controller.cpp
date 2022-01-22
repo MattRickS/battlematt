@@ -152,6 +152,25 @@ void Controller::DeleteSelectedTokens()
     PerformAction(std::make_shared<RemoveTokensAction>(m_scene, SelectedTokens()));
 }
 
+// Viewport
+void Controller::Focus()
+{
+    if (m_scene->IsEmpty())
+        return;
+    m_viewport->Focus(m_scene->GetBounds());
+}
+
+void Controller::FocusSelected()
+{
+    if (!HasSelectedTokens())
+        return;
+    
+    std::vector<std::shared_ptr<Shape2D>> shapes;
+    for (const auto& token: SelectedTokens())
+        shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
+    m_viewport->Focus(Bounds2D::BoundsForShapes(shapes));
+}
+
 // Screen Position
 std::vector<std::shared_ptr<Token>> Controller::TokensInScreenRect(float minx, float miny, float maxx, float maxy)
 {
@@ -337,11 +356,6 @@ void Controller::OnViewportMouseScroll(double xoffset, double yoffset)
 
 void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 {
-    // TODO: Confirmation dialog on escape
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
-        OnCloseRequested();
-    if (key == GLFW_KEY_S && action == GLFW_RELEASE)
-        m_scene->grid->SetSnapEnabled(!m_scene->grid->GetSnapEnabled());
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         m_viewport->SetFullscreen(!m_viewport->IsFullscreen());
     if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && HasSelectedTokens())
@@ -364,10 +378,7 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
         DeleteSelectedTokens();
     if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && HasSelectedTokens())
         DuplicateSelectedTokens();
-    if (key == GLFW_KEY_Z && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
-        Undo();
-    if (key == GLFW_KEY_Y && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
-        Redo();
+    OnKeyChanged(key, scancode, action, mods);
 }
 
 void Controller::OnViewportSizeChanged(int width, int height)
@@ -403,12 +414,7 @@ void Controller::OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image)
 
 void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        OnCloseRequested();
-    if (key == GLFW_KEY_Z && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
-        Undo();
-    if (key == GLFW_KEY_Y && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
-        Redo();
+    OnKeyChanged(key, scancode, action, mods);
 }
 
 void Controller::PerformAction(const std::shared_ptr<Action>& action)
@@ -571,4 +577,20 @@ void Controller::OnPromptResponse(int promptType, bool response)
 void Controller::OnCloseRequested()
 {
     m_uiWindow->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
+}
+
+void Controller::OnKeyChanged(int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_S && action == GLFW_RELEASE)
+        m_scene->grid->SetSnapEnabled(!m_scene->grid->GetSnapEnabled());
+    if (key == GLFW_KEY_S && mods & GLFW_MOD_CONTROL && action == GLFW_RELEASE && !m_scene->sourceFile.empty())
+        Save(m_scene->sourceFile);
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        OnCloseRequested();
+    if (key == GLFW_KEY_Z && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
+        Undo();
+    if (key == GLFW_KEY_Y && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
+        Redo();
+    if (key == GLFW_KEY_F && action == GLFW_RELEASE)
+        HasSelectedTokens() ? FocusSelected() : Focus();
 }
