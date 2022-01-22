@@ -34,6 +34,8 @@ void Token::SetStatuses(TokenStatuses statuses) { m_statuses = statuses; }
 TokenStatuses Token::GetStatuses() { return m_statuses; }
 void Token::SetStatusEnabled(int status, bool enabled) { m_statuses[status] = enabled; }
 bool Token::IsStatusEnabled(int status) { return m_statuses[status]; }
+void Token::SetXStatus(bool enabled) { m_xStatus = enabled; }
+bool Token::GetXStatus() { return m_xStatus; }
 
 void Token::Draw(Shader &shader)
 {

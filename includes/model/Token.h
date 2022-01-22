@@ -49,6 +49,8 @@ public:
     TokenStatuses GetStatuses();
     void SetStatusEnabled(int status, bool enabled);
     bool IsStatusEnabled(int status);
+    void SetXStatus(bool enabled);
+    bool GetXStatus();
     virtual void Draw(Shader &shader);
     virtual bool Contains(glm::vec2 pt) const;
     virtual bool Contains(float x, float y) const;
@@ -59,4 +61,5 @@ private:
     glm::vec4 m_borderColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
     float m_borderWidth = 0.15f;
     TokenStatuses m_statuses;
+    bool m_xStatus = false;
 };

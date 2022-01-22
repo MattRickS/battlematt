@@ -127,13 +127,23 @@ void Scene::Draw()
 
     auto quad = m_resources->GetMesh(Resources::MeshType::Quad);
     auto statusTexture = m_resources->GetTexture(Resources::TextureType::Status);
+    auto xStatusTexture = m_resources->GetTexture(Resources::TextureType::XStatus);
     std::shared_ptr<Shader> tokenShader = m_resources->GetShader(Resources::ShaderType::Token);
     std::shared_ptr<Shader> statusShader = m_resources->GetShader(Resources::ShaderType::Status);
     tokenShader->use();
     for (const std::shared_ptr<Token>& token : tokens)
     {
         token->Draw(*tokenShader);
-        
+
+        if (token->GetXStatus())
+        {
+            imageShader->setMat4("model", *token->GetModel()->Value());
+            xStatusTexture->activate(GL_TEXTURE0);
+            imageShader->setInt("diffuse", 0);
+            glBindTexture(GL_TEXTURE_2D, xStatusTexture->ID);
+            quad->Draw(*imageShader);
+        }
+
         auto statuses = token->GetStatuses();
         if (statuses.none())
             continue;

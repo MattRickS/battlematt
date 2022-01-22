@@ -474,6 +474,10 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
         for (const auto& selectedToken: SelectedTokens())
             actionGroup->Add(std::make_shared<ModifyTokenStatuses>(selectedToken, &Token::SetStatuses, selectedToken->GetStatuses(), std::get<TokenStatuses>(value)));
         break;
+    case Token_XStatus:
+        for (const auto& selectedToken: SelectedTokens())
+            actionGroup->Add(std::make_shared<ModifyTokenBool>(selectedToken, &Token::SetXStatus, selectedToken->GetXStatus(), std::get<bool>(value)));
+        break;
     
     default:
         std::cerr << "Unknown TokenProperty: " << property << std::endl;

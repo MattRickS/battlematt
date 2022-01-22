@@ -80,6 +80,7 @@ void Application::LoadDefaultResources()
 
     m_resources->CreateTexture(Resources::TextureType::Default, "resources/images/QuestionMark.jpg");
     m_resources->CreateTexture(Resources::TextureType::Status, "resources/images/StatusDot.png");
+    m_resources->CreateTexture(Resources::TextureType::XStatus, "resources/images/XStatus.png");
 }
 
 bool Application::IsInitialised()
