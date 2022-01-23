@@ -89,6 +89,9 @@ void Controller::Load(std::string path, bool merge)
     }
     else
         std::cerr << "Unable to open file" << std::endl;
+
+    undoQueue.clear();
+    redoQueue.clear();
 }
 
 
