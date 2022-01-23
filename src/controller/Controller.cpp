@@ -605,4 +605,11 @@ void Controller::OnKeyChanged(int key, int scancode, int action, int mods)
         Redo();
     if (key == GLFW_KEY_F && action == GLFW_RELEASE)
         HasSelectedTokens() ? FocusSelected() : Focus();
+    if (key == GLFW_KEY_X && action == GLFW_RELEASE && HasSelectedTokens())
+    {
+        auto actionGroup = std::make_shared<ActionGroup>();
+        for (const auto& selectedToken: SelectedTokens())
+            actionGroup->Add(std::make_shared<ModifyTokenBool>(selectedToken, &Token::SetXStatus, selectedToken->GetXStatus(), !selectedToken->GetXStatus()));
+        PerformAction(actionGroup);
+    }
 }
