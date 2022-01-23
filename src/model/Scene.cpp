@@ -125,10 +125,53 @@ void Scene::Draw()
 
     grid->Draw();
 
+    auto quad = m_resources->GetMesh(Resources::MeshType::Quad);
+    auto statusTexture = m_resources->GetTexture(Resources::TextureType::Status);
+    auto xStatusTexture = m_resources->GetTexture(Resources::TextureType::XStatus);
     std::shared_ptr<Shader> tokenShader = m_resources->GetShader(Resources::ShaderType::Token);
+    std::shared_ptr<Shader> statusShader = m_resources->GetShader(Resources::ShaderType::Status);
     tokenShader->use();
     for (const std::shared_ptr<Token>& token : tokens)
+    {
+        tokenShader->use();
         token->Draw(*tokenShader);
+
+        auto statuses = token->GetStatuses();
+        if (statuses.any())
+        {
+            statusShader->use();
+            statusTexture->activate(GL_TEXTURE0);
+            statusShader->setInt("diffuse", 0);
+            glBindTexture(GL_TEXTURE_2D, statusTexture->ID);
+
+            for (unsigned int i=0; i < statuses.size(); i++)
+            {
+                if (!statuses[i])
+                    continue;
+
+                float degree = glm::radians(90 - 360.0f * i / statuses.size());
+                
+                glm::mat4 matrix = glm::mat4(1.0f);
+                matrix = glm::translate(matrix, glm::vec3(token->GetModel()->GetPos() + glm::vec2(glm::cos(degree), glm::sin(degree)) * token->GetModel()->GetScale() * 0.35f, 0.0f));
+                matrix = glm::scale(matrix, glm::vec3(token->GetModel()->GetScalef() * 0.15f));
+                statusShader->setMat4("model", matrix);
+                statusShader->setFloat4("color", statusColors[i].x, statusColors[i].y, statusColors[i].z, token->GetOpacity());
+
+                quad->Draw(*statusShader);
+            }
+        }
+
+        if (token->GetXStatus())
+        {
+            statusShader->use();
+            statusShader->setMat4("model", *token->GetModel()->Value());
+            xStatusTexture->activate(GL_TEXTURE0);
+            statusShader->setInt("diffuse", 0);
+            statusShader->setFloat4("color", 1.0f, 1.0f, 1.0f, token->GetOpacity());
+            glBindTexture(GL_TEXTURE_2D, xStatusTexture->ID);
+            quad->Draw(*statusShader);
+        }
+    }
 
     // Overlays have their own shaders
     for (const std::shared_ptr<Overlay>& overlay : overlays)

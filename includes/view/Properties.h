@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include <model/Token.h>
+
 
 enum TokenProperty
 {
@@ -14,7 +16,10 @@ enum TokenProperty
     Token_BorderWidth,
     Token_BorderColor,
     Token_Name,
-    Token_Texture
+    Token_Texture,
+    Token_Statuses,
+    Token_XStatus,
+    Token_Opacity
 };
 
 enum ImageProperty
@@ -33,6 +38,6 @@ enum GridProperty
     Grid_Color
 };
 
-typedef std::variant<float, glm::vec2, glm::vec4, std::string> TokenPropertyValue;
+typedef std::variant<float, bool, TokenStatuses, glm::vec2, glm::vec4, std::string> TokenPropertyValue;
 typedef std::variant<float, glm::vec2, bool, std::string> ImagePropertyValue;
 typedef std::variant<float, glm::vec3, bool> GridPropertyValue;

@@ -98,6 +98,9 @@ bool JSONSerializer::SerializeToken(std::shared_ptr<Token> token, nlohmann::json
     json["name"] = token->GetName();
     json["borderColour"] = {token->GetBorderColor().x, token->GetBorderColor().y, token->GetBorderColor().z, token->GetBorderColor().w};
     json["borderWidth"] = token->GetBorderWidth();
+    json["statuses"] = token->GetStatuses().to_string();
+    json["xstatus"] = token->GetXStatus();
+    json["opacity"] = token->GetOpacity();
 
     return true;
 }
@@ -114,6 +117,14 @@ std::shared_ptr<Token> JSONSerializer::DeserializeToken(nlohmann::json& json)
     token->SetBorderColor(glm::vec4(
         json["borderColour"][0], json["borderColour"][1], json["borderColour"][2], json["borderColour"][3]
     ));
+    // Status properties added together
+    if (json.contains("statuses"))
+    {
+        TokenStatuses statuses(static_cast<std::string>(json["statuses"]));
+        token->SetStatuses(statuses);
+        token->SetOpacity(json["opacity"]);
+        token->SetXStatus(json["xstatus"]);
+    }
     return token;
 }
 

@@ -89,6 +89,9 @@ void Controller::Load(std::string path, bool merge)
     }
     else
         std::cerr << "Unable to open file" << std::endl;
+
+    undoQueue.clear();
+    redoQueue.clear();
 }
 
 
@@ -470,6 +473,18 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
         for (const auto& selectedToken: SelectedTokens())
             actionGroup->Add(std::make_shared<ModifyTokenTexture>(selectedToken, &Token::SetIcon, selectedToken->GetIcon(), m_resources->GetTexture(std::get<std::string>(value))));
         break;
+    case Token_Statuses:
+        for (const auto& selectedToken: SelectedTokens())
+            actionGroup->Add(std::make_shared<ModifyTokenStatuses>(selectedToken, &Token::SetStatuses, selectedToken->GetStatuses(), std::get<TokenStatuses>(value)));
+        break;
+    case Token_XStatus:
+        for (const auto& selectedToken: SelectedTokens())
+            actionGroup->Add(std::make_shared<ModifyTokenBool>(selectedToken, &Token::SetXStatus, selectedToken->GetXStatus(), std::get<bool>(value)));
+        break;
+    case Token_Opacity:
+        for (const auto& selectedToken: SelectedTokens())
+            actionGroup->Add(std::make_shared<ModifyTokenFloat>(selectedToken, &Token::SetOpacity, selectedToken->GetOpacity(), std::get<float>(value)));
+        break;
     
     default:
         std::cerr << "Unknown TokenProperty: " << property << std::endl;
@@ -593,4 +608,11 @@ void Controller::OnKeyChanged(int key, int scancode, int action, int mods)
         Redo();
     if (key == GLFW_KEY_F && action == GLFW_RELEASE)
         HasSelectedTokens() ? FocusSelected() : Focus();
+    if (key == GLFW_KEY_X && action == GLFW_RELEASE && HasSelectedTokens())
+    {
+        auto actionGroup = std::make_shared<ActionGroup>();
+        for (const auto& selectedToken: SelectedTokens())
+            actionGroup->Add(std::make_shared<ModifyTokenBool>(selectedToken, &Token::SetXStatus, selectedToken->GetXStatus(), !selectedToken->GetXStatus()));
+        PerformAction(actionGroup);
+    }
 }

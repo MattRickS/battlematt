@@ -46,6 +46,8 @@ private:
     int m_promptType = 0;
     bool mergeLoad = false;
 
+    std::string tokenNames[NUM_TOKEN_STATUSES] {"Red", "Green", "Blue", "Yellow", "Cyan", "Pink"};
+
     void DrawImageOptions(const std::shared_ptr<BGImage>& image);
     void DrawGridOptions(const std::shared_ptr<Grid>&);
     void DrawTokenOptions(const std::shared_ptr<Token>& tokens);

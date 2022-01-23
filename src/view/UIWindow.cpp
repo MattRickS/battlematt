@@ -181,6 +181,27 @@ void UIWindow::DrawTokenOptions(const std::shared_ptr<Token>& token)
     float rotation = matrix2D->GetRotation();
     if (ImGui::SliderFloat("Rotation##Token", &rotation, 0, 360, "%.2f"))
         tokenPropertyChanged.emit(token, Token_Rotation, TokenPropertyValue(rotation));
+
+    // TODO: Mixed status for multiple tokens? Ideally only add/remove one if changed
+    bool enabled = token->GetXStatus();
+    if (ImGui::Checkbox("X", &enabled))
+        tokenPropertyChanged.emit(token, Token_XStatus, TokenPropertyValue(enabled));
+
+    TokenStatuses statuses = token->GetStatuses();
+    for (size_t i = 0; i < statuses.size(); i++)
+    {
+        ImGui::SameLine();
+        enabled = token->IsStatusEnabled(i);
+        if (ImGui::Checkbox(tokenNames[i].c_str(), &enabled))
+            statuses.set(i, enabled);
+    }
+
+    if (token->GetStatuses() != statuses)
+        tokenPropertyChanged.emit(token, Token_Statuses, TokenPropertyValue(statuses));
+
+    float opacity = token->GetOpacity();
+    if (ImGui::SliderFloat("Opacity##Token", &opacity, 0.0f, 1.0f, "%.3f"))
+        tokenPropertyChanged.emit(token, Token_Opacity, TokenPropertyValue(opacity));
 }
 
 void UIWindow::Draw()

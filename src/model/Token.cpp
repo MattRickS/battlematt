@@ -20,6 +20,9 @@ Token::Token(const Token& token) : Rect(token)
     m_model = std::make_shared<Matrix2D>(*token.m_model);
     m_borderColor = token.m_borderColor;
     m_borderWidth = token.m_borderWidth;
+    m_statuses = token.m_statuses;
+    m_opacity = token.m_opacity;
+    m_xStatus = token.m_xStatus;
 }
 
 void Token::SetIcon(std::shared_ptr<Texture> texture) { m_texture = texture; }
@@ -30,6 +33,14 @@ void Token::SetBorderColor(glm::vec4 color) { m_borderColor = color; }
 glm::vec4 Token::GetBorderColor() { return m_borderColor; }
 void Token::SetName(std::string name) { m_name = name; }
 std::string Token::GetName() { return m_name; }
+void Token::SetStatuses(TokenStatuses statuses) { m_statuses = statuses; }
+TokenStatuses Token::GetStatuses() { return m_statuses; }
+void Token::SetStatusEnabled(int status, bool enabled) { m_statuses[status] = enabled; }
+bool Token::IsStatusEnabled(int status) { return m_statuses[status]; }
+void Token::SetXStatus(bool enabled) { m_xStatus = enabled; }
+bool Token::GetXStatus() { return m_xStatus; }
+void Token::SetOpacity(float opacity) { m_opacity = opacity; }
+float Token::GetOpacity() { return m_opacity; }
 
 void Token::Draw(Shader &shader)
 {
@@ -53,6 +64,7 @@ void Token::Draw(Shader &shader)
     shader.setFloat4("highlightColor", highlight.x, highlight.y, highlight.z, highlight.w);
     shader.setFloat4("borderColor", m_borderColor.x, m_borderColor.y, m_borderColor.z, m_borderColor.w);
     shader.setFloat("borderWidth", m_borderWidth);
+    shader.setFloat("opacity", m_opacity);
     Rect::Draw(shader);
 }
 
