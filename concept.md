@@ -167,10 +167,10 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [-] Overlays
 - [ ] Fog of War
 - [ ] Lighting effects
-- [ ] Token statuses (multiple predefined effects that can be toggled)
-    - [ ] Tint / Opacity
-    - [ ] X symbol (ideally without rotation)
-    - [ ] Ring of coloured dots around a token (like numbers on a clock) for arbitrary effects
+- [x] Token statuses (multiple predefined effects that can be toggled)
+    - [x] Tint / Opacity
+    - [x] X symbol (ideally without rotation)
+    - [x] Ring of coloured dots around a token (like numbers on a clock) for arbitrary effects
     - [ ] User config for naming each status
 - [x] Separate windows for viewport and UI (SetWindowSize to match framebuffer)
     - [ ] Hotkey to show/hide UI window
@@ -190,3 +190,8 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Profiling
 - [ ] Tests
 - [ ] Threaded windows
+- [ ] Rotatable camera
+- [ ] Global scaling
+- [ ] Hotkey for token rotation
+- [ ] Image selection mode
+- [ ] Fix token size scaling snap to grid
