@@ -53,6 +53,8 @@ void Controller::SetScene(std::shared_ptr<Scene> scene)
     m_scene = scene;
     m_viewport->SetScene(scene);
     m_uiWindow->SetScene(scene);
+    undoQueue.clear();
+    redoQueue.clear();
 }
 
 void Controller::Save(std::string path)
@@ -78,29 +80,40 @@ void Controller::Load(std::string path, bool merge)
     {
         myfile >> j;
         myfile.close();
-        if (!merge)
+        std::shared_ptr<Scene> scene = std::make_shared<Scene>(m_resources);
+        if (merge)
         {
-            m_scene->images.clear();
-            m_scene->tokens.clear();
+            m_serializer.DeserializeScene(j, *scene);
+            Merge(scene);
         }
-        m_serializer.DeserializeScene(j, *m_scene);
-        m_scene->sourceFile = path;
-        SetScene(m_scene);
+        else
+        {
+            m_serializer.DeserializeScene(j, *scene);
+            scene->sourceFile = path;
+            SetScene(scene);
+        }
     }
     else
         std::cerr << "Unable to open file" << std::endl;
-
-    undoQueue.clear();
-    redoQueue.clear();
 }
 
 void Controller::Merge(const std::shared_ptr<Scene>& scene)
 {
-    for (const auto&token: scene->tokens)
-        m_scene->AddToken(token);
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
 
-    for (const auto&image: scene->images)
-        m_scene->AddImage(image);
+    if (!scene->tokens.empty())
+    {
+        actionGroup->Add(std::make_shared<AddTokensAction>(m_scene, scene->tokens));
+        actionGroup->Add(std::make_shared<SelectTokensAction>(SelectedTokens(), scene->tokens));
+    }
+
+    if (!scene->images.empty())
+    {
+        actionGroup->Add(std::make_shared<AddImagesAction>(m_scene, scene->images));
+    }
+
+    if (!actionGroup->IsEmpty())
+        PerformAction(actionGroup);
 }
 
 void Controller::CopySelected()
@@ -531,7 +544,7 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
         break;
     }
     
-    if (actionGroup)
+    if (!actionGroup->IsEmpty())
         PerformAction(actionGroup);
 }
 
