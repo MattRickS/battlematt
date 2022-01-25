@@ -44,6 +44,7 @@ public:
     {
         m_actions.push_back(action);
     }
+    bool IsEmpty() { return m_actions.empty(); }
 
     virtual bool CanMerge(const std::shared_ptr<Action>& action)
     {

@@ -53,6 +53,8 @@ void Controller::SetScene(std::shared_ptr<Scene> scene)
     m_scene = scene;
     m_viewport->SetScene(scene);
     m_uiWindow->SetScene(scene);
+    undoQueue.clear();
+    redoQueue.clear();
 }
 
 void Controller::Save(std::string path)
@@ -78,22 +80,66 @@ void Controller::Load(std::string path, bool merge)
     {
         myfile >> j;
         myfile.close();
-        if (!merge)
+        std::shared_ptr<Scene> scene = std::make_shared<Scene>(m_resources);
+        if (merge)
         {
-            m_scene->images.clear();
-            m_scene->tokens.clear();
+            m_serializer.DeserializeScene(j, *scene);
+            Merge(scene);
         }
-        m_serializer.DeserializeScene(j, *m_scene);
-        m_scene->sourceFile = path;
-        SetScene(m_scene);
+        else
+        {
+            m_serializer.DeserializeScene(j, *scene);
+            scene->sourceFile = path;
+            SetScene(scene);
+        }
     }
     else
         std::cerr << "Unable to open file" << std::endl;
-
-    undoQueue.clear();
-    redoQueue.clear();
 }
 
+void Controller::Merge(const std::shared_ptr<Scene>& scene)
+{
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+
+    if (!scene->tokens.empty())
+    {
+        actionGroup->Add(std::make_shared<AddTokensAction>(m_scene, scene->tokens));
+        actionGroup->Add(std::make_shared<SelectTokensAction>(SelectedTokens(), scene->tokens));
+    }
+
+    if (!scene->images.empty())
+    {
+        actionGroup->Add(std::make_shared<AddImagesAction>(m_scene, scene->images));
+    }
+
+    if (!actionGroup->IsEmpty())
+        PerformAction(actionGroup);
+}
+
+void Controller::CopySelected()
+{
+    if (!HasSelectedTokens())
+        return;
+
+    std::string string = m_serializer.SerializeScene(m_scene, SerializeFlag::Token | SerializeFlag::Selected).dump();
+    m_viewport->CopyToClipboard(string);
+}
+
+void Controller::CutSelected()
+{
+    CopySelected();
+    DeleteSelectedTokens();
+}
+
+void Controller::PasteSelected()
+{
+    std::string text = m_viewport->GetClipboard();
+    if (text.empty())
+        return;
+    
+    std::shared_ptr<Scene> scene = m_serializer.DeserializeScene(text);
+    Merge(scene);
+}
 
 // Selection
 std::vector<std::shared_ptr<Token>> Controller::SelectedTokens()
@@ -135,6 +181,9 @@ void Controller::SelectTokens(std::vector<std::shared_ptr<Token>> tokens, bool a
 
 void Controller::DuplicateSelectedTokens()
 {
+    if (!HasSelectedTokens())
+        return;
+
     std::vector<std::shared_ptr<Token>> duplicates;
     for (const std::shared_ptr<Token>& token : SelectedTokens())
     {
@@ -379,8 +428,14 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
     }
     if (key == GLFW_KEY_DELETE && HasSelectedTokens())
         DeleteSelectedTokens();
-    if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && HasSelectedTokens())
+    if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
         DuplicateSelectedTokens();
+    if (key == GLFW_KEY_C && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
+        CopySelected();
+    if (key == GLFW_KEY_X && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
+        CutSelected();
+    if (key == GLFW_KEY_V && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
+        PasteSelected();
     OnKeyChanged(key, scancode, action, mods);
 }
 
@@ -492,7 +547,7 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
         break;
     }
     
-    if (actionGroup)
+    if (!actionGroup->IsEmpty())
         PerformAction(actionGroup);
 }
 

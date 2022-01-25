@@ -19,7 +19,7 @@
 JSONSerializer::JSONSerializer(std::shared_ptr<Resources> resources) : m_resources(resources) {}
 
 // Camera
-bool JSONSerializer::SerializeCamera(std::shared_ptr<Camera> camera, nlohmann::json& json)
+bool JSONSerializer::SerializeCamera(const std::shared_ptr<Camera>& camera, nlohmann::json& json)
 {
     json["pos"] = {camera->Position.x, camera->Position.y, camera->Position.z};
     json["focal"] = camera->Focal;
@@ -34,7 +34,7 @@ std::shared_ptr<Camera> JSONSerializer::DeserializeCamera(nlohmann::json& json)
 }
 
 // Grid
-bool JSONSerializer::SerializeGrid(std::shared_ptr<Grid> grid, nlohmann::json& json)
+bool JSONSerializer::SerializeGrid(const std::shared_ptr<Grid>& grid, nlohmann::json& json)
 {
     json["scale"] = grid->GetScale();
     return true;
@@ -51,13 +51,22 @@ std::shared_ptr<Grid> JSONSerializer::DeserializeGrid(nlohmann::json& json)
 }
 
 // Image
-bool JSONSerializer::SerializeImage(std::shared_ptr<BGImage> image, nlohmann::json& json)
+bool JSONSerializer::SerializeImage(const std::shared_ptr<BGImage>& image, nlohmann::json& json)
 {
     json["texture"] = image->GetImage()->filename;
     nlohmann::json matrix;
     SerializeMatrix2D(image->GetModel(), matrix);
     json["matrix2D"] = matrix;
     return true;
+}
+
+nlohmann::json JSONSerializer::SerializeImages(const std::vector<std::shared_ptr<BGImage>>& images)
+{
+    std::vector<nlohmann::json> jimages(images.size());
+    unsigned int i = 0;
+    std::for_each(images.begin(), images.end(),
+                  [this, &i, &jimages](const std::shared_ptr<BGImage> image){ SerializeImage(image, jimages[i++]); });
+    return jimages;
 }
 
 std::shared_ptr<BGImage> JSONSerializer::DeserializeImage(nlohmann::json& json)
@@ -71,7 +80,7 @@ std::shared_ptr<BGImage> JSONSerializer::DeserializeImage(nlohmann::json& json)
 }
 
 // Matrix2D
-bool JSONSerializer::SerializeMatrix2D(std::shared_ptr<Matrix2D> matrix, nlohmann::json& json)
+bool JSONSerializer::SerializeMatrix2D(const std::shared_ptr<Matrix2D>& matrix, nlohmann::json& json)
 {
     json["pos"] = {matrix->GetPos().x, matrix->GetPos().y};
     json["scale"] = {matrix->GetScale().x, matrix->GetScale().y};
@@ -89,7 +98,7 @@ std::shared_ptr<Matrix2D> JSONSerializer::DeserializeMatrix2D(nlohmann::json& js
 }
 
 // Token
-bool JSONSerializer::SerializeToken(std::shared_ptr<Token> token, nlohmann::json& json)
+bool JSONSerializer::SerializeToken(const std::shared_ptr<Token>& token, nlohmann::json& json)
 {
     nlohmann::json matrix;
     SerializeMatrix2D(token->GetModel(), matrix);
@@ -103,6 +112,18 @@ bool JSONSerializer::SerializeToken(std::shared_ptr<Token> token, nlohmann::json
     json["opacity"] = token->GetOpacity();
 
     return true;
+}
+
+nlohmann::json JSONSerializer::SerializeTokens(const std::vector<std::shared_ptr<Token>>& tokens, bool selectedOnly)
+{
+    nlohmann::json jtokens = nlohmann::json::array();
+    uint i = 0;
+    std::for_each(tokens.begin(), tokens.end(),
+                  [this, &i, &jtokens, &selectedOnly](const std::shared_ptr<Token> token){
+                      if (token->isSelected || !selectedOnly)
+                          SerializeToken(token, jtokens[i++]);
+                  });
+    return jtokens;
 }
 
 std::shared_ptr<Token> JSONSerializer::DeserializeToken(nlohmann::json& json)
@@ -129,19 +150,10 @@ std::shared_ptr<Token> JSONSerializer::DeserializeToken(nlohmann::json& json)
 }
 
 // Scene
-bool JSONSerializer::SerializeScene(std::shared_ptr<Scene> scene, nlohmann::json& json)
+bool JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scene, nlohmann::json& json)
 {
-    std::vector<nlohmann::json> jtokens(scene->tokens.size());
-    uint i = 0;
-    std::for_each(scene->tokens.begin(), scene->tokens.end(),
-                  [this, &i, &jtokens](const std::shared_ptr<Token> token){ SerializeToken(token, jtokens[i++]); });
-    json["tokens"] = jtokens;
-
-    std::vector<nlohmann::json> jimages(scene->images.size());
-    i = 0;
-    std::for_each(scene->images.begin(), scene->images.end(),
-                  [this, &i, &jimages](const std::shared_ptr<BGImage> image){ SerializeImage(image, jimages[i++]); });
-    json["images"] = jimages;
+    json["tokens"] = SerializeTokens(scene->tokens);
+    json["images"] = SerializeImages(scene->images);
 
     nlohmann::json jcamera;
     SerializeCamera(scene->camera, jcamera);
@@ -156,18 +168,27 @@ bool JSONSerializer::SerializeScene(std::shared_ptr<Scene> scene, nlohmann::json
 
 void JSONSerializer::DeserializeScene(nlohmann::json& json, Scene& scene)
 {
-    scene.camera = DeserializeCamera(json["camera"]);
-    scene.grid = DeserializeGrid(json["grid"]);
+    if (json.contains("camera"))
+        scene.camera = DeserializeCamera(json["camera"]);
+    
+    if (json.contains("grid"))
+        scene.grid = DeserializeGrid(json["grid"]);
 
-    nlohmann::json jimages = json["images"];
-    scene.images.reserve(jimages.size());
-    std::for_each(jimages.begin(), jimages.end(),
-                  [this, &scene](nlohmann::json& jimage){ scene.images.push_back(DeserializeImage(jimage)); });
+    if (json.contains("images"))
+    {
+        nlohmann::json jimages = json["images"];
+        scene.images.reserve(jimages.size());
+        std::for_each(jimages.begin(), jimages.end(),
+                    [this, &scene](nlohmann::json& jimage){ scene.images.push_back(DeserializeImage(jimage)); });
+    }
 
-    nlohmann::json jtokens = json["tokens"];
-    scene.tokens.reserve(jtokens.size());
-    std::for_each(jtokens.begin(), jtokens.end(),
-                  [this, &scene](nlohmann::json& jtoken){ scene.tokens.push_back(DeserializeToken(jtoken)); });
+    if (json.contains("tokens"))
+    {
+        nlohmann::json jtokens = json["tokens"];
+        scene.tokens.reserve(jtokens.size());
+        std::for_each(jtokens.begin(), jtokens.end(),
+                    [this, &scene](nlohmann::json& jtoken){ scene.tokens.push_back(DeserializeToken(jtoken)); });
+    }
 }
 
 std::shared_ptr<Scene> JSONSerializer::DeserializeScene(nlohmann::json& json)
@@ -177,9 +198,41 @@ std::shared_ptr<Scene> JSONSerializer::DeserializeScene(nlohmann::json& json)
     return scene;
 }
 
-nlohmann::json JSONSerializer::SerializeScene(std::shared_ptr<Scene> scene)
+std::shared_ptr<Scene> JSONSerializer::DeserializeScene(const std::string& text)
+{
+    nlohmann::json json = nlohmann::json::parse(text);
+    return DeserializeScene(json);
+}
+
+nlohmann::json JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scene)
 {
     nlohmann::json json;
     SerializeScene(scene, json);
+    return json;
+}
+
+nlohmann::json JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scene, SerializeFlag flags)
+{
+    nlohmann::json json;
+    if (bool(flags & SerializeFlag::Token) || bool(flags & SerializeFlag::All))
+        json["tokens"] = SerializeTokens(scene->tokens, bool(flags & SerializeFlag::Selected) && !bool(flags & SerializeFlag::All));
+
+    if (bool(flags & SerializeFlag::Image) || bool(flags & SerializeFlag::All))
+        json["images"] = SerializeImages(scene->images);
+
+    if (bool(flags & SerializeFlag::Camera) || bool(flags & SerializeFlag::All))
+    {
+        nlohmann::json jcamera;
+        SerializeCamera(scene->camera, jcamera);
+        json["camera"] = jcamera;
+    }
+
+    if (bool(flags & SerializeFlag::Grid) || bool(flags & SerializeFlag::All))
+    {
+        nlohmann::json jgrid;
+        SerializeGrid(scene->grid, jgrid);
+        json["grid"] = jgrid;
+    }
+
     return json;
 }

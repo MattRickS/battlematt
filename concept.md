@@ -190,8 +190,17 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Profiling
 - [ ] Tests
 - [ ] Threaded windows
-- [ ] Rotatable camera
+- [ ] Rotatable camera (but not tokens... ie, disorient players :D )
+    - [ ] Optional compass in corner
 - [ ] Global scaling
 - [ ] Hotkey for token rotation
 - [ ] Image selection mode
 - [ ] Fix token size scaling snap to grid
+- [ ] Renderer
+    - [ ] Centralise drawing
+- [ ] Multiple cameras, saveable views
+- [ ] Cut/Copy/Paste
+    - [ ] Load (Merge) to use Paste
+- [ ] Host Screen
+    - [ ] All scene elements have an option for Host visibility only
+    - [ ] Separate camera
