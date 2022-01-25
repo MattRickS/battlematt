@@ -195,12 +195,12 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Global scaling
 - [ ] Hotkey for token rotation
 - [ ] Image selection mode
-- [ ] Fix token size scaling snap to grid
+- [x] Fix token size scaling snap to grid
 - [ ] Renderer
     - [ ] Centralise drawing
 - [ ] Multiple cameras, saveable views
-- [ ] Cut/Copy/Paste
-    - [ ] Load (Merge) to use Paste
+- [x] Cut/Copy/Paste
+    - [x] Load (Merge) to use Paste
 - [ ] Host Screen
     - [ ] All scene elements have an option for Host visibility only
     - [ ] Separate camera

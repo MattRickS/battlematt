@@ -58,7 +58,11 @@ glm::vec2 Grid::NearestCorner(float shapeSize, glm::vec2 pos)
 
 ShapeGridSize Grid::GetShapeGridSize(std::shared_ptr<Shape2D> shape)
 {
-    float size = shape->GetModel()->GetScalef();
+    return GetShapeGridSize(shape->GetModel()->GetScalef());
+}
+
+ShapeGridSize Grid::GetShapeGridSize(float size)
+{
     if (size >= m_scale)
         return static_cast<ShapeGridSize>(std::round(size / m_scale) - 1);
     else

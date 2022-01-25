@@ -35,6 +35,7 @@ public:
     bool GetSnapEnabled();
     glm::vec2 NearestCenter(float tokenSize, glm::vec2 pos);
     glm::vec2 NearestCorner(float tokenSize, glm::vec2 pos);
+    ShapeGridSize GetShapeGridSize(float size);
     ShapeGridSize GetShapeGridSize(std::shared_ptr<Shape2D> token);
     float SnapGridSize(ShapeGridSize tokenGridSize);
     float SnapGridSize(float size);

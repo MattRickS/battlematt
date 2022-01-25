@@ -514,7 +514,15 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
         break;
     case Token_Scale:
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(selectedToken->GetModel(), &Matrix2D::SetScale, selectedToken->GetModel()->GetScale(), std::get<glm::vec2>(value)));
+        {
+            glm::vec2 scale = std::get<glm::vec2>(value);
+            if (m_scene->grid->GetSnapEnabled())
+            {
+                ShapeGridSize gridSize = static_cast<ShapeGridSize>(m_scene->grid->GetShapeGridSize(scale.x));
+                scale = glm::vec2(m_scene->grid->SnapGridSize(gridSize));
+            }
+            actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(selectedToken->GetModel(), &Matrix2D::SetScale, selectedToken->GetModel()->GetScale(), scale));
+        }
         break;
     case Token_BorderWidth:
         for (const auto& selectedToken: SelectedTokens())
