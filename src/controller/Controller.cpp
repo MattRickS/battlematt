@@ -126,7 +126,10 @@ void Controller::CopySelected()
 }
 
 void Controller::CutSelected()
-{}
+{
+    CopySelected();
+    DeleteSelectedTokens();
+}
 
 void Controller::PasteSelected()
 {
