@@ -94,13 +94,21 @@ void Controller::Load(std::string path, bool merge)
     redoQueue.clear();
 }
 
+void Controller::Merge(const std::shared_ptr<Scene>& scene)
+{
+    for (const auto&token: scene->tokens)
+        m_scene->AddToken(token);
+
+    for (const auto&image: scene->images)
+        m_scene->AddImage(image);
+}
+
 void Controller::CopySelected()
 {
     if (!HasSelectedTokens())
         return;
 
     std::string string = m_serializer.SerializeScene(m_scene, SerializeFlag::Token | SerializeFlag::Selected).dump();
-    std::cout << "Clipboard: " << string << std::endl;
     m_viewport->CopyToClipboard(string);
 }
 
@@ -110,18 +118,11 @@ void Controller::CutSelected()
 void Controller::PasteSelected()
 {
     std::string text = m_viewport->GetClipboard();
-    std::cout << "Clipboard: " << text << std::endl;
-
     if (text.empty())
         return;
     
     std::shared_ptr<Scene> scene = m_serializer.DeserializeScene(text);
-    
-    for (const auto&token: scene->tokens)
-        m_scene->AddToken(token);
-
-    for (const auto&image: scene->images)
-        m_scene->AddImage(image);
+    Merge(scene);
 }
 
 // Selection

@@ -23,6 +23,7 @@ public:
     void SetScene(std::shared_ptr<Scene> scene);
     void Save(std::string path);
     void Load(std::string path, bool merge = false);
+    void Merge(const std::shared_ptr<Scene>& scene);
 
     void CopySelected();
     void CutSelected();
