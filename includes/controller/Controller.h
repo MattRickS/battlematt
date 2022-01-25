@@ -24,6 +24,10 @@ public:
     void Save(std::string path);
     void Load(std::string path, bool merge = false);
 
+    void CopySelected();
+    void CutSelected();
+    void PasteSelected();
+
     std::vector<std::shared_ptr<Token>> SelectedTokens();
     bool HasSelectedTokens();
     void ClearSelection();

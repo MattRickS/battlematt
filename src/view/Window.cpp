@@ -150,6 +150,16 @@ void Window::Render()
     glfwSwapBuffers(window);
 }
 
+void Window::CopyToClipboard(const std::string& text)
+{
+    glfwSetClipboardString(window, text.c_str());
+}
+
+std::string Window::GetClipboard()
+{
+    return glfwGetClipboardString(window);
+}
+
 void Window::DisconnectSignals()
 {
     cursorMoved.disconnect();

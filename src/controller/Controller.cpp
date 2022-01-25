@@ -94,6 +94,35 @@ void Controller::Load(std::string path, bool merge)
     redoQueue.clear();
 }
 
+void Controller::CopySelected()
+{
+    if (!HasSelectedTokens())
+        return;
+
+    std::string string = m_serializer.SerializeScene(m_scene, SerializeFlag::Token | SerializeFlag::Selected).dump();
+    std::cout << "Clipboard: " << string << std::endl;
+    m_viewport->CopyToClipboard(string);
+}
+
+void Controller::CutSelected()
+{}
+
+void Controller::PasteSelected()
+{
+    std::string text = m_viewport->GetClipboard();
+    std::cout << "Clipboard: " << text << std::endl;
+
+    if (text.empty())
+        return;
+    
+    std::shared_ptr<Scene> scene = m_serializer.DeserializeScene(text);
+    
+    for (const auto&token: scene->tokens)
+        m_scene->AddToken(token);
+
+    for (const auto&image: scene->images)
+        m_scene->AddImage(image);
+}
 
 // Selection
 std::vector<std::shared_ptr<Token>> Controller::SelectedTokens()
@@ -135,6 +164,9 @@ void Controller::SelectTokens(std::vector<std::shared_ptr<Token>> tokens, bool a
 
 void Controller::DuplicateSelectedTokens()
 {
+    if (!HasSelectedTokens())
+        return;
+
     std::vector<std::shared_ptr<Token>> duplicates;
     for (const std::shared_ptr<Token>& token : SelectedTokens())
     {
@@ -379,8 +411,14 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
     }
     if (key == GLFW_KEY_DELETE && HasSelectedTokens())
         DeleteSelectedTokens();
-    if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL && HasSelectedTokens())
+    if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
         DuplicateSelectedTokens();
+    if (key == GLFW_KEY_C && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
+        CopySelected();
+    if (key == GLFW_KEY_X && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
+        CutSelected();
+    if (key == GLFW_KEY_V && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
+        PasteSelected();
     OnKeyChanged(key, scancode, action, mods);
 }
 
