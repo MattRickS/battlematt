@@ -52,7 +52,6 @@ public:
     float GetOpacity();
     virtual void Draw(Shader &shader);
     virtual bool Contains(glm::vec2 pt) const;
-    virtual bool Contains(float x, float y) const;
 
 private:
     std::string m_name;

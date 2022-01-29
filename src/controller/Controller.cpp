@@ -311,21 +311,19 @@ std::shared_ptr<Shape2D> Controller::GetShapeAtScreenPos(glm::vec2 screenPos)
     // Tokens are drawn from first to last, so iterate in reverse to find the topmost
     for (int i = m_scene->tokens.size() - 1; i >= 0; i--)
     {
-        std::shared_ptr<Shape2D> shape = static_cast<std::shared_ptr<Shape2D>>(m_scene->tokens[i]);
         // It should only be possible to select one shape with a single click
-        if (shape->Contains(worldPos))
+        if (m_scene->tokens[i]->Contains(worldPos))
         {
-            return shape;
+            return static_cast<std::shared_ptr<Shape2D>>(m_scene->tokens[i]);
         }
     }
     // Images are drawn from first to last, so iterate in reverse to find the topmost
     for (int i = m_scene->images.size() - 1; i >= 0; i--)
     {
-        std::shared_ptr<Shape2D> shape = static_cast<std::shared_ptr<Shape2D>>(m_scene->images[i]);
         // It should only be possible to select one shape with a single click
-        if (shape->Contains(worldPos))
+        if (m_scene->images[i]->Contains(worldPos))
         {
-            return shape;
+            return static_cast<std::shared_ptr<Shape2D>>(m_scene->images[i]);
         }
     }
     return nullptr;

@@ -68,12 +68,6 @@ void Token::Draw(Shader &shader)
     Rect::Draw(shader);
 }
 
-bool Token::Contains(float x, float y) const
-{
-    return Contains(glm::vec2(x, y));
-}
-
-
 bool Token::Contains(glm::vec2 pt) const
 {
     // Scale is the diameter, use radius for comparison
