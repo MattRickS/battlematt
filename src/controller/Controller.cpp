@@ -295,7 +295,7 @@ std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx,
             glm::vec2 scale = image->GetModel()->GetScale() * 0.5f;
             glm::vec2 imageMin = image->GetModel()->GetPos() - scale;
             glm::vec2 imageMax = image->GetModel()->GetPos() + scale;
-            if (imageMin.x > lo.x && imageMax.x < hi.x && imageMin.y > lo.y && imageMax.y < hi.y)
+            if (imageMax.x > lo.x && imageMin.x < hi.x && imageMax.y > lo.y && imageMin.y < hi.y)
             {
                 shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(image));
             }

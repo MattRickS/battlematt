@@ -15,9 +15,9 @@ Rect::Rect(std::shared_ptr<Mesh> mesh) : m_mesh(mesh) {}
 bool Rect::Contains(glm::vec2 pt)
 {
     // TODO: Account for rotation, being lazy atm
-    glm::vec2 lo = m_model->GetPos() - m_model->GetScale();
-    glm::vec2 hi = m_model->GetPos() + m_model->GetScale();
-    return lo.x >= pt.x && hi.x <= pt.x && lo.y >= pt.y && hi.y <= pt.y;
+    glm::vec2 lo = m_model->GetPos() - m_model->GetScale() * 0.5f;
+    glm::vec2 hi = m_model->GetPos() + m_model->GetScale() * 0.5f;
+    return lo.x <= pt.x && hi.x >= pt.x && lo.y <= pt.y && hi.y >= pt.y;
 }
 
 void Rect::Draw(Shader& shader)
