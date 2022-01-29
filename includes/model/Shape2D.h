@@ -11,6 +11,9 @@
 class Shape2D
 {
 public:
+    bool isHighlighted = false;
+    bool isSelected = false;
+
     std::shared_ptr<Matrix2D> GetModel();
     void SetModel(const std::shared_ptr<Matrix2D>& matrix);
     virtual bool Contains(float x, float y) = 0;

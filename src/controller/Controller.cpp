@@ -28,7 +28,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->saveClicked.connect(this, &Controller::Save);
     m_uiWindow->loadClicked.connect(this, &Controller::Load);
     m_uiWindow->promptResponse.connect(this, &Controller::OnPromptResponse);
-    m_uiWindow->tokenSelectionChanged.connect(this, &Controller::SelectToken);
+    m_uiWindow->shapeSelectionChanged.connect(this, &Controller::SelectShape);
     m_uiWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
     m_uiWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
     m_uiWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
@@ -104,7 +104,10 @@ void Controller::Merge(const std::shared_ptr<Scene>& scene)
     if (!scene->tokens.empty())
     {
         actionGroup->Add(std::make_shared<AddTokensAction>(m_scene, scene->tokens));
-        actionGroup->Add(std::make_shared<SelectTokensAction>(SelectedTokens(), scene->tokens));
+        std::vector<std::shared_ptr<Shape2D>> shapes;
+        for (const auto& token: scene->tokens)
+            shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
+        actionGroup->Add(std::make_shared<SelectShapesAction>(SelectedShapes(), shapes));
     }
 
     if (!scene->images.empty())
@@ -118,7 +121,7 @@ void Controller::Merge(const std::shared_ptr<Scene>& scene)
 
 void Controller::CopySelected()
 {
-    if (!HasSelectedTokens())
+    if (!HasSelectedShapes())
         return;
 
     std::string string = m_serializer.SerializeScene(m_scene, SerializeFlag::Token | SerializeFlag::Selected).dump();
@@ -142,6 +145,25 @@ void Controller::PasteSelected()
 }
 
 // Selection
+std::vector<std::shared_ptr<Shape2D>> Controller::SelectedShapes()
+{
+    // TODO: Could this return an iterator? would be nicer.
+    std::vector<std::shared_ptr<Shape2D>> selectedShapes;
+    for (const auto& token : m_scene->tokens)
+    {
+        if (token->isSelected)
+            selectedShapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
+    }
+
+    for (const auto& image : m_scene->images)
+    {
+        if (image->isSelected)
+            selectedShapes.push_back(static_cast<std::shared_ptr<Shape2D>>(image));
+    }
+
+    return selectedShapes;
+}
+
 std::vector<std::shared_ptr<Token>> Controller::SelectedTokens()
 {
     // TODO: Could this return an iterator? would be nicer.
@@ -151,6 +173,7 @@ std::vector<std::shared_ptr<Token>> Controller::SelectedTokens()
         if (token->isSelected)
             selectedTokens.push_back(token);
     }
+
     return selectedTokens;
 }
 
@@ -164,21 +187,39 @@ bool Controller::HasSelectedTokens()
     return false;
 }
 
+bool Controller::HasSelectedShapes()
+{
+    if (HasSelectedTokens())
+        return true;
+    for (const auto& image : m_scene->images)
+    {
+        if (image->isSelected)
+            return true;
+    }
+    return false;
+}
+
 void Controller::ClearSelection()
 {
-    PerformAction(std::make_shared<SelectTokensAction>(SelectedTokens()));
+    PerformAction(std::make_shared<SelectShapesAction>(SelectedShapes()));
 }
 
-void Controller::SelectToken(std::shared_ptr<Token> token, bool additive)
+void Controller::SelectShape(std::shared_ptr<Shape2D> shape, bool additive)
 {
-    PerformAction(std::make_shared<SelectTokensAction>(SelectedTokens(), token, additive));
+    PerformAction(std::make_shared<SelectShapesAction>(SelectedShapes(), shape, additive));
 }
 
-void Controller::SelectTokens(std::vector<std::shared_ptr<Token>> tokens, bool additive)
+// void Controller::SelectShape(const std::shared_ptr<Shape2D>& shape, bool additive)
+// {
+//     PerformAction(std::make_shared<SelectShapesAction>(SelectedShapes(), shape, additive));
+// }
+
+void Controller::SelectShapes(const std::vector<std::shared_ptr<Shape2D>>& shapes, bool additive)
 {
-    PerformAction(std::make_shared<SelectTokensAction>(SelectedTokens(), tokens, additive));
+    PerformAction(std::make_shared<SelectShapesAction>(SelectedShapes(), shapes, additive));
 }
 
+// TODO: Duplicate selected shapes
 void Controller::DuplicateSelectedTokens()
 {
     if (!HasSelectedTokens())
@@ -187,6 +228,8 @@ void Controller::DuplicateSelectedTokens()
     std::vector<std::shared_ptr<Token>> duplicates;
     for (const std::shared_ptr<Token>& token : SelectedTokens())
     {
+        // TODO: dynamic cast checks to token/image
+        //    OR separate methods for SelectedTokens / SelectedImages that filters the selection
         std::shared_ptr<Token> duplicate = std::make_shared<Token>(*token);
         duplicate->GetModel()->Offset(glm::vec2(1));
         duplicates.push_back(duplicate);
@@ -195,7 +238,10 @@ void Controller::DuplicateSelectedTokens()
     // Add them to the scene and select them in the one action
     std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
     actionGroup->Add(std::make_shared<AddTokensAction>(m_scene, duplicates));
-    actionGroup->Add(std::make_shared<SelectTokensAction>(SelectedTokens(), duplicates));
+    std::vector<std::shared_ptr<Shape2D>> shapes;
+    for (const auto& token: duplicates)
+        shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
+    actionGroup->Add(std::make_shared<SelectShapesAction>(SelectedShapes(), shapes));
     PerformAction(actionGroup);
 }
 
@@ -214,46 +260,72 @@ void Controller::Focus()
 
 void Controller::FocusSelected()
 {
-    if (!HasSelectedTokens())
+    if (!HasSelectedShapes())
         return;
-    
-    std::vector<std::shared_ptr<Shape2D>> shapes;
-    for (const auto& token: SelectedTokens())
-        shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
-    m_viewport->Focus(Bounds2D::BoundsForShapes(shapes));
+
+    m_viewport->Focus(Bounds2D::BoundsForShapes(SelectedShapes()));
 }
 
 // Screen Position
-std::vector<std::shared_ptr<Token>> Controller::TokensInScreenRect(float minx, float miny, float maxx, float maxy)
+std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx, float miny, float maxx, float maxy)
 {
     glm::vec2 lo = m_viewport->ScreenToWorldPos(minx, miny);
     glm::vec2 hi = m_viewport->ScreenToWorldPos(maxx, maxy);
 
-    std::vector<std::shared_ptr<Token>> tokens;
-    for (std::shared_ptr<Token> token: m_scene->tokens)
+    std::vector<std::shared_ptr<Shape2D>> shapes;
+
+    if (tokensSelectable)
     {
-        float radius = token->GetModel()->GetScalef() * 0.5f;
-        glm::vec2 tokenPos = token->GetModel()->GetPos();
-        if (tokenPos.x + radius > lo.x && tokenPos.x - radius < hi.x
-            && tokenPos.y + radius > lo.y && tokenPos.y - radius < hi.y)
+        for (const std::shared_ptr<Token>& token: m_scene->tokens)
         {
-            tokens.push_back(token);
+            float radius = token->GetModel()->GetScalef() * 0.5f;
+            glm::vec2 tokenPos = token->GetModel()->GetPos();
+            if (tokenPos.x + radius > lo.x && tokenPos.x - radius < hi.x
+                && tokenPos.y + radius > lo.y && tokenPos.y - radius < hi.y)
+            {
+                shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
+            }
         }
     }
-    return tokens;
+
+    if (imagesSelectable)
+    {
+        for (const std::shared_ptr<BGImage>& image: m_scene->images)
+        {
+            glm::vec2 scale = image->GetModel()->GetScale() * 0.5f;
+            glm::vec2 imageMin = image->GetModel()->GetPos() - scale;
+            glm::vec2 imageMax = image->GetModel()->GetPos() + scale;
+            if (imageMin.x > lo.x && imageMax.x < hi.x && imageMin.y > lo.y && imageMax.y < hi.y)
+            {
+                shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(image));
+            }
+        }
+    }
+
+    return shapes;
 }
 
-std::shared_ptr<Token> Controller::GetTokenAtScreenPos(glm::vec2 screenPos)
+std::shared_ptr<Shape2D> Controller::GetShapeAtScreenPos(glm::vec2 screenPos)
 {
     glm::vec2 worldPos = m_viewport->ScreenToWorldPos(screenPos.x, screenPos.y);
     // Tokens are drawn from first to last, so iterate in reverse to find the topmost
     for (int i = m_scene->tokens.size() - 1; i >= 0; i--)
     {
-        std::shared_ptr<Token> token = m_scene->tokens[i];
-        // It should only be possible to select one token with a single click
-        if (token->Contains(worldPos))
+        std::shared_ptr<Shape2D> shape = static_cast<std::shared_ptr<Shape2D>>(m_scene->tokens[i]);
+        // It should only be possible to select one shape with a single click
+        if (shape->Contains(worldPos))
         {
-            return token;
+            return shape;
+        }
+    }
+    // Images are drawn from first to last, so iterate in reverse to find the topmost
+    for (int i = m_scene->images.size() - 1; i >= 0; i--)
+    {
+        std::shared_ptr<Shape2D> shape = static_cast<std::shared_ptr<Shape2D>>(m_scene->images[i]);
+        // It should only be possible to select one shape with a single click
+        if (shape->Contains(worldPos))
+        {
+            return shape;
         }
     }
     return nullptr;
@@ -282,30 +354,30 @@ void Controller::UpdateDragSelection(float xpos, float ypos)
     dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
 
     // Y-axis is inverted on rect, use re-invert for calculating world positions
-    auto coveredTokens = TokensInScreenRect(
+    auto coveredShapes = ShapesInScreenRect(
         dragSelectRect->MinX(),
         m_viewport->Height() - dragSelectRect->MinY(),
         dragSelectRect->MaxX(),
         m_viewport->Height() - dragSelectRect->MaxY()
     );
 
-    for (std::shared_ptr<Token> token : coveredTokens)
-        token->isHighlighted = true;
+    for (const std::shared_ptr<Shape2D>& shape : coveredShapes)
+        shape->isHighlighted = true;
 }
 
 void Controller::FinishDragSelection(bool additive)
 {
     // Y-axis is inverted on rect, use re-invert for calculating world positions
-    auto tokensInBounds = TokensInScreenRect(
+    auto shapesInBounds = ShapesInScreenRect(
         dragSelectRect->MinX(),
         m_viewport->Height() - dragSelectRect->MinY(),
         dragSelectRect->MaxX(),
         m_viewport->Height() - dragSelectRect->MaxY()
     );
 
-    if (tokensInBounds.size() > 0)
-        SelectTokens(tokensInBounds, additive);
-    else if (HasSelectedTokens())
+    if (shapesInBounds.size() > 0)
+        SelectShapes(shapesInBounds, additive);
+    else if (HasSelectedShapes())
         ClearSelection();
 
     m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
@@ -343,18 +415,18 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
         m_scene->camera->Pan(m_viewport->ScreenToWorldOffset(xoffset, yoffset));
         m_viewport->RefreshCamera();
     }
-    else if (leftMouseHeld && tokenUnderCursor)
+    else if (leftMouseHeld && shapeUnderCursor)
     {
         if (m_scene->grid->GetSnapEnabled())
         {
-            glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(tokenUnderCursor, m_viewport->ScreenToWorldPos(xpos, ypos));
-            glm::vec2 currPos = tokenUnderCursor->GetModel()->GetPos();
+            glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(shapeUnderCursor, m_viewport->ScreenToWorldPos(xpos, ypos));
+            glm::vec2 currPos = shapeUnderCursor->GetModel()->GetPos();
             if (newPos != currPos)
             {
                 std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
                 glm::vec2 offset = newPos - currPos;
-                for (const std::shared_ptr<Token>& token : SelectedTokens())
-                    actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(token->GetModel(), &Matrix2D::SetPos, token->GetModel()->GetPos(), token->GetModel()->GetPos() + offset));
+                for (const std::shared_ptr<Shape2D>& shape : SelectedShapes())
+                    actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(shape->GetModel(), &Matrix2D::SetPos, shape->GetModel()->GetPos(), shape->GetModel()->GetPos() + offset));
 
                 PerformAction(actionGroup);
             }
@@ -363,8 +435,8 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
         {
             std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
             glm::vec2 offset = m_viewport->ScreenToWorldOffset(xoffset, yoffset);
-            for (std::shared_ptr<Token> token : SelectedTokens())
-                actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(token->GetModel(), &Matrix2D::SetPos, token->GetModel()->GetPos(), token->GetModel()->GetPos() + offset));
+            for (std::shared_ptr<Shape2D> shape : SelectedShapes())
+                actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(shape->GetModel(), &Matrix2D::SetPos, shape->GetModel()->GetPos(), shape->GetModel()->GetPos() + offset));
 
             PerformAction(actionGroup);
         }
@@ -383,16 +455,16 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
         {
             // TODO: Selection action should be combined with move action, ie, undo undoes the selection and the movement
             glm::vec2 cursorPos = m_viewport->CursorPos();
-            tokenUnderCursor = GetTokenAtScreenPos(cursorPos);
-            if (tokenUnderCursor && !tokenUnderCursor->isSelected)
-                SelectToken(tokenUnderCursor, mods & (GLFW_MOD_SHIFT | GLFW_MOD_CONTROL));
+            shapeUnderCursor = GetShapeAtScreenPos(cursorPos);
+            if (shapeUnderCursor && !shapeUnderCursor->isSelected)
+                SelectShape(shapeUnderCursor, mods & (GLFW_MOD_SHIFT | GLFW_MOD_CONTROL));
             // If nothing was immediately selected/being modified, start a drag select
-            else if (!tokenUnderCursor)
+            else if (!shapeUnderCursor)
                 StartDragSelection(cursorPos.x, cursorPos.y);
         }
         else if (action == GLFW_RELEASE)
         {
-            tokenUnderCursor = nullptr;
+            shapeUnderCursor = nullptr;
             if (IsDragSelecting())
                 FinishDragSelection(mods & GLFW_MOD_SHIFT);
         }
@@ -410,23 +482,23 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         m_viewport->SetFullscreen(!m_viewport->IsFullscreen());
-    if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && HasSelectedTokens())
+    if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && HasSelectedShapes())
     {
-        for (std::shared_ptr<Token> token : SelectedTokens())
+        for (std::shared_ptr<Shape2D> shape : SelectedShapes())
         {
-            ShapeGridSize gridSize = static_cast<ShapeGridSize>(m_scene->grid->GetShapeGridSize(token) + 1);
-            token->GetModel()->SetScalef(m_scene->grid->SnapGridSize(gridSize));
+            ShapeGridSize gridSize = static_cast<ShapeGridSize>(m_scene->grid->GetShapeGridSize(shape) + 1);
+            shape->GetModel()->SetScalef(m_scene->grid->SnapGridSize(gridSize));
         }
     }
-    if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_RELEASE && HasSelectedTokens())
+    if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_RELEASE && HasSelectedShapes())
     {
-        for (std::shared_ptr<Token> token : SelectedTokens())
+        for (std::shared_ptr<Shape2D> shape : SelectedShapes())
         {
-            ShapeGridSize gridSize = static_cast<ShapeGridSize>(m_scene->grid->GetShapeGridSize(token) - 1);
-            token->GetModel()->SetScalef(m_scene->grid->SnapGridSize(gridSize));
+            ShapeGridSize gridSize = static_cast<ShapeGridSize>(m_scene->grid->GetShapeGridSize(shape) - 1);
+            shape->GetModel()->SetScalef(m_scene->grid->SnapGridSize(gridSize));
         }
     }
-    if (key == GLFW_KEY_DELETE && HasSelectedTokens())
+    if (key == GLFW_KEY_DELETE && HasSelectedShapes())
         DeleteSelectedTokens();
     if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
         DuplicateSelectedTokens();
@@ -670,8 +742,8 @@ void Controller::OnKeyChanged(int key, int scancode, int action, int mods)
     if (key == GLFW_KEY_Y && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
         Redo();
     if (key == GLFW_KEY_F && action == GLFW_RELEASE)
-        HasSelectedTokens() ? FocusSelected() : Focus();
-    if (key == GLFW_KEY_X && action == GLFW_RELEASE && HasSelectedTokens())
+        HasSelectedShapes() ? FocusSelected() : Focus();
+    if (key == GLFW_KEY_X && action == GLFW_RELEASE && HasSelectedShapes())
     {
         auto actionGroup = std::make_shared<ActionGroup>();
         for (const auto& selectedToken: SelectedTokens())

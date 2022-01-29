@@ -29,9 +29,6 @@ const glm::vec3 statusColors[NUM_TOKEN_STATUSES] {
 class Token : public Rect
 {
 public:
-    bool isHighlighted = false;
-    bool isSelected = false;
-
     Token(std::shared_ptr<Mesh> mesh);
     Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture);
     Token(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture, std::string name);

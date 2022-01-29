@@ -24,7 +24,7 @@ public:
     Signal<std::string> saveClicked;
     Signal<std::string, bool> loadClicked;
     Signal<int, bool> promptResponse;
-    Signal<std::shared_ptr<Token>, bool> tokenSelectionChanged;
+    Signal<std::shared_ptr<Shape2D>, bool> shapeSelectionChanged;
     Signal<const std::shared_ptr<Token>&, TokenProperty, TokenPropertyValue> tokenPropertyChanged;
     Signal<const std::shared_ptr<BGImage>&, ImageProperty, ImagePropertyValue> imagePropertyChanged;
     Signal<const std::shared_ptr<Grid>&, GridProperty, GridPropertyValue> gridPropertyChanged;

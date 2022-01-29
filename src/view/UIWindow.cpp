@@ -268,7 +268,7 @@ void UIWindow::Draw()
                 for (std::shared_ptr<Token>& token : m_scene->tokens)
                 {
                     if (ImGui::Selectable((token->GetName() + "##Item" + std::to_string(i++)).c_str(), token->isSelected))
-                        tokenSelectionChanged.emit(token, HasKeyPressed(GLFW_KEY_LEFT_CONTROL));
+                        shapeSelectionChanged.emit(static_cast<std::shared_ptr<Shape2D>>(token), HasKeyPressed(GLFW_KEY_LEFT_CONTROL));
                     if (token->isSelected)
                         lastSelectedToken = token;
                 }

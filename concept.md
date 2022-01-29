@@ -194,7 +194,7 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
     - [ ] Optional compass in corner
 - [ ] Global scaling
 - [ ] Hotkey for token rotation
-- [ ] Image selection mode
+- [-] Image selection mode (Toggle between Token/Image)
 - [x] Fix token size scaling snap to grid
 - [ ] Renderer
     - [ ] Centralise drawing
@@ -204,3 +204,4 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Host Screen
     - [ ] All scene elements have an option for Host visibility only
     - [ ] Separate camera
+    - [ ] Merged with UI Window? Collapsible UI?
