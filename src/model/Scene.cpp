@@ -20,7 +20,12 @@ Scene::Scene(std::shared_ptr<Resources> resources) : m_resources(resources)
         m_resources->GetMesh(Resources::MeshType::Quad2),
         m_resources->GetShader(Resources::ShaderType::Grid)
     );
-    camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f);
+    cameras.push_back(std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f));
+}
+
+void Scene::AddCamera(std::shared_ptr<Camera> camera)
+{
+    cameras.push_back(camera);
 }
 
 void Scene::AddImage()
@@ -50,8 +55,6 @@ void Scene::AddToken()
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(Resources::TextureType::Default)
     ));
-    // Centers it on the camera view
-    tokens.back()->GetModel()->SetPos(glm::vec2(camera->Position.x, camera->Position.y));
 }
 
 void Scene::AddToken(std::string path)
@@ -60,8 +63,6 @@ void Scene::AddToken(std::string path)
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(path)
     ));
-    // Centers it on the camera view
-    tokens.back()->GetModel()->SetPos(glm::vec2(camera->Position.x, camera->Position.y));
 }
 
 void Scene::AddToken(const std::shared_ptr<Token>& token)

@@ -512,7 +512,7 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
 
     if (middleMouseHeld)
     {
-        m_scene->camera->Pan(m_viewport->ScreenToWorldOffset(xoffset, yoffset));
+        m_viewport->GetCamera()->Pan(m_viewport->ScreenToWorldOffset(xoffset, yoffset));
         m_viewport->RefreshCamera();
     }
     else if (leftMouseHeld && shapeUnderCursor)
@@ -574,7 +574,7 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
 
 void Controller::OnViewportMouseScroll(double xoffset, double yoffset)
 {
-    m_scene->camera->Zoom(yoffset);
+    m_viewport->GetCamera()->Zoom(yoffset);
     m_viewport->RefreshCamera();
 }
 
@@ -623,7 +623,7 @@ void Controller::OnUIAddTokenClicked()
         m_resources->GetTexture(Resources::TextureType::Default)
     );
     // Centers it on the camera view
-    token->GetModel()->SetPos(glm::vec2(m_scene->camera->Position.x, m_scene->camera->Position.y));
+    token->GetModel()->SetPos(glm::vec2(m_viewport->GetCamera()->Position.x, m_viewport->GetCamera()->Position.y));
     std::shared_ptr<AddTokensAction> action = std::make_shared<AddTokensAction>(m_scene, token);
     // TODO: Include selection
     PerformAction(action);

@@ -22,10 +22,11 @@ public:
     std::vector<std::shared_ptr<Token>> tokens;
     std::vector<std::shared_ptr<Overlay>> overlays;
     std::shared_ptr<Grid> grid = nullptr;
-    std::shared_ptr<Camera> camera = nullptr;
+    std::vector<std::shared_ptr<Camera>> cameras;
     std::string sourceFile;
 
     Scene(std::shared_ptr<Resources> resources);
+    void AddCamera(std::shared_ptr<Camera> camera);
     void AddImage();
     void AddImage(std::string path);
     void AddImage(const std::shared_ptr<BGImage>& image);
