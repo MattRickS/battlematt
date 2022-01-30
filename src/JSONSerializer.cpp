@@ -62,7 +62,7 @@ bool JSONSerializer::SerializeImage(const std::shared_ptr<BGImage>& image, nlohm
 
 nlohmann::json JSONSerializer::SerializeImages(const std::vector<std::shared_ptr<BGImage>>& images, bool selectedOnly)
 {
-    std::vector<nlohmann::json> jimages(images.size());
+    nlohmann::json jimages = nlohmann::json::array();
     unsigned int i = 0;
     std::for_each(images.begin(), images.end(),
                   [this, &i, &jimages, &selectedOnly](const std::shared_ptr<BGImage> image){
