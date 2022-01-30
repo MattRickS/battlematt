@@ -227,8 +227,9 @@ void UIWindow::Draw()
 
         if (ImGui::CollapsingHeader("Images"))
         {
-            if (ImGui::Checkbox("Lock Images in Viewport", &m_lockImages))
-                imageLockChanged.emit(m_lockImages);
+            bool lockImages = m_scene->GetImagesLocked();
+            if (ImGui::Checkbox("Lock Images in Viewport", &lockImages))
+                imageLockChanged.emit(lockImages);
 
             std::shared_ptr<BGImage> lastSelectedImage = nullptr;
             if (ImGui::BeginListBox("Images##List"))
@@ -260,8 +261,9 @@ void UIWindow::Draw()
 
         if (ImGui::CollapsingHeader("Token"))
         {
-            if (ImGui::Checkbox("Lock Tokens in Viewport", &m_lockTokens))
-                tokenLockChanged.emit(m_lockTokens);
+            bool lockTokens = m_scene->GetTokensLocked();
+            if (ImGui::Checkbox("Lock Tokens in Viewport", &lockTokens))
+                tokenLockChanged.emit(lockTokens);
 
             std::shared_ptr<Token> lastSelectedToken = nullptr;
             if (ImGui::BeginListBox("Tokens##List"))

@@ -48,9 +48,6 @@ private:
     int m_promptType = 0;
     bool mergeLoad = false;
 
-    bool m_lockImages = false;
-    bool m_lockTokens = false;
-
     std::string tokenNames[NUM_TOKEN_STATUSES] {"Red", "Green", "Blue", "Yellow", "Cyan", "Pink"};
 
     void DrawImageOptions(const std::shared_ptr<BGImage>& image);
