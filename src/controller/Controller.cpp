@@ -137,11 +137,8 @@ void Controller::SetImagesLocked(bool locked)
     {
         auto selectedShapes = SelectedShapes();
         std::vector<std::shared_ptr<Shape2D>> newSelectedShapes;
-        std::for_each(selectedShapes.begin(), selectedShapes.end(),
-                      [&newSelectedShapes](const auto& shape) {
-                          if (!std::dynamic_pointer_cast<BGImage>(shape))
-                             newSelectedShapes.push_back(shape);
-                      });
+        std::copy_if(selectedShapes.begin(), selectedShapes.end(), std::back_inserter(newSelectedShapes),
+                     [](const auto& shape){ return !std::dynamic_pointer_cast<BGImage>(shape);});
         actionGroup->Add(std::make_shared<SelectShapesAction>(selectedShapes, newSelectedShapes));
     }
     PerformAction(actionGroup);
@@ -157,11 +154,8 @@ void Controller::SetTokensLocked(bool locked)
     {
         auto selectedShapes = SelectedShapes();
         std::vector<std::shared_ptr<Shape2D>> newSelectedShapes;
-        std::for_each(selectedShapes.begin(), selectedShapes.end(),
-                      [&newSelectedShapes](const auto& shape) {
-                          if (!std::dynamic_pointer_cast<Token>(shape))
-                             newSelectedShapes.push_back(shape);
-                      });
+        std::copy_if(selectedShapes.begin(), selectedShapes.end(), std::back_inserter(newSelectedShapes),
+                     [](const auto& shape){ return !std::dynamic_pointer_cast<Token>(shape);});
         actionGroup->Add(std::make_shared<SelectShapesAction>(selectedShapes, newSelectedShapes));
     }
     PerformAction(actionGroup);
