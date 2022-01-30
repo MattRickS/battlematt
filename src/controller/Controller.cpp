@@ -123,32 +123,6 @@ void Controller::Merge(const std::shared_ptr<Scene>& scene)
     }
 }
 
-bool Controller::CopySelected()
-{
-    if (!HasSelectedShapes())
-        return false;
-
-    std::string string = m_serializer.SerializeScene(m_scene, SerializeFlag::Image |SerializeFlag::Token | SerializeFlag::Selected).dump();
-    m_viewport->CopyToClipboard(string);
-    return true;
-}
-
-void Controller::CutSelected()
-{
-    CopySelected();
-    DeleteSelectedShapes();
-}
-
-void Controller::PasteSelected()
-{
-    std::string text = m_viewport->GetClipboard();
-    if (text.empty())
-        return;
-    
-    std::shared_ptr<Scene> scene = m_serializer.DeserializeScene(text);
-    Merge(scene);
-}
-
 // Selection
 std::vector<std::shared_ptr<Shape2D>> Controller::SelectedShapes()
 {
@@ -240,13 +214,40 @@ void Controller::SelectShapes(const std::vector<std::shared_ptr<Shape2D>>& shape
     PerformAction(std::make_shared<SelectShapesAction>(SelectedShapes(), shapes, additive));
 }
 
-void Controller::DuplicateSelectedShapes()
+// Selection Operators
+bool Controller::CopySelected()
+{
+    if (!HasSelectedShapes())
+        return false;
+
+    std::string string = m_serializer.SerializeScene(m_scene, SerializeFlag::Image |SerializeFlag::Token | SerializeFlag::Selected).dump();
+    m_viewport->CopyToClipboard(string);
+    return true;
+}
+
+void Controller::CutSelected()
+{
+    CopySelected();
+    DeleteSelected();
+}
+
+void Controller::PasteSelected()
+{
+    std::string text = m_viewport->GetClipboard();
+    if (text.empty())
+        return;
+    
+    std::shared_ptr<Scene> scene = m_serializer.DeserializeScene(text);
+    Merge(scene);
+}
+
+void Controller::DuplicateSelected()
 {
     if (CopySelected())
         PasteSelected();
 }
 
-void Controller::DeleteSelectedShapes()
+void Controller::DeleteSelected()
 {
     std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
 
@@ -508,9 +509,9 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
         }
     }
     if (key == GLFW_KEY_DELETE && HasSelectedShapes())
-        DeleteSelectedShapes();
+        DeleteSelected();
     if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
-        DuplicateSelectedShapes();
+        DuplicateSelected();
     if (key == GLFW_KEY_C && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
         CopySelected();
     if (key == GLFW_KEY_X && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)

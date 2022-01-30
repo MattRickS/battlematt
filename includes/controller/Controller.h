@@ -25,10 +25,6 @@ public:
     void Load(std::string path, bool merge = false);
     void Merge(const std::shared_ptr<Scene>& scene);
 
-    bool CopySelected();
-    void CutSelected();
-    void PasteSelected();
-
     // TODO: Image needs to render selection highlight
     std::vector<std::shared_ptr<Shape2D>> SelectedShapes();
     std::vector<std::shared_ptr<Token>> SelectedTokens();
@@ -40,8 +36,12 @@ public:
     void SelectShape(std::shared_ptr<Shape2D> shape, bool additive=false);
     // void SelectShape(const std::shared_ptr<Shape2D>& shape, bool additive=false);  // Clashes with signal.
     void SelectShapes(const std::vector<std::shared_ptr<Shape2D>>& shapes, bool additive=false);
-    void DuplicateSelectedShapes();
-    void DeleteSelectedShapes();
+
+    bool CopySelected();
+    void CutSelected();
+    void PasteSelected();
+    void DuplicateSelected();
+    void DeleteSelected();
 
     void Focus();
     void FocusSelected();
