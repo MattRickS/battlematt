@@ -11,7 +11,7 @@
 
 Overlay::Overlay(std::shared_ptr<Shader> shader) : shader(shader) {}
 
-RectOverlay::RectOverlay(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader) : Overlay(shader), m_mesh(mesh)
+RectOverlay::RectOverlay(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader, glm::vec4 colour) : Overlay(shader), m_mesh(mesh)
 {
     SetColour(colour);
 }
@@ -23,11 +23,11 @@ void RectOverlay::Draw()
     m_mesh->Draw(*shader);
 }
 
-void RectOverlay::SetColour(glm::vec3 col)
+void RectOverlay::SetColour(glm::vec4 col)
 {
-    colour = col;
+    m_colour = col;
     shader->use();
-    shader->setFloat3("colour", colour.x, colour.y, colour.z);
+    shader->setFloat4("colour", m_colour.x, m_colour.y, m_colour.z, m_colour.w);
 }
 
 float RectOverlay::MinX() { return std::min(startCorner.x, endCorner.x); }

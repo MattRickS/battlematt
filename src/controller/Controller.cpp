@@ -4,6 +4,7 @@
 #include <variant>
 #include <vector>
 
+#include <Constants.h>
 #include <JSONSerializer.h>
 #include <Resources.h>
 #include <model/Overlays.h>
@@ -351,7 +352,8 @@ void Controller::StartDragSelection(float xpos, float ypos)
 {
     dragSelectRect = std::make_shared<RectOverlay>(
         m_resources->GetMesh(Resources::MeshType::Quad2),
-        m_resources->GetShader(Resources::ShaderType::ScreenRect)
+        m_resources->GetShader(Resources::ShaderType::ScreenRect),
+        glm::vec4(SELECTION_COLOR, OVERLAY_OPACITY)
     );
     // GL uses inverted Y-axis
     dragSelectRect->startCorner = dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);

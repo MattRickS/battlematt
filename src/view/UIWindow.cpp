@@ -227,12 +227,21 @@ void UIWindow::Draw()
 
         if (ImGui::CollapsingHeader("Images"))
         {
+            // How to get whether or not image selection is enabled?
+            // bool imageSelectionEnabled = false;
+            // if (ImGui::Checkbox("Disable Image Selection", &imageSelectionEnabled))
+            //     // Signal
+
             std::shared_ptr<BGImage> lastSelectedImage = nullptr;
             if (ImGui::BeginListBox("Images##List"))
             {
                 int i = 0;
                 for (const auto& image : m_scene->images)
                 {
+                    // TODO: if selection is disabled, still want to be able to modify UI properties without selecting it in scene...
+                    //       Need to separate UI selection from model selection
+                    //       perhaps a slight highlight for model selection and a distinct UI selection highlight
+                    //       Or just disable UI selection entirely
                     if (ImGui::Selectable((image->GetImage()->Name() + "##Item" + std::to_string(i++)).c_str(), image->isSelected))
                         shapeSelectionChanged.emit(static_cast<std::shared_ptr<Shape2D>>(image), HasKeyPressed(GLFW_KEY_LEFT_CONTROL));
                     if (image->isSelected)
