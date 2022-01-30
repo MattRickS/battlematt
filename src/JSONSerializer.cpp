@@ -60,12 +60,15 @@ bool JSONSerializer::SerializeImage(const std::shared_ptr<BGImage>& image, nlohm
     return true;
 }
 
-nlohmann::json JSONSerializer::SerializeImages(const std::vector<std::shared_ptr<BGImage>>& images)
+nlohmann::json JSONSerializer::SerializeImages(const std::vector<std::shared_ptr<BGImage>>& images, bool selectedOnly)
 {
     std::vector<nlohmann::json> jimages(images.size());
     unsigned int i = 0;
     std::for_each(images.begin(), images.end(),
-                  [this, &i, &jimages](const std::shared_ptr<BGImage> image){ SerializeImage(image, jimages[i++]); });
+                  [this, &i, &jimages, &selectedOnly](const std::shared_ptr<BGImage> image){
+                      if (image->isSelected || !selectedOnly)
+                          SerializeImage(image, jimages[i++]);
+                  });
     return jimages;
 }
 
@@ -218,7 +221,7 @@ nlohmann::json JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scen
         json["tokens"] = SerializeTokens(scene->tokens, bool(flags & SerializeFlag::Selected) && !bool(flags & SerializeFlag::All));
 
     if (bool(flags & SerializeFlag::Image) || bool(flags & SerializeFlag::All))
-        json["images"] = SerializeImages(scene->images);
+        json["images"] = SerializeImages(scene->images, bool(flags & SerializeFlag::Selected) && !bool(flags & SerializeFlag::All));
 
     if (bool(flags & SerializeFlag::Camera) || bool(flags & SerializeFlag::All))
     {

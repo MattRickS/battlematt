@@ -25,7 +25,7 @@ public:
     void Load(std::string path, bool merge = false);
     void Merge(const std::shared_ptr<Scene>& scene);
 
-    void CopySelected();
+    bool CopySelected();
     void CutSelected();
     void PasteSelected();
 
@@ -40,7 +40,7 @@ public:
     void SelectShape(std::shared_ptr<Shape2D> shape, bool additive=false);
     // void SelectShape(const std::shared_ptr<Shape2D>& shape, bool additive=false);  // Clashes with signal.
     void SelectShapes(const std::vector<std::shared_ptr<Shape2D>>& shapes, bool additive=false);
-    void DuplicateSelectedTokens();
+    void DuplicateSelectedShapes();
     void DeleteSelectedShapes();
 
     void Focus();

@@ -100,32 +100,37 @@ void Controller::Load(std::string path, bool merge)
 void Controller::Merge(const std::shared_ptr<Scene>& scene)
 {
     std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    std::vector<std::shared_ptr<Shape2D>> shapes;
 
     if (!scene->tokens.empty())
     {
         actionGroup->Add(std::make_shared<AddTokensAction>(m_scene, scene->tokens));
-        std::vector<std::shared_ptr<Shape2D>> shapes;
         for (const auto& token: scene->tokens)
             shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
-        actionGroup->Add(std::make_shared<SelectShapesAction>(SelectedShapes(), shapes));
     }
 
     if (!scene->images.empty())
     {
         actionGroup->Add(std::make_shared<AddImagesAction>(m_scene, scene->images));
+        for (const auto& image: scene->images)
+            shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(image));
     }
 
     if (!actionGroup->IsEmpty())
+    {
+        actionGroup->Add(std::make_shared<SelectShapesAction>(SelectedShapes(), shapes));
         PerformAction(actionGroup);
+    }
 }
 
-void Controller::CopySelected()
+bool Controller::CopySelected()
 {
     if (!HasSelectedShapes())
-        return;
+        return false;
 
-    std::string string = m_serializer.SerializeScene(m_scene, SerializeFlag::Token | SerializeFlag::Selected).dump();
+    std::string string = m_serializer.SerializeScene(m_scene, SerializeFlag::Image |SerializeFlag::Token | SerializeFlag::Selected).dump();
     m_viewport->CopyToClipboard(string);
+    return true;
 }
 
 void Controller::CutSelected()
@@ -235,30 +240,10 @@ void Controller::SelectShapes(const std::vector<std::shared_ptr<Shape2D>>& shape
     PerformAction(std::make_shared<SelectShapesAction>(SelectedShapes(), shapes, additive));
 }
 
-// TODO: Duplicate selected shapes
-void Controller::DuplicateSelectedTokens()
+void Controller::DuplicateSelectedShapes()
 {
-    if (!HasSelectedTokens())
-        return;
-
-    std::vector<std::shared_ptr<Token>> duplicates;
-    for (const std::shared_ptr<Token>& token : SelectedTokens())
-    {
-        // TODO: dynamic cast checks to token/image
-        //    OR separate methods for SelectedTokens / SelectedImages that filters the selection
-        std::shared_ptr<Token> duplicate = std::make_shared<Token>(*token);
-        duplicate->GetModel()->Offset(glm::vec2(1));
-        duplicates.push_back(duplicate);
-    }
-
-    // Add them to the scene and select them in the one action
-    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
-    actionGroup->Add(std::make_shared<AddTokensAction>(m_scene, duplicates));
-    std::vector<std::shared_ptr<Shape2D>> shapes;
-    for (const auto& token: duplicates)
-        shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
-    actionGroup->Add(std::make_shared<SelectShapesAction>(SelectedShapes(), shapes));
-    PerformAction(actionGroup);
+    if (CopySelected())
+        PasteSelected();
 }
 
 void Controller::DeleteSelectedShapes()
@@ -525,7 +510,7 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
     if (key == GLFW_KEY_DELETE && HasSelectedShapes())
         DeleteSelectedShapes();
     if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
-        DuplicateSelectedTokens();
+        DuplicateSelectedShapes();
     if (key == GLFW_KEY_C && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
         CopySelected();
     if (key == GLFW_KEY_X && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
