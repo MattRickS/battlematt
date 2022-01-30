@@ -227,18 +227,16 @@ void UIWindow::Draw()
 
         if (ImGui::CollapsingHeader("Images"))
         {
-            static unsigned int selected_image_idx = 0;
+            std::shared_ptr<BGImage> lastSelectedImage = nullptr;
             if (ImGui::BeginListBox("Images##List"))
             {
-                for (unsigned int i = 0; i < m_scene->images.size(); i++)
+                int i = 0;
+                for (const auto& image : m_scene->images)
                 {
-                    const bool is_selected = (selected_image_idx == i);
-                    if (ImGui::Selectable((m_scene->images[i]->GetImage()->Name() + "##Item" + std::to_string(i)).c_str(), is_selected))
-                        selected_image_idx = i;
-
-                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                    if (is_selected)
-                        ImGui::SetItemDefaultFocus();
+                    if (ImGui::Selectable((image->GetImage()->Name() + "##Item" + std::to_string(i++)).c_str(), image->isSelected))
+                        shapeSelectionChanged.emit(static_cast<std::shared_ptr<Shape2D>>(image), HasKeyPressed(GLFW_KEY_LEFT_CONTROL));
+                    if (image->isSelected)
+                        lastSelectedImage = image;
                 }
                 ImGui::EndListBox();
             }
@@ -246,14 +244,8 @@ void UIWindow::Draw()
             if (ImGui::Button("Add Image"))
                 addImageClicked.emit();
 
-            if (selected_image_idx < m_scene->images.size())
-            {
-                ImGui::SameLine();
-                if (ImGui::Button("Delete Image"))
-                    removeImageClicked.emit(m_scene->images[selected_image_idx]);
-
-                DrawImageOptions(m_scene->images[selected_image_idx]);
-            }
+            if (lastSelectedImage)
+                DrawImageOptions(lastSelectedImage);
         }
 
         if (ImGui::CollapsingHeader("Grid"))
