@@ -126,6 +126,8 @@ typedef ModifyMemberAction<Token, std::shared_ptr<Texture>> ModifyTokenTexture; 
 typedef ModifyMemberAction<Token, std::string> ModifyTokenString;  // name
 typedef ModifyMemberAction<Token, TokenStatuses> ModifyTokenStatuses;
 
+typedef ModifyMemberAction<Scene, bool> ModifySceneLocks;
+
 // Selection
 class SelectShapesAction : public Action
 {

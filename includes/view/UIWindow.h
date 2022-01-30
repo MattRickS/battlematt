@@ -28,6 +28,8 @@ public:
     Signal<const std::shared_ptr<Token>&, TokenProperty, TokenPropertyValue> tokenPropertyChanged;
     Signal<const std::shared_ptr<BGImage>&, ImageProperty, ImagePropertyValue> imagePropertyChanged;
     Signal<const std::shared_ptr<Grid>&, GridProperty, GridPropertyValue> gridPropertyChanged;
+    Signal<bool> imageLockChanged;
+    Signal<bool> tokenLockChanged;
 
     UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share = NULL);
     ~UIWindow();
@@ -45,6 +47,9 @@ private:
     std::string m_promptMsg = "";
     int m_promptType = 0;
     bool mergeLoad = false;
+
+    bool m_lockImages = false;
+    bool m_lockTokens = false;
 
     std::string tokenNames[NUM_TOKEN_STATUSES] {"Red", "Green", "Blue", "Yellow", "Cyan", "Pink"};
 

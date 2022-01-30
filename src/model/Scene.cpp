@@ -112,6 +112,11 @@ Bounds2D Scene::GetBounds()
     return Bounds2D::BoundsForShapes(shapes);
 }
 
+bool Scene::GetImagesLocked() { return m_lockImages; }
+void Scene::SetImagesLocked(bool locked) { m_lockImages = locked; }
+bool Scene::GetTokensLocked() { return m_lockTokens; }
+void Scene::SetTokensLocked(bool locked) { m_lockTokens = locked; }
+
 // TODO: Move to renderer class
 void Scene::Draw()
 {

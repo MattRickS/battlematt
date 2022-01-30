@@ -38,6 +38,8 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->addTokenClicked.connect(this, &Controller::OnUIAddTokenClicked);
     m_uiWindow->addImageClicked.connect(this, &Controller::OnUIAddImageClicked);
     m_uiWindow->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
+    m_uiWindow->imageLockChanged.connect(this, &Controller::SetImagesLocked);
+    m_uiWindow->tokenLockChanged.connect(this, &Controller::SetTokensLocked);
 
     SetScene(std::make_shared<Scene>(m_resources));
 }
@@ -122,6 +124,47 @@ void Controller::Merge(const std::shared_ptr<Scene>& scene)
         actionGroup->Add(std::make_shared<SelectShapesAction>(SelectedShapes(), shapes));
         PerformAction(actionGroup);
     }
+}
+
+// Locking
+void Controller::SetImagesLocked(bool locked)
+{
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    actionGroup->Add(std::make_shared<ModifySceneLocks>(m_scene, &Scene::SetImagesLocked, m_scene->GetImagesLocked(), locked));
+
+    // Deselect images
+    if (HasSelectedImages())
+    {
+        auto selectedShapes = SelectedShapes();
+        std::vector<std::shared_ptr<Shape2D>> newSelectedShapes;
+        std::for_each(selectedShapes.begin(), selectedShapes.end(),
+                      [&newSelectedShapes](const auto& shape) {
+                          if (!std::dynamic_pointer_cast<BGImage>(shape))
+                             newSelectedShapes.push_back(shape);
+                      });
+        actionGroup->Add(std::make_shared<SelectShapesAction>(selectedShapes, newSelectedShapes));
+    }
+    PerformAction(actionGroup);
+}
+
+void Controller::SetTokensLocked(bool locked)
+{
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    actionGroup->Add(std::make_shared<ModifySceneLocks>(m_scene, &Scene::SetTokensLocked, m_scene->GetTokensLocked(), locked));
+
+    // Deselect tokens
+    if (HasSelectedTokens())
+    {
+        auto selectedShapes = SelectedShapes();
+        std::vector<std::shared_ptr<Shape2D>> newSelectedShapes;
+        std::for_each(selectedShapes.begin(), selectedShapes.end(),
+                      [&newSelectedShapes](const auto& shape) {
+                          if (!std::dynamic_pointer_cast<Token>(shape))
+                             newSelectedShapes.push_back(shape);
+                      });
+        actionGroup->Add(std::make_shared<SelectShapesAction>(selectedShapes, newSelectedShapes));
+    }
+    PerformAction(actionGroup);
 }
 
 // Selection
@@ -287,7 +330,7 @@ std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx,
 
     std::vector<std::shared_ptr<Shape2D>> shapes;
 
-    if (!m_lockTokens)
+    if (!m_scene->GetTokensLocked())
     {
         for (const std::shared_ptr<Token>& token: m_scene->tokens)
         {
@@ -301,7 +344,7 @@ std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx,
         }
     }
 
-    if (!m_lockImages)
+    if (!m_scene->GetImagesLocked())
     {
         for (const std::shared_ptr<BGImage>& image: m_scene->images)
         {
@@ -322,7 +365,7 @@ std::shared_ptr<Shape2D> Controller::GetShapeAtScreenPos(glm::vec2 screenPos)
 {
     glm::vec2 worldPos = m_viewport->ScreenToWorldPos(screenPos.x, screenPos.y);
     // Tokens are drawn from first to last, so iterate in reverse to find the topmost
-    if (!m_lockTokens)
+    if (!m_scene->GetTokensLocked())
     {
         for (int i = m_scene->tokens.size() - 1; i >= 0; i--)
         {
@@ -334,7 +377,7 @@ std::shared_ptr<Shape2D> Controller::GetShapeAtScreenPos(glm::vec2 screenPos)
         }
     }
     // Images are drawn from first to last, so iterate in reverse to find the topmost
-    if (!m_lockImages)
+    if (!m_scene->GetImagesLocked())
     {
         for (int i = m_scene->images.size() - 1; i >= 0; i--)
         {
@@ -424,7 +467,7 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
     // Only highlight the first matching shape, but unhighlight any others that were highlighted
     // Shapes are drawn from first to last, so iterate in reverse to find the topmost
     bool highlighted = false;
-    if (!m_lockTokens)
+    if (!m_scene->GetTokensLocked())
     {
         for (int i = m_scene->tokens.size() - 1; i >= 0; i--)
         {
@@ -433,7 +476,7 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
             highlighted |= token->isHighlighted;
         }
     }
-    if (!m_lockImages)
+    if (!m_scene->GetImagesLocked())
     {
         for (int i = m_scene->images.size() - 1; i >= 0; i--)
         {

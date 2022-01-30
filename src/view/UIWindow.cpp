@@ -227,10 +227,8 @@ void UIWindow::Draw()
 
         if (ImGui::CollapsingHeader("Images"))
         {
-            // How to get whether or not image selection is enabled?
-            // bool imageSelectionEnabled = false;
-            // if (ImGui::Checkbox("Disable Image Selection", &imageSelectionEnabled))
-            //     // Signal
+            if (ImGui::Checkbox("Lock Images in Viewport", &m_lockImages))
+                imageLockChanged.emit(m_lockImages);
 
             std::shared_ptr<BGImage> lastSelectedImage = nullptr;
             if (ImGui::BeginListBox("Images##List"))
@@ -262,6 +260,9 @@ void UIWindow::Draw()
 
         if (ImGui::CollapsingHeader("Token"))
         {
+            if (ImGui::Checkbox("Lock Tokens in Viewport", &m_lockTokens))
+                tokenLockChanged.emit(m_lockTokens);
+
             std::shared_ptr<Token> lastSelectedToken = nullptr;
             if (ImGui::BeginListBox("Tokens##List"))
             {

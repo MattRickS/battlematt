@@ -25,6 +25,9 @@ public:
     void Load(std::string path, bool merge = false);
     void Merge(const std::shared_ptr<Scene>& scene);
 
+    void SetImagesLocked(bool locked);
+    void SetTokensLocked(bool locked);
+
     // TODO: Image needs to render selection highlight
     std::vector<std::shared_ptr<Shape2D>> SelectedShapes();
     std::vector<std::shared_ptr<Token>> SelectedTokens();
@@ -86,8 +89,6 @@ private:
     std::deque<std::shared_ptr<Action>> undoQueue;
     std::deque<std::shared_ptr<Action>> redoQueue;
 
-    bool m_lockImages = false;
-    bool m_lockTokens = false;
     std::shared_ptr<RectOverlay> dragSelectRect = nullptr;
     std::shared_ptr<Shape2D> shapeUnderCursor = nullptr;
 
