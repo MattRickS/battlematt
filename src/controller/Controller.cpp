@@ -240,6 +240,14 @@ void Controller::ClearSelection()
 void Controller::SelectShape(std::shared_ptr<Shape2D> shape, bool additive)
 {
     PerformAction(std::make_shared<SelectShapesAction>(SelectedShapes(), shape, additive));
+
+    auto token = std::dynamic_pointer_cast<Token>(shape);
+    if (token)
+        m_uiWindow->SetDisplayPropertiesToken(token);
+
+    auto image = std::dynamic_pointer_cast<BGImage>(shape);
+    if (image)
+        m_uiWindow->SetDisplayPropertiesImage(image);
 }
 
 // void Controller::SelectShape(const std::shared_ptr<Shape2D>& shape, bool additive)
@@ -250,6 +258,19 @@ void Controller::SelectShape(std::shared_ptr<Shape2D> shape, bool additive)
 void Controller::SelectShapes(const std::vector<std::shared_ptr<Shape2D>>& shapes, bool additive)
 {
     PerformAction(std::make_shared<SelectShapesAction>(SelectedShapes(), shapes, additive));
+    for (const auto& shape: shapes)
+    {
+        auto token = std::dynamic_pointer_cast<Token>(shape);
+        if (token)
+        {
+            m_uiWindow->SetDisplayPropertiesToken(token);
+        }
+        auto image = std::dynamic_pointer_cast<BGImage>(shape);
+        if (image)
+        {
+            m_uiWindow->SetDisplayPropertiesImage(image);
+        }
+    }
 }
 
 // Selection Operators

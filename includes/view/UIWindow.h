@@ -39,6 +39,9 @@ public:
     void Prompt(int promptType, std::string msg);
     bool HasPrompt();
 
+    void SetDisplayPropertiesToken(const std::shared_ptr<Token>& token);
+    void SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image);
+
     virtual void OnKeyChanged(int key, int scancode, int action, int mods);
 
 private:
@@ -49,6 +52,9 @@ private:
     bool mergeLoad = false;
 
     std::string tokenNames[NUM_TOKEN_STATUSES] {"Red", "Green", "Blue", "Yellow", "Cyan", "Pink"};
+
+    std::shared_ptr<Token> m_displayPropertiesToken = nullptr;
+    std::shared_ptr<BGImage> m_displayPropertiesImage = nullptr;
 
     void DrawImageOptions(const std::shared_ptr<BGImage>& image);
     void DrawGridOptions(const std::shared_ptr<Grid>&);

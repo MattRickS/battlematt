@@ -24,6 +24,9 @@ namespace ImGui
 }
 
 
+const ImVec4 SELECT_COLOR = ImVec4(0.3f, 0.3f, 1.0f, 1.0f);
+
+
 UIWindow::UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share) :
     Window(width, height, "UI", share), m_resources(resources)
 {
@@ -66,6 +69,16 @@ UIWindow::~UIWindow()
 }
 
 void UIWindow::SetScene(std::shared_ptr<Scene> scene) { m_scene = scene; }
+
+void UIWindow::SetDisplayPropertiesToken(const std::shared_ptr<Token>& token)
+{
+    m_displayPropertiesToken = token;
+}
+
+void UIWindow::SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image)
+{
+    m_displayPropertiesImage = image;
+}
 
 void UIWindow::Prompt(int promptType, std::string msg)
 {
@@ -231,20 +244,22 @@ void UIWindow::Draw()
             if (ImGui::Checkbox("Lock Images in Viewport", &lockImages))
                 imageLockChanged.emit(lockImages);
 
-            std::shared_ptr<BGImage> lastSelectedImage = nullptr;
             if (ImGui::BeginListBox("Images##List"))
             {
                 int i = 0;
                 for (const auto& image : m_scene->images)
                 {
-                    // TODO: if selection is disabled, still want to be able to modify UI properties without selecting it in scene...
-                    //       Need to separate UI selection from model selection
-                    //       perhaps a slight highlight for model selection and a distinct UI selection highlight
-                    //       Or just disable UI selection entirely
-                    if (ImGui::Selectable((image->GetImage()->Name() + "##Item" + std::to_string(i++)).c_str(), image->isSelected))
+                    bool isUISelected = image == m_displayPropertiesImage;
+                    if (isUISelected)
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Header, SELECT_COLOR);
+                        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, SELECT_COLOR);
+                    }
+                    if (ImGui::Selectable((image->GetImage()->Name() + "##Item" + std::to_string(i++)).c_str(), image->isSelected || isUISelected))
                         shapeSelectionChanged.emit(static_cast<std::shared_ptr<Shape2D>>(image), HasKeyPressed(GLFW_KEY_LEFT_CONTROL));
-                    if (image->isSelected)
-                        lastSelectedImage = image;
+
+                    if (isUISelected)
+                        ImGui::PopStyleColor(2);
                 }
                 ImGui::EndListBox();
             }
@@ -252,8 +267,10 @@ void UIWindow::Draw()
             if (ImGui::Button("Add Image"))
                 addImageClicked.emit();
 
-            if (lastSelectedImage)
-                DrawImageOptions(lastSelectedImage);
+            if (std::find(m_scene->images.begin(), m_scene->images.end(), m_displayPropertiesImage) != m_scene->images.end())
+                DrawImageOptions(m_displayPropertiesImage);
+            else
+                m_displayPropertiesImage = nullptr;
         }
 
         if (ImGui::CollapsingHeader("Grid"))
@@ -265,16 +282,22 @@ void UIWindow::Draw()
             if (ImGui::Checkbox("Lock Tokens in Viewport", &lockTokens))
                 tokenLockChanged.emit(lockTokens);
 
-            std::shared_ptr<Token> lastSelectedToken = nullptr;
             if (ImGui::BeginListBox("Tokens##List"))
             {
                 int i = 0;
                 for (std::shared_ptr<Token>& token : m_scene->tokens)
                 {
-                    if (ImGui::Selectable((token->GetName() + "##Item" + std::to_string(i++)).c_str(), token->isSelected))
+                    bool isUISelected = token == m_displayPropertiesToken;
+                    if (isUISelected)
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Header, SELECT_COLOR);
+                        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, SELECT_COLOR);
+                    }
+                    if (ImGui::Selectable((token->GetName() + "##Item" + std::to_string(i++)).c_str(), token->isSelected || isUISelected))
                         shapeSelectionChanged.emit(static_cast<std::shared_ptr<Shape2D>>(token), HasKeyPressed(GLFW_KEY_LEFT_CONTROL));
-                    if (token->isSelected)
-                        lastSelectedToken = token;
+
+                    if (isUISelected)
+                        ImGui::PopStyleColor(2);
                 }
                 ImGui::EndListBox();
             }
@@ -282,8 +305,10 @@ void UIWindow::Draw()
             if (ImGui::Button("Add Token"))
                 addTokenClicked.emit();
 
-            if (lastSelectedToken)
-                DrawTokenOptions(lastSelectedToken);
+            if (std::find(m_scene->tokens.begin(), m_scene->tokens.end(), m_displayPropertiesToken) != m_scene->tokens.end())
+                DrawTokenOptions(m_displayPropertiesToken);
+            else
+                m_displayPropertiesToken = nullptr;
         }
 
         // Spacer
