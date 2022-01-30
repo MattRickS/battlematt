@@ -30,6 +30,9 @@ public:
     Signal<const std::shared_ptr<Grid>&, GridProperty, GridPropertyValue> gridPropertyChanged;
     Signal<bool> imageLockChanged;
     Signal<bool> tokenLockChanged;
+    Signal<int> cameraIndexChanged;
+    Signal<> cloneCameraClicked;
+    Signal<> deleteCameraClicked;
 
     UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share = NULL);
     ~UIWindow();

@@ -45,6 +45,7 @@ public:
     void PasteSelected();
     void DuplicateSelected();
     void DeleteSelected();
+    void CloneCamera();
 
     void Focus();
     void FocusSelected();
@@ -64,6 +65,7 @@ public:
     void OnUIAddImageClicked();
     void OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image);
     void OnUIKeyChanged(int key, int scancode, int action, int mods);
+    void OnUICameraIndexChanged(int index);
     void PerformAction(const std::shared_ptr<Action>& action);
 
     bool Undo();

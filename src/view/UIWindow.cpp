@@ -238,6 +238,26 @@ void UIWindow::Draw()
 
         ImGui::ColorEdit3("Background Color", (float*)&m_scene->bgColor);
 
+        if (ImGui::CollapsingHeader("Cameras"))
+        {
+            if (ImGui::BeginListBox("Cameras##List"))
+            {
+                for (unsigned int i = 0; i < m_scene->cameras.size(); i++)
+                {
+                    if (ImGui::Selectable(("Camera" + std::to_string(i)).c_str(), false))
+                        cameraIndexChanged.emit(i);
+                }
+                ImGui::EndListBox();
+            }
+
+            if (ImGui::Button("Clone Camera"))
+                cloneCameraClicked.emit();
+
+            ImGui::SameLine();
+            if (ImGui::Button("Delete Camera"))
+                deleteCameraClicked.emit();
+        }
+
         if (ImGui::CollapsingHeader("Images"))
         {
             bool lockImages = m_scene->GetImagesLocked();

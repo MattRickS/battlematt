@@ -40,6 +40,8 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
     m_uiWindow->imageLockChanged.connect(this, &Controller::SetImagesLocked);
     m_uiWindow->tokenLockChanged.connect(this, &Controller::SetTokensLocked);
+    m_uiWindow->cameraIndexChanged.connect(this, &Controller::OnUICameraIndexChanged);
+    m_uiWindow->cloneCameraClicked.connect(this, &Controller::CloneCamera);
 
     SetScene(std::make_shared<Scene>(m_resources));
 }
@@ -328,6 +330,12 @@ void Controller::DeleteSelected()
         actionGroup->Add(std::make_shared<RemoveImagesAction>(m_scene, selectedImages));
 
     PerformAction(actionGroup);
+}
+
+void Controller::CloneCamera()
+{
+    auto camera = std::make_shared<Camera>(*m_viewport->GetCamera());
+    m_scene->AddCamera(camera);
 }
 
 // Viewport
@@ -645,6 +653,11 @@ void Controller::OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image)
 void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
 {
     OnKeyChanged(key, scancode, action, mods);
+}
+
+void Controller::OnUICameraIndexChanged(int index)
+{
+    m_viewport->SetCameraIndex(index);
 }
 
 void Controller::PerformAction(const std::shared_ptr<Action>& action)
