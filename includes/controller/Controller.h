@@ -32,6 +32,8 @@ public:
     // TODO: Image needs to render selection highlight
     std::vector<std::shared_ptr<Shape2D>> SelectedShapes();
     std::vector<std::shared_ptr<Token>> SelectedTokens();
+    std::vector<std::shared_ptr<BGImage>> SelectedImages();
+    bool HasSelectedImages();
     bool HasSelectedTokens();
     bool HasSelectedShapes();
     void ClearSelection();
@@ -39,7 +41,7 @@ public:
     // void SelectShape(const std::shared_ptr<Shape2D>& shape, bool additive=false);  // Clashes with signal.
     void SelectShapes(const std::vector<std::shared_ptr<Shape2D>>& shapes, bool additive=false);
     void DuplicateSelectedTokens();
-    void DeleteSelectedTokens();
+    void DeleteSelectedShapes();
 
     void Focus();
     void FocusSelected();

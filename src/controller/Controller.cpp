@@ -131,7 +131,7 @@ void Controller::CopySelected()
 void Controller::CutSelected()
 {
     CopySelected();
-    DeleteSelectedTokens();
+    DeleteSelectedShapes();
 }
 
 void Controller::PasteSelected()
@@ -177,6 +177,19 @@ std::vector<std::shared_ptr<Token>> Controller::SelectedTokens()
     return selectedTokens;
 }
 
+std::vector<std::shared_ptr<BGImage>> Controller::SelectedImages()
+{
+    // TODO: Could this return an iterator? would be nicer.
+    std::vector<std::shared_ptr<BGImage>> selectedImages;
+    for (const auto& image : m_scene->images)
+    {
+        if (image->isSelected)
+            selectedImages.push_back(image);
+    }
+
+    return selectedImages;
+}
+
 bool Controller::HasSelectedTokens()
 {
     for (const auto& token : m_scene->tokens)
@@ -187,16 +200,19 @@ bool Controller::HasSelectedTokens()
     return false;
 }
 
-bool Controller::HasSelectedShapes()
+bool Controller::HasSelectedImages()
 {
-    if (HasSelectedTokens())
-        return true;
     for (const auto& image : m_scene->images)
     {
         if (image->isSelected)
             return true;
     }
     return false;
+}
+
+bool Controller::HasSelectedShapes()
+{
+    return HasSelectedTokens() || HasSelectedImages();
 }
 
 void Controller::ClearSelection()
@@ -245,9 +261,19 @@ void Controller::DuplicateSelectedTokens()
     PerformAction(actionGroup);
 }
 
-void Controller::DeleteSelectedTokens()
+void Controller::DeleteSelectedShapes()
 {
-    PerformAction(std::make_shared<RemoveTokensAction>(m_scene, SelectedTokens()));
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+
+    auto selectedTokens = SelectedTokens();
+    if (!selectedTokens.empty())
+        actionGroup->Add(std::make_shared<RemoveTokensAction>(m_scene, selectedTokens));
+
+    auto selectedImages = SelectedImages();
+    if (!selectedImages.empty())
+        actionGroup->Add(std::make_shared<RemoveImagesAction>(m_scene, selectedImages));
+
+    PerformAction(actionGroup);
 }
 
 // Viewport
@@ -497,7 +523,7 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
         }
     }
     if (key == GLFW_KEY_DELETE && HasSelectedShapes())
-        DeleteSelectedTokens();
+        DeleteSelectedShapes();
     if (key == GLFW_KEY_D && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
         DuplicateSelectedTokens();
     if (key == GLFW_KEY_C && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
