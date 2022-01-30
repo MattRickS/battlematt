@@ -23,6 +23,8 @@ void BGImage::Draw(Shader &shader)
     glm::vec4 colour = m_tintColour;
     if (isSelected)
         colour = glm::vec4(SELECTION_COLOR, m_tintColour.w);
+    else if (isHighlighted)
+        colour = glm::vec4(HIGHLIGHT_COLOR, m_tintColour.w);
     shader.setFloat4("color", colour.x, colour.y, colour.z, colour.w);
 
     if (m_texture && m_texture->IsValid())

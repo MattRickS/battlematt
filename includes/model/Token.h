@@ -12,8 +12,6 @@
 #include <model/Shape2D.h>
 
 
-const glm::vec4 highlightColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
-
 // TODO: Want this to be configurable
 const unsigned int NUM_TOKEN_STATUSES = 6;
 typedef std::bitset<NUM_TOKEN_STATUSES> TokenStatuses;

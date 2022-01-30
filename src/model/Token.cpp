@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <Constants.h>
 #include <glutil/Matrix2D.h>
 #include <glutil/Mesh.h>
 #include <model/Token.h>
@@ -48,11 +49,11 @@ void Token::Draw(Shader &shader)
 
     glm::vec4 highlight;
     if (isSelected)
-        highlight = highlightColor;
+        highlight = SELECTION_COLOR_ALPHA;
     else if (isHighlighted)
-        highlight = highlightColor * 0.75f;
+        highlight = HIGHLIGHT_COLOR_ALPHA;
     else
-        highlight = glm::vec4(0);
+        highlight = BLACK_RGBA;
 
     if (m_texture && m_texture->IsValid())
     {

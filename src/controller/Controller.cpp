@@ -412,14 +412,20 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
     lastMouseY = ypos;
 
     glm::vec2 worldPos = m_viewport->ScreenToWorldPos(xpos, ypos);
+    // Only highlight the first matching shape, but unhighlight any others that were highlighted
+    // Shapes are drawn from first to last, so iterate in reverse to find the topmost
     bool highlighted = false;
     for (int i = m_scene->tokens.size() - 1; i >= 0; i--)
     {
-        // Only highlight the first matching token, but unhighlight any others that were highlighted
-        // Tokens are drawn from first to last, so iterate in reverse to find the topmost
-        std::shared_ptr<Token> token = m_scene->tokens[i];
+        std::shared_ptr<Token>& token = m_scene->tokens[i];
         token->isHighlighted = token->Contains(worldPos) && !highlighted;
         highlighted |= token->isHighlighted;
+    }
+    for (int i = m_scene->images.size() - 1; i >= 0; i--)
+    {
+        std::shared_ptr<BGImage>& image = m_scene->images[i];
+        image->isHighlighted = image->Contains(worldPos) && !highlighted;
+        highlighted |= image->isHighlighted;
     }
 
     if (middleMouseHeld)
