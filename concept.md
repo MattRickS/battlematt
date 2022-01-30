@@ -194,8 +194,10 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
     - [ ] Optional compass in corner
 - [ ] Global scaling
 - [-] Image selection mode (Toggle between Token/Image)
+- [ ] Interactive transform controls
     - [ ] Hotkey for shape rotation (ctrl + right click?)
     - [ ] Hotkey for shape scaling (ctrl + middle mouse?)
+    - [ ] Central point of scale/rotation for all selected shapes
 - [x] Fix token size scaling snap to grid
 - [ ] Renderer
     - [ ] Centralise drawing

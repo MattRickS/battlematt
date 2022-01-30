@@ -287,7 +287,7 @@ std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx,
 
     std::vector<std::shared_ptr<Shape2D>> shapes;
 
-    if (tokensSelectable)
+    if (!m_lockTokens)
     {
         for (const std::shared_ptr<Token>& token: m_scene->tokens)
         {
@@ -301,7 +301,7 @@ std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx,
         }
     }
 
-    if (imagesSelectable)
+    if (!m_lockImages)
     {
         for (const std::shared_ptr<BGImage>& image: m_scene->images)
         {
@@ -322,21 +322,27 @@ std::shared_ptr<Shape2D> Controller::GetShapeAtScreenPos(glm::vec2 screenPos)
 {
     glm::vec2 worldPos = m_viewport->ScreenToWorldPos(screenPos.x, screenPos.y);
     // Tokens are drawn from first to last, so iterate in reverse to find the topmost
-    for (int i = m_scene->tokens.size() - 1; i >= 0; i--)
+    if (!m_lockTokens)
     {
-        // It should only be possible to select one shape with a single click
-        if (m_scene->tokens[i]->Contains(worldPos))
+        for (int i = m_scene->tokens.size() - 1; i >= 0; i--)
         {
-            return static_cast<std::shared_ptr<Shape2D>>(m_scene->tokens[i]);
+            // It should only be possible to select one shape with a single click
+            if (m_scene->tokens[i]->Contains(worldPos))
+            {
+                return static_cast<std::shared_ptr<Shape2D>>(m_scene->tokens[i]);
+            }
         }
     }
     // Images are drawn from first to last, so iterate in reverse to find the topmost
-    for (int i = m_scene->images.size() - 1; i >= 0; i--)
+    if (!m_lockImages)
     {
-        // It should only be possible to select one shape with a single click
-        if (m_scene->images[i]->Contains(worldPos))
+        for (int i = m_scene->images.size() - 1; i >= 0; i--)
         {
-            return static_cast<std::shared_ptr<Shape2D>>(m_scene->images[i]);
+            // It should only be possible to select one shape with a single click
+            if (m_scene->images[i]->Contains(worldPos))
+            {
+                return static_cast<std::shared_ptr<Shape2D>>(m_scene->images[i]);
+            }
         }
     }
     return nullptr;
@@ -412,20 +418,29 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
     lastMouseY = ypos;
 
     glm::vec2 worldPos = m_viewport->ScreenToWorldPos(xpos, ypos);
+    // TODO: Change this.
+    //   Can be optimised to track what's highlighted and explicitly clear it.
+    //   Also shouldn't rely on the `lock` options in mouse move
     // Only highlight the first matching shape, but unhighlight any others that were highlighted
     // Shapes are drawn from first to last, so iterate in reverse to find the topmost
     bool highlighted = false;
-    for (int i = m_scene->tokens.size() - 1; i >= 0; i--)
+    if (!m_lockTokens)
     {
-        std::shared_ptr<Token>& token = m_scene->tokens[i];
-        token->isHighlighted = token->Contains(worldPos) && !highlighted;
-        highlighted |= token->isHighlighted;
+        for (int i = m_scene->tokens.size() - 1; i >= 0; i--)
+        {
+            std::shared_ptr<Token>& token = m_scene->tokens[i];
+            token->isHighlighted = token->Contains(worldPos) && !highlighted;
+            highlighted |= token->isHighlighted;
+        }
     }
-    for (int i = m_scene->images.size() - 1; i >= 0; i--)
+    if (!m_lockImages)
     {
-        std::shared_ptr<BGImage>& image = m_scene->images[i];
-        image->isHighlighted = image->Contains(worldPos) && !highlighted;
-        highlighted |= image->isHighlighted;
+        for (int i = m_scene->images.size() - 1; i >= 0; i--)
+        {
+            std::shared_ptr<BGImage>& image = m_scene->images[i];
+            image->isHighlighted = image->Contains(worldPos) && !highlighted;
+            highlighted |= image->isHighlighted;
+        }
     }
 
     if (middleMouseHeld)

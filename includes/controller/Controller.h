@@ -86,8 +86,8 @@ private:
     std::deque<std::shared_ptr<Action>> undoQueue;
     std::deque<std::shared_ptr<Action>> redoQueue;
 
-    bool imagesSelectable = true;
-    bool tokensSelectable = true;
+    bool m_lockImages = false;
+    bool m_lockTokens = false;
     std::shared_ptr<RectOverlay> dragSelectRect = nullptr;
     std::shared_ptr<Shape2D> shapeUnderCursor = nullptr;
 
