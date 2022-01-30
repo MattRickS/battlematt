@@ -1,6 +1,5 @@
 #pragma once
 #include <chrono>
-#include <iostream>
 #include <memory>
 
 #include <glm/glm.hpp>
@@ -175,10 +174,6 @@ private:
     {
         for (const auto& shape: shapes)
             shape->isSelected = select;
-        if (select)
-            std::cout << "Selected: " << shapes.size() << std::endl;
-        else
-            std::cout << "Deselected: " << shapes.size() << std::endl;
     }
 };
 
