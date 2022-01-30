@@ -218,10 +218,18 @@ nlohmann::json JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scen
 {
     nlohmann::json json;
     if (bool(flags & SerializeFlag::Token) || bool(flags & SerializeFlag::All))
-        json["tokens"] = SerializeTokens(scene->tokens, bool(flags & SerializeFlag::Selected) && !bool(flags & SerializeFlag::All));
+    {
+        auto serialized = SerializeTokens(scene->tokens, bool(flags & SerializeFlag::Selected) && !bool(flags & SerializeFlag::All));
+        if (!serialized.empty())
+            json["tokens"] = serialized;
+    }
 
     if (bool(flags & SerializeFlag::Image) || bool(flags & SerializeFlag::All))
-        json["images"] = SerializeImages(scene->images, bool(flags & SerializeFlag::Selected) && !bool(flags & SerializeFlag::All));
+    {
+        auto serialized = SerializeImages(scene->images, bool(flags & SerializeFlag::Selected) && !bool(flags & SerializeFlag::All));
+        if (!serialized.empty())
+            json["images"] = serialized;
+    }
 
     if (bool(flags & SerializeFlag::Camera) || bool(flags & SerializeFlag::All))
     {
