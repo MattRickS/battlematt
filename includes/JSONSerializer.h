@@ -47,7 +47,7 @@ public:
     bool SerializeScene(const std::shared_ptr<Scene>& scene, nlohmann::json& json);
     bool SerializeToken(const std::shared_ptr<Token>& token, nlohmann::json& json);
 
-    nlohmann::json SerializeImages(const std::vector<std::shared_ptr<BGImage>>& images);
+    nlohmann::json SerializeImages(const std::vector<std::shared_ptr<BGImage>>& images, bool selectedOnly=false);
     nlohmann::json SerializeTokens(const std::vector<std::shared_ptr<Token>>& tokens, bool selectedOnly=false);
     nlohmann::json SerializeScene(const std::shared_ptr<Scene>& scene);
     nlohmann::json SerializeScene(const std::shared_ptr<Scene>& scene, SerializeFlag flags);

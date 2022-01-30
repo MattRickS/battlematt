@@ -193,8 +193,11 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Rotatable camera (but not tokens... ie, disorient players :D )
     - [ ] Optional compass in corner
 - [ ] Global scaling
-- [ ] Hotkey for token rotation
-- [ ] Image selection mode
+- [x] Image selection mode (Toggle between Token/Image)
+- [ ] Interactive transform controls
+    - [ ] Hotkey for shape rotation (ctrl + right click?)
+    - [ ] Hotkey for shape scaling (ctrl + middle mouse?)
+    - [ ] Central point of scale/rotation for all selected shapes
 - [x] Fix token size scaling snap to grid
 - [ ] Renderer
     - [ ] Centralise drawing
@@ -204,3 +207,6 @@ Infinite Grid: http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGr
 - [ ] Host Screen
     - [ ] All scene elements have an option for Host visibility only
     - [ ] Separate camera
+    - [ ] Merged with UI Window? Collapsible UI?
+- [ ] Repeating background image
+    - [ ] Layering repeating images with alogrithms for merging, eg, noise opacity.

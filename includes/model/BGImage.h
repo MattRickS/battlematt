@@ -18,10 +18,12 @@ public:
     void Draw(Shader &shader) override;
     std::shared_ptr<Texture> GetImage();
     void SetImage(std::shared_ptr<Texture> texture);
+    void SetTint(glm::vec4 colour);
     bool GetLockRatio();
     void SetLockRatio(bool lockRatio);
 
 private:
     std::shared_ptr<Texture> m_texture;
+    glm::vec4 m_tintColour = glm::vec4(1);
     bool m_lockRatio = false;
 };

@@ -37,8 +37,14 @@ public:
     void RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove);
     bool IsEmpty();
     Bounds2D GetBounds();
+    bool GetImagesLocked();
+    void SetImagesLocked(bool locked);
+    bool GetTokensLocked();
+    void SetTokensLocked(bool locked);
     void Draw();
 
 private:
     std::shared_ptr<Resources> m_resources;
+    bool m_lockImages = false;
+    bool m_lockTokens = false;
 };

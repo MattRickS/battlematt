@@ -60,12 +60,15 @@ bool JSONSerializer::SerializeImage(const std::shared_ptr<BGImage>& image, nlohm
     return true;
 }
 
-nlohmann::json JSONSerializer::SerializeImages(const std::vector<std::shared_ptr<BGImage>>& images)
+nlohmann::json JSONSerializer::SerializeImages(const std::vector<std::shared_ptr<BGImage>>& images, bool selectedOnly)
 {
-    std::vector<nlohmann::json> jimages(images.size());
+    nlohmann::json jimages = nlohmann::json::array();
     unsigned int i = 0;
     std::for_each(images.begin(), images.end(),
-                  [this, &i, &jimages](const std::shared_ptr<BGImage> image){ SerializeImage(image, jimages[i++]); });
+                  [this, &i, &jimages, &selectedOnly](const std::shared_ptr<BGImage> image){
+                      if (image->isSelected || !selectedOnly)
+                          SerializeImage(image, jimages[i++]);
+                  });
     return jimages;
 }
 
@@ -152,8 +155,11 @@ std::shared_ptr<Token> JSONSerializer::DeserializeToken(nlohmann::json& json)
 // Scene
 bool JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scene, nlohmann::json& json)
 {
-    json["tokens"] = SerializeTokens(scene->tokens);
     json["images"] = SerializeImages(scene->images);
+    json["imagesLocked"] = scene->GetImagesLocked();
+
+    json["tokens"] = SerializeTokens(scene->tokens);
+    json["tokensLocked"] = scene->GetTokensLocked();
 
     nlohmann::json jcamera;
     SerializeCamera(scene->camera, jcamera);
@@ -181,6 +187,8 @@ void JSONSerializer::DeserializeScene(nlohmann::json& json, Scene& scene)
         std::for_each(jimages.begin(), jimages.end(),
                     [this, &scene](nlohmann::json& jimage){ scene.images.push_back(DeserializeImage(jimage)); });
     }
+    if (json.contains("imagesLocked"))
+        scene.SetImagesLocked(json["imagesLocked"]);
 
     if (json.contains("tokens"))
     {
@@ -189,6 +197,8 @@ void JSONSerializer::DeserializeScene(nlohmann::json& json, Scene& scene)
         std::for_each(jtokens.begin(), jtokens.end(),
                     [this, &scene](nlohmann::json& jtoken){ scene.tokens.push_back(DeserializeToken(jtoken)); });
     }
+    if (json.contains("tokensLocked"))
+        scene.SetTokensLocked(json["tokensLocked"]);
 }
 
 std::shared_ptr<Scene> JSONSerializer::DeserializeScene(nlohmann::json& json)
@@ -215,10 +225,18 @@ nlohmann::json JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scen
 {
     nlohmann::json json;
     if (bool(flags & SerializeFlag::Token) || bool(flags & SerializeFlag::All))
-        json["tokens"] = SerializeTokens(scene->tokens, bool(flags & SerializeFlag::Selected) && !bool(flags & SerializeFlag::All));
+    {
+        auto serialized = SerializeTokens(scene->tokens, bool(flags & SerializeFlag::Selected) && !bool(flags & SerializeFlag::All));
+        if (!serialized.empty())
+            json["tokens"] = serialized;
+    }
 
     if (bool(flags & SerializeFlag::Image) || bool(flags & SerializeFlag::All))
-        json["images"] = SerializeImages(scene->images);
+    {
+        auto serialized = SerializeImages(scene->images, bool(flags & SerializeFlag::Selected) && !bool(flags & SerializeFlag::All));
+        if (!serialized.empty())
+            json["images"] = serialized;
+    }
 
     if (bool(flags & SerializeFlag::Camera) || bool(flags & SerializeFlag::All))
     {

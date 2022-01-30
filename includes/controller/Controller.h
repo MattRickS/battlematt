@@ -25,23 +25,32 @@ public:
     void Load(std::string path, bool merge = false);
     void Merge(const std::shared_ptr<Scene>& scene);
 
-    void CopySelected();
+    void SetImagesLocked(bool locked);
+    void SetTokensLocked(bool locked);
+
+    // TODO: Image needs to render selection highlight
+    std::vector<std::shared_ptr<Shape2D>> SelectedShapes();
+    std::vector<std::shared_ptr<Token>> SelectedTokens();
+    std::vector<std::shared_ptr<BGImage>> SelectedImages();
+    bool HasSelectedImages();
+    bool HasSelectedTokens();
+    bool HasSelectedShapes();
+    void ClearSelection();
+    void SelectShape(std::shared_ptr<Shape2D> shape, bool additive=false);
+    // void SelectShape(const std::shared_ptr<Shape2D>& shape, bool additive=false);  // Clashes with signal.
+    void SelectShapes(const std::vector<std::shared_ptr<Shape2D>>& shapes, bool additive=false);
+
+    bool CopySelected();
     void CutSelected();
     void PasteSelected();
-
-    std::vector<std::shared_ptr<Token>> SelectedTokens();
-    bool HasSelectedTokens();
-    void ClearSelection();
-    void SelectToken(std::shared_ptr<Token> token, bool additive=false);
-    void SelectTokens(std::vector<std::shared_ptr<Token>> tokens, bool additive=false);
-    void DuplicateSelectedTokens();
-    void DeleteSelectedTokens();
+    void DuplicateSelected();
+    void DeleteSelected();
 
     void Focus();
     void FocusSelected();
 
-    std::vector<std::shared_ptr<Token>> TokensInScreenRect(float minx, float miny, float maxx, float maxy);
-    std::shared_ptr<Token> GetTokenAtScreenPos(glm::vec2 screenPos);
+    std::vector<std::shared_ptr<Shape2D>> ShapesInScreenRect(float minx, float miny, float maxx, float maxy);
+    std::shared_ptr<Shape2D> GetShapeAtScreenPos(glm::vec2 screenPos);
 
     // Have to public for the glfw bound callbacks to access
     void OnViewportMouseMove(double xpos, double ypos);
@@ -81,7 +90,7 @@ private:
     std::deque<std::shared_ptr<Action>> redoQueue;
 
     std::shared_ptr<RectOverlay> dragSelectRect = nullptr;
-    std::shared_ptr<Token> tokenUnderCursor = nullptr;
+    std::shared_ptr<Shape2D> shapeUnderCursor = nullptr;
 
     bool IsDragSelecting();
     void StartDragSelection(float xpos, float ypos);

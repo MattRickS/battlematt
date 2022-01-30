@@ -1,17 +1,13 @@
-#include <iostream>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <Constants.h>
 #include <glutil/Matrix2D.h>
 #include <glutil/Mesh.h>
 #include <glutil/Texture.h>
 #include <model/Shape2D.h>
 
 #include <model/BGImage.h>
-
-
-const float DEFAULT_PIXELS_PER_UNIT = 50.0f;
 
 
 BGImage::BGImage(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture) : Rect(mesh), m_texture(texture)
@@ -23,6 +19,13 @@ BGImage::BGImage(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture) :
 void BGImage::Draw(Shader &shader)
 {
     shader.setMat4("model", *m_model->Value());
+
+    glm::vec4 colour = m_tintColour;
+    if (isSelected)
+        colour = glm::vec4(SELECTION_COLOR, m_tintColour.w);
+    else if (isHighlighted)
+        colour = glm::vec4(HIGHLIGHT_COLOR, m_tintColour.w);
+    shader.setFloat4("color", colour.x, colour.y, colour.z, colour.w);
 
     if (m_texture && m_texture->IsValid())
     {
@@ -52,6 +55,11 @@ void BGImage::SetImage(std::shared_ptr<Texture> texture)
         m_texture = texture;
         m_model->Rebuild();
     }
+}
+
+void BGImage::SetTint(glm::vec4 colour)
+{
+    m_tintColour = colour;
 }
 
 bool BGImage::GetLockRatio() { return m_lockRatio; }

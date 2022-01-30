@@ -23,9 +23,9 @@ public:
     glm::vec2 startCorner;
     glm::vec2 endCorner;
 
-    RectOverlay(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader);
+    RectOverlay(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader, glm::vec4 colour=glm::vec4(1));
     virtual void Draw();
-    void SetColour(glm::vec3 col);
+    void SetColour(glm::vec4 col);
     float MinX();
     float MaxX();
     float MinY();
@@ -33,5 +33,5 @@ public:
 
 private:
     std::shared_ptr<Mesh> m_mesh;
-    glm::vec3 colour = glm::vec3(0, 1, 1);
+    glm::vec4 m_colour;
 };

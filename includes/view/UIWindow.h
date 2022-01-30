@@ -24,10 +24,12 @@ public:
     Signal<std::string> saveClicked;
     Signal<std::string, bool> loadClicked;
     Signal<int, bool> promptResponse;
-    Signal<std::shared_ptr<Token>, bool> tokenSelectionChanged;
+    Signal<std::shared_ptr<Shape2D>, bool> shapeSelectionChanged;
     Signal<const std::shared_ptr<Token>&, TokenProperty, TokenPropertyValue> tokenPropertyChanged;
     Signal<const std::shared_ptr<BGImage>&, ImageProperty, ImagePropertyValue> imagePropertyChanged;
     Signal<const std::shared_ptr<Grid>&, GridProperty, GridPropertyValue> gridPropertyChanged;
+    Signal<bool> imageLockChanged;
+    Signal<bool> tokenLockChanged;
 
     UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share = NULL);
     ~UIWindow();
@@ -36,6 +38,9 @@ public:
     void SetScene(std::shared_ptr<Scene> scene);
     void Prompt(int promptType, std::string msg);
     bool HasPrompt();
+
+    void SetDisplayPropertiesToken(const std::shared_ptr<Token>& token);
+    void SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image);
 
     virtual void OnKeyChanged(int key, int scancode, int action, int mods);
 
@@ -47,6 +52,9 @@ private:
     bool mergeLoad = false;
 
     std::string tokenNames[NUM_TOKEN_STATUSES] {"Red", "Green", "Blue", "Yellow", "Cyan", "Pink"};
+
+    std::shared_ptr<Token> m_displayPropertiesToken = nullptr;
+    std::shared_ptr<BGImage> m_displayPropertiesImage = nullptr;
 
     void DrawImageOptions(const std::shared_ptr<BGImage>& image);
     void DrawGridOptions(const std::shared_ptr<Grid>&);

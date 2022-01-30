@@ -126,39 +126,41 @@ typedef ModifyMemberAction<Token, std::shared_ptr<Texture>> ModifyTokenTexture; 
 typedef ModifyMemberAction<Token, std::string> ModifyTokenString;  // name
 typedef ModifyMemberAction<Token, TokenStatuses> ModifyTokenStatuses;
 
+typedef ModifyMemberAction<Scene, bool> ModifySceneLocks;
+
 // Selection
-class SelectTokensAction : public Action
+class SelectShapesAction : public Action
 {
 public:
-    SelectTokensAction(std::vector<std::shared_ptr<Token>> selected) : selectedTokens(selected) {}
-    SelectTokensAction(std::vector<std::shared_ptr<Token>> selected, const std::shared_ptr<Token>& token, bool add=false) : selectedTokens(selected), m_additive(add)
+    SelectShapesAction(std::vector<std::shared_ptr<Shape2D>> selected) : selectedShapes(selected) {}
+    SelectShapesAction(std::vector<std::shared_ptr<Shape2D>> selected, const std::shared_ptr<Shape2D>& token, bool add=false) : selectedShapes(selected), m_additive(add)
     {
-        tokensToSelect.push_back(token);
+        shapesToSelect.push_back(token);
     }
-    SelectTokensAction(std::vector<std::shared_ptr<Token>> selected, std::vector<std::shared_ptr<Token>> toSelect, bool add=false) : selectedTokens(selected), tokensToSelect(toSelect), m_additive(add) {}
+    SelectShapesAction(std::vector<std::shared_ptr<Shape2D>> selected, std::vector<std::shared_ptr<Shape2D>> toSelect, bool add=false) : selectedShapes(selected), shapesToSelect(toSelect), m_additive(add) {}
 
     virtual void Undo()
     {
         if (m_additive)
-            Select(tokensToSelect, false);
+            Select(shapesToSelect, false);
         else
         {
-            Select(tokensToSelect, false);
-            Select(selectedTokens, true);
+            Select(shapesToSelect, false);
+            Select(selectedShapes, true);
         }
     }
     virtual void Redo()
     {
         if (!m_additive)
-            Select(selectedTokens, false);
-        Select(tokensToSelect, true);
+            Select(selectedShapes, false);
+        Select(shapesToSelect, true);
     }
 
     // If selecting the same thing / selecting nothing, then the actions can be combined
     virtual bool CanMerge(const std::shared_ptr<Action>& action)
     {
-        auto selectionAction = std::dynamic_pointer_cast<SelectTokensAction>(action);
-        if (selectionAction && selectionAction->tokensToSelect == tokensToSelect)
+        auto selectionAction = std::dynamic_pointer_cast<SelectShapesAction>(action);
+        if (selectionAction && selectionAction->shapesToSelect == shapesToSelect)
             return true;
 
         return false;
@@ -166,14 +168,14 @@ public:
     virtual void Merge(const std::shared_ptr<Action>& action) {}
 
 private:
-    std::vector<std::shared_ptr<Token>> selectedTokens;
-    std::vector<std::shared_ptr<Token>> tokensToSelect;
+    std::vector<std::shared_ptr<Shape2D>> selectedShapes;
+    std::vector<std::shared_ptr<Shape2D>> shapesToSelect;
     bool m_additive = false;
 
-    void Select(const std::vector<std::shared_ptr<Token>>& tokens, bool select)
+    void Select(const std::vector<std::shared_ptr<Shape2D>>& shapes, bool select)
     {
-        for (const auto& token: tokens)
-            token->isSelected = select;
+        for (const auto& shape: shapes)
+            shape->isSelected = select;
     }
 };
 
