@@ -9,7 +9,7 @@
 class Viewport : public Window
 {
 public:
-    Viewport(unsigned int width, unsigned int height, std::shared_ptr<Window> share = NULL);
+    Viewport(unsigned int width, unsigned int height, std::string name="Viewport", std::shared_ptr<Window> share = NULL);
     // ~Viewport();
 
     virtual void Draw();
@@ -26,7 +26,7 @@ public:
     void Focus(const Bounds2D& bounds);
 
     virtual void OnWindowResized(int width, int height);
-private:
+protected:
     std::shared_ptr<Scene> m_scene = nullptr;
     std::shared_ptr<Camera> m_camera = nullptr;
     std::shared_ptr<CameraBuffer> m_cameraBuffer = nullptr;

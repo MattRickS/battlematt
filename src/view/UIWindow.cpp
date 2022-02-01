@@ -28,7 +28,7 @@ const ImVec4 SELECT_COLOR = ImVec4(0.3f, 0.3f, 1.0f, 1.0f);
 
 
 UIWindow::UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share) :
-    Window(width, height, "UI", share), m_resources(resources)
+    Viewport(width, height, "UI", share), m_resources(resources)
 {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -68,8 +68,6 @@ UIWindow::~UIWindow()
     ImGui::DestroyContext();
 }
 
-void UIWindow::SetScene(std::shared_ptr<Scene> scene) { m_scene = scene; }
-
 void UIWindow::SetDisplayPropertiesToken(const std::shared_ptr<Token>& token)
 {
     m_displayPropertiesToken = token;
@@ -84,7 +82,7 @@ void UIWindow::Prompt(int promptType, std::string msg)
 {
     m_promptMsg = msg;
     m_promptType = promptType;
-    Focus();
+    Window::Focus();
 }
 
 bool UIWindow::HasPrompt()
@@ -219,22 +217,17 @@ void UIWindow::DrawTokenOptions(const std::shared_ptr<Token>& token)
 
 void UIWindow::Draw()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    Viewport::Draw();
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(viewport->Pos);
-    ImGui::SetNextWindowSize(viewport->Size);
-
     // UI window
     static bool p_open = NULL;
     {
-        ImGui::Begin("Mapmaker UI", &p_open, flags);
+        ImGui::Begin("Mapmaker UI", &p_open);
 
         ImGui::ColorEdit3("Background Color", (float*)&m_scene->bgColor);
 

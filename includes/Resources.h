@@ -25,6 +25,8 @@ public:
     std::shared_ptr<Texture> GetTexture(TextureType textureType);
     std::shared_ptr<Texture> GetTexture(std::string path);
 
+    void RegenerateGLContainers();
+
 private:
     std::unordered_map<MeshType, std::shared_ptr<Mesh>> m_meshes;
     std::unordered_map<ShaderType, std::shared_ptr<Shader>> m_shaders;

@@ -52,3 +52,9 @@ std::shared_ptr<Texture> Resources::GetTexture(std::string path)
         std::cerr << "Re-using texture: " << path  << std::endl;
     return it->second;
 }
+
+void Resources::RegenerateGLContainers()
+{
+    for (const auto& it: m_meshes)
+        it.second->GenerateVAO();
+}

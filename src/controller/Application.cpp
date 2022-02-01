@@ -32,11 +32,16 @@ Application::Application() : m_resources(std::make_shared<Resources>())
     m_glfw_initialised = true;
 
     // Initialises GL contexts
-    m_uiWindow = std::make_shared<UIWindow>(480, 640, m_resources);
-    m_viewport = std::make_shared<Viewport>(1280, 720, static_cast<std::shared_ptr<Window>>(m_uiWindow));
+    m_uiWindow = std::make_shared<UIWindow>(1280, 720, m_resources);
 
-    // Resources must be loaded after the GL context is created by the window.
+    // Resources must be loaded after a GL context (ie, window) is created.
     LoadDefaultResources();
+
+    // openGL does not share containers (eg, VAOs) across contexts.
+    // Creating a second window requires regenerating containers to associate them with the context.
+    m_viewport = std::make_shared<Viewport>(1280, 720, "Viewport", static_cast<std::shared_ptr<Window>>(m_uiWindow));
+    m_resources->RegenerateGLContainers();
+
     controller = std::make_shared<Controller>(m_resources, m_viewport, m_uiWindow);
 }
 
@@ -99,8 +104,7 @@ void Application::Exec()
         glfwPollEvents();
     
         m_viewport->Render();
-        if (m_uiWindow)
-            m_uiWindow->Render();
+        m_uiWindow->Render();
 
         // Lazy hack to limit frame rate for now
         std::this_thread::sleep_for(std::chrono::milliseconds(10));

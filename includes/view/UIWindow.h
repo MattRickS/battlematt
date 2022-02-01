@@ -12,10 +12,11 @@
 #include <model/Shape2D.h>
 #include <model/Token.h>
 #include <view/Properties.h>
+#include <view/Viewport.h>
 #include <view/Window.h>
 
 
-class UIWindow : public Window
+class UIWindow : public Viewport
 {
 public:
     Signal<> addImageClicked;
@@ -38,7 +39,6 @@ public:
     ~UIWindow();
 
     virtual void Draw();
-    void SetScene(std::shared_ptr<Scene> scene);
     void Prompt(int promptType, std::string msg);
     bool HasPrompt();
 
@@ -49,7 +49,6 @@ public:
 
 private:
     std::shared_ptr<Resources> m_resources;
-    std::shared_ptr<Scene> m_scene = nullptr;
     std::string m_promptMsg = "";
     int m_promptType = 0;
     bool mergeLoad = false;
