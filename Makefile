@@ -59,3 +59,7 @@ $(BUILD_DIR)/%.o:$(VIEW_DIR)/%.cpp
 .PHONY: clean
 clean:
 	rm $(BUILD_DIR)/$(APP) $(OBJS)
+
+.PHONY: testfile
+testfile:
+	g++ src/app.cpp src/glad.c src/glutil/Mesh.cpp src/glutil/Shader.cpp src/glutil/Texture.cpp src/stb_image.cpp src/glutil/Camera.cpp -Iincludes `pkg-config --static --libs glfw3` -lGL -pthread -g -Wall -Wformat --std=c++17 -lstdc++fs
