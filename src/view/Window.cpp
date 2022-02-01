@@ -69,7 +69,11 @@ Window::Window(unsigned int width, unsigned int height, const char* name, std::s
         std::cout << "Failed to initialize GLAD" << std::endl;
         return;
     }
-    
+
+    // TODO: Should be configurable    
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+
     monitor = glfwGetPrimaryMonitor();
 
     // Reference: https://www.glfw.org/docs/3.3/window_guide.html
