@@ -64,7 +64,6 @@ int main(int numArgs, char* args[])
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         return -1;
     
-    Texture texture2 = Texture("resources/images/QuestionMark.jpg");
     Shader shader2 = Shader("resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
     CameraBuffer buffer2 = CameraBuffer(camera);
     mesh1.GenerateVAO();
@@ -86,7 +85,7 @@ int main(int numArgs, char* args[])
         glfwMakeContextCurrent(window2);
         glViewport(0, 0, 640, 480);
         glClear(GL_COLOR_BUFFER_BIT);
-        texture2.activate(GL_TEXTURE0);
+        texture1.activate(GL_TEXTURE0);
         shader2.use();
         shader2.setInt("diffuse", 0);
         shader2.setMat4("model", glm::mat4(1.0f));
