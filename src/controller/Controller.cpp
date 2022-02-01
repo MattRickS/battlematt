@@ -485,8 +485,9 @@ void Controller::OnViewportMouseButton(Window* window, int button, int action, i
 
 void Controller::OnViewportMouseScroll(Window* window, double xoffset, double yoffset)
 {
-    m_viewport->GetCamera()->Zoom(yoffset);
-    m_viewport->RefreshCamera();
+    Viewport* viewport = static_cast<Viewport*>(window);
+    viewport->GetCamera()->Zoom(yoffset);
+    viewport->RefreshCamera();
 }
 
 void Controller::OnViewportKey(Window* window, int key, int scancode, int action, int mods)

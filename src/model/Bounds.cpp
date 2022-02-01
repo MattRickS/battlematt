@@ -11,3 +11,8 @@ Bounds2D Bounds2D::Merge(const Bounds2D& bounds)
 {
     return {glm::vec2(std::min(min.x, bounds.min.x)), glm::vec2(std::max(max.y, bounds.max.y))};
 }
+
+float Bounds2D::MinX() { return std::min(min.x, max.x); }
+float Bounds2D::MaxX() { return std::max(min.x, max.x); }
+float Bounds2D::MinY() { return std::min(min.y, max.y); }
+float Bounds2D::MaxY() { return std::max(min.y, max.y); }

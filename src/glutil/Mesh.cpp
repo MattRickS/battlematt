@@ -23,8 +23,10 @@ void Mesh::Draw(Shader &shader)
 
 void Mesh::GenerateVAO()
 {
-	glGenVertexArrays(1, &VAO);
-
+    // setupMesh will generate the VAO ID when the mesh is initialized
+    // binding in the same context uses the generated array, while binding in
+    // another context only works if the VAO was already generated (and not
+    // used by another mesh)
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -56,5 +58,6 @@ void Mesh::BufferData()
 void Mesh::setupMesh()
 {
     BufferData();
+	glGenVertexArrays(1, &VAO);
     GenerateVAO();
 }

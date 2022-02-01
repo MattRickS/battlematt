@@ -55,6 +55,11 @@ std::shared_ptr<Texture> Resources::GetTexture(std::string path)
 
 void Resources::RegenerateGLContainers()
 {
+    // Hacky hack. In order for the VAO IDs to be reused by each context,
+    // Pre-generate an array for each mesh, then generate the VAOs by re-using the
+    // Mesh's existing VAO id.
+    GLuint x;
+    glGenVertexArrays(m_meshes.size(), &x);
     for (const auto& it: m_meshes)
         it.second->GenerateVAO();
 }
