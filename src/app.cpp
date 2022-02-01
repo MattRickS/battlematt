@@ -16,22 +16,22 @@ int main(int numArgs, char* args[])
     if (!glfwInit())
         return -1;
 
-    // Window
-    GLFWwindow* window = glfwCreateWindow(640, 480, "A", NULL, NULL);
-    if (window == NULL)
+    // Window 1
+    GLFWwindow* window1 = glfwCreateWindow(640, 480, "A", NULL, NULL);
+    if (window1 == NULL)
         return -1;
     
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(window1);
     glfwSwapInterval(1); // Enable vsync
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         return -1;
 
-    glViewport(0, 0, 640, 480);
+    auto camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f);
 
     // Data
     auto vertices = std::vector<Vertex>{
@@ -44,25 +44,54 @@ int main(int numArgs, char* args[])
         0, 1, 2,
         2, 3, 0,
     };
-    Mesh mesh = Mesh(vertices, indices);    
+    Mesh mesh1 = Mesh(vertices, indices);    
+    Texture texture1 = Texture("resources/images/QuestionMark.jpg");
+    Shader shader1 = Shader("resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
+    CameraBuffer buffer1 = CameraBuffer(camera);
 
-    Texture texture = Texture("resources/images/QuestionMark.jpg");
-    texture.activate(GL_TEXTURE0);
+    // Window2
+    GLFWwindow* window2 = glfwCreateWindow(640, 480, "B", NULL, window1);
+    if (window2 == NULL)
+        return -1;
+    
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
 
-    Shader shader = Shader("resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
-    shader.setInt("diffuse", 0);
-    shader.setMat4("model", glm::mat4(1.0f));
+    glfwMakeContextCurrent(window2);
+    glfwSwapInterval(1); // Enable vsync
 
-    auto camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f);
-    CameraBuffer buffer = CameraBuffer(camera);
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        return -1;
+    
+    Mesh mesh2 = Mesh(vertices, indices);    
+    Texture texture2 = Texture("resources/images/QuestionMark.jpg");
+    Shader shader2 = Shader("resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
+    CameraBuffer buffer2 = CameraBuffer(camera);
 
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window1) && !glfwWindowShouldClose(window2))
     {
         glfwPollEvents();
 
-        mesh.Draw(shader);
+        glfwMakeContextCurrent(window1);
+        glViewport(0, 0, 640, 480);
+        glClear(GL_COLOR_BUFFER_BIT);
+        texture1.activate(GL_TEXTURE0);
+        shader1.use();
+        shader1.setInt("diffuse", 0);
+        shader1.setMat4("model", glm::mat4(1.0f));
+        mesh1.Draw(shader1);
+        glfwSwapBuffers(window1);
 
-        glfwSwapBuffers(window);
+        glfwMakeContextCurrent(window2);
+        glViewport(0, 0, 640, 480);
+        glClear(GL_COLOR_BUFFER_BIT);
+        texture2.activate(GL_TEXTURE0);
+        shader2.use();
+        shader2.setInt("diffuse", 0);
+        shader2.setMat4("model", glm::mat4(1.0f));
+        mesh2.Draw(shader2);
+        glfwSwapBuffers(window2);
     }
 
     glfwTerminate();
