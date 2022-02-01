@@ -64,10 +64,10 @@ int main(int numArgs, char* args[])
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         return -1;
     
-    Mesh mesh2 = Mesh(vertices, indices);    
     Texture texture2 = Texture("resources/images/QuestionMark.jpg");
     Shader shader2 = Shader("resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
     CameraBuffer buffer2 = CameraBuffer(camera);
+    mesh1.GenerateVAO();
 
     while (!glfwWindowShouldClose(window1) && !glfwWindowShouldClose(window2))
     {
@@ -90,7 +90,7 @@ int main(int numArgs, char* args[])
         shader2.use();
         shader2.setInt("diffuse", 0);
         shader2.setMat4("model", glm::mat4(1.0f));
-        mesh2.Draw(shader2);
+        mesh1.Draw(shader2);
         glfwSwapBuffers(window2);
     }
 
