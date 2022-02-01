@@ -14,10 +14,15 @@ public:
 
     Bounds2D();
     Bounds2D(glm::vec2 min, glm::vec2 max);
+    Bounds2D(float minx, float miny, float maxx, float maxy);
 
     glm::vec2 Center() const;
     glm::vec2 Size() const;
     Bounds2D Merge(const Bounds2D& bounds);
+    float MinX() { return std::min(min.x, max.x); }
+    float MaxX() { return std::max(min.x, max.x); }
+    float MinY() { return std::min(min.y, max.y); }
+    float MaxY() { return std::max(min.y, max.y); }
 
     // TODO: Bounds should be a property in shapes, and this method exist elsewhere
     static Bounds2D BoundsForShapes(std::vector<std::shared_ptr<Shape2D>> shapes)

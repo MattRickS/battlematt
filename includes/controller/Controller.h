@@ -28,7 +28,7 @@ public:
     void SetImagesLocked(bool locked);
     void SetTokensLocked(bool locked);
 
-    // TODO: Image needs to render selection highlight
+    // TODO: Selection should probably be per viewport...
     std::vector<std::shared_ptr<Shape2D>> SelectedShapes();
     std::vector<std::shared_ptr<Token>> SelectedTokens();
     std::vector<std::shared_ptr<BGImage>> SelectedImages();
@@ -49,9 +49,6 @@ public:
 
     void Focus();
     void FocusSelected();
-
-    std::vector<std::shared_ptr<Shape2D>> ShapesInScreenRect(float minx, float miny, float maxx, float maxy);
-    std::shared_ptr<Shape2D> GetShapeAtScreenPos(glm::vec2 screenPos);
 
     // Have to public for the glfw bound callbacks to access
     void OnViewportMouseMove(Window* window, double xpos, double ypos);
@@ -90,14 +87,8 @@ private:
     const size_t MAX_UNDO_SIZE = 10;
     std::deque<std::shared_ptr<Action>> undoQueue;
     std::deque<std::shared_ptr<Action>> redoQueue;
-
-    std::shared_ptr<RectOverlay> dragSelectRect = nullptr;
+    
     std::shared_ptr<Shape2D> shapeUnderCursor = nullptr;
-
-    bool IsDragSelecting();
-    void StartDragSelection(float xpos, float ypos);
-    void UpdateDragSelection(float xpos, float ypos);
-    void FinishDragSelection(bool additive);
 
     static const int PROMPT_CLOSE = 1;
     void OnPromptResponse(int promptType, bool response);

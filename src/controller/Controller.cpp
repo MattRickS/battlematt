@@ -26,6 +26,11 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_viewport->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
     m_viewport->closeRequested.connect(this, &Controller::OnCloseRequested);
 
+    m_uiWindow->cursorMoved.connect(this, &Controller::OnViewportMouseMove);
+    m_uiWindow->keyChanged.connect(this, &Controller::OnViewportKey);
+    m_uiWindow->mouseButtonChanged.connect(this, &Controller::OnViewportMouseButton);
+    m_uiWindow->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
+    m_uiWindow->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
     m_uiWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
     m_uiWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
 
@@ -355,129 +360,6 @@ void Controller::FocusSelected()
     m_viewport->Focus(Bounds2D::BoundsForShapes(SelectedShapes()));
 }
 
-// Screen Position
-std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx, float miny, float maxx, float maxy)
-{
-    glm::vec2 lo = m_viewport->ScreenToWorldPos(minx, miny);
-    glm::vec2 hi = m_viewport->ScreenToWorldPos(maxx, maxy);
-
-    std::vector<std::shared_ptr<Shape2D>> shapes;
-
-    if (!m_scene->GetTokensLocked())
-    {
-        for (const std::shared_ptr<Token>& token: m_scene->tokens)
-        {
-            float radius = token->GetModel()->GetScalef() * 0.5f;
-            glm::vec2 tokenPos = token->GetModel()->GetPos();
-            if (tokenPos.x + radius > lo.x && tokenPos.x - radius < hi.x
-                && tokenPos.y + radius > lo.y && tokenPos.y - radius < hi.y)
-            {
-                shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
-            }
-        }
-    }
-
-    if (!m_scene->GetImagesLocked())
-    {
-        for (const std::shared_ptr<BGImage>& image: m_scene->images)
-        {
-            glm::vec2 scale = image->GetModel()->GetScale() * 0.5f;
-            glm::vec2 imageMin = image->GetModel()->GetPos() - scale;
-            glm::vec2 imageMax = image->GetModel()->GetPos() + scale;
-            if (imageMax.x > lo.x && imageMin.x < hi.x && imageMax.y > lo.y && imageMin.y < hi.y)
-            {
-                shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(image));
-            }
-        }
-    }
-
-    return shapes;
-}
-
-std::shared_ptr<Shape2D> Controller::GetShapeAtScreenPos(glm::vec2 screenPos)
-{
-    glm::vec2 worldPos = m_viewport->ScreenToWorldPos(screenPos.x, screenPos.y);
-    // Tokens are drawn from first to last, so iterate in reverse to find the topmost
-    if (!m_scene->GetTokensLocked())
-    {
-        for (int i = m_scene->tokens.size() - 1; i >= 0; i--)
-        {
-            // It should only be possible to select one shape with a single click
-            if (m_scene->tokens[i]->Contains(worldPos))
-            {
-                return static_cast<std::shared_ptr<Shape2D>>(m_scene->tokens[i]);
-            }
-        }
-    }
-    // Images are drawn from first to last, so iterate in reverse to find the topmost
-    if (!m_scene->GetImagesLocked())
-    {
-        for (int i = m_scene->images.size() - 1; i >= 0; i--)
-        {
-            // It should only be possible to select one shape with a single click
-            if (m_scene->images[i]->Contains(worldPos))
-            {
-                return static_cast<std::shared_ptr<Shape2D>>(m_scene->images[i]);
-            }
-        }
-    }
-    return nullptr;
-}
-
-// Drag Selection
-bool Controller::IsDragSelecting()
-{
-    return static_cast<bool>(dragSelectRect);
-}
-
-void Controller::StartDragSelection(float xpos, float ypos)
-{
-    dragSelectRect = std::make_shared<RectOverlay>(
-        m_resources->GetMesh(Resources::MeshType::Quad2),
-        m_resources->GetShader(Resources::ShaderType::ScreenRect),
-        glm::vec4(SELECTION_COLOR, OVERLAY_OPACITY)
-    );
-    // GL uses inverted Y-axis
-    dragSelectRect->startCorner = dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
-    m_scene->overlays.push_back(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
-}
-
-void Controller::UpdateDragSelection(float xpos, float ypos)
-{
-    // GL uses inverted Y-axis
-    dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
-
-    // Y-axis is inverted on rect, use re-invert for calculating world positions
-    auto coveredShapes = ShapesInScreenRect(
-        dragSelectRect->MinX(),
-        m_viewport->Height() - dragSelectRect->MinY(),
-        dragSelectRect->MaxX(),
-        m_viewport->Height() - dragSelectRect->MaxY()
-    );
-
-    for (const std::shared_ptr<Shape2D>& shape : coveredShapes)
-        shape->isHighlighted = true;
-}
-
-void Controller::FinishDragSelection(bool additive)
-{
-    // Y-axis is inverted on rect, use re-invert for calculating world positions
-    auto shapesInBounds = ShapesInScreenRect(
-        dragSelectRect->MinX(),
-        m_viewport->Height() - dragSelectRect->MinY(),
-        dragSelectRect->MaxX(),
-        m_viewport->Height() - dragSelectRect->MaxY()
-    );
-
-    if (shapesInBounds.size() > 0)
-        SelectShapes(shapesInBounds, additive);
-    else if (HasSelectedShapes())
-        ClearSelection();
-
-    m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
-    dragSelectRect.reset();
-}
-
 // Input Callbacks
 void Controller::OnViewportMouseMove(Window* window, double xpos, double ypos)
 {
@@ -493,7 +375,8 @@ void Controller::OnViewportMouseMove(Window* window, double xpos, double ypos)
     lastMouseX = xpos;
     lastMouseY = ypos;
 
-    glm::vec2 worldPos = m_viewport->ScreenToWorldPos(xpos, ypos);
+    Viewport* viewport = static_cast<Viewport*>(window);
+    glm::vec2 worldPos = viewport->ScreenToWorldPos(xpos, ypos);
     // TODO: Change this.
     //   Can be optimised to track what's highlighted and explicitly clear it.
     //   Also shouldn't rely on the `lock` options in mouse move
@@ -521,14 +404,15 @@ void Controller::OnViewportMouseMove(Window* window, double xpos, double ypos)
 
     if (middleMouseHeld)
     {
-        m_viewport->GetCamera()->Pan(m_viewport->ScreenToWorldOffset(xoffset, yoffset));
-        m_viewport->RefreshCamera();
+        viewport->GetCamera()->Pan(viewport->ScreenToWorldOffset(xoffset, yoffset));
+        // TODO: If refreshing a camera that's shared by viewports, both viewports need to refresh
+        viewport->RefreshCamera();
     }
     else if (leftMouseHeld && shapeUnderCursor)
     {
         if (m_scene->grid->GetSnapEnabled())
         {
-            glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(shapeUnderCursor, m_viewport->ScreenToWorldPos(xpos, ypos));
+            glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(shapeUnderCursor, viewport->ScreenToWorldPos(xpos, ypos));
             glm::vec2 currPos = shapeUnderCursor->GetModel()->GetPos();
             if (newPos != currPos)
             {
@@ -543,15 +427,15 @@ void Controller::OnViewportMouseMove(Window* window, double xpos, double ypos)
         else
         {
             std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
-            glm::vec2 offset = m_viewport->ScreenToWorldOffset(xoffset, yoffset);
+            glm::vec2 offset = viewport->ScreenToWorldOffset(xoffset, yoffset);
             for (std::shared_ptr<Shape2D> shape : SelectedShapes())
                 actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(shape->GetModel(), &Matrix2D::SetPos, shape->GetModel()->GetPos(), shape->GetModel()->GetPos() + offset));
 
             PerformAction(actionGroup);
         }
     }
-    else if (leftMouseHeld && IsDragSelecting())
-        UpdateDragSelection(xpos, ypos);
+    else if (leftMouseHeld && viewport->IsDragSelecting())
+        viewport->UpdateDragSelection(xpos, ypos);
 }
 
 void Controller::OnViewportMouseButton(Window* window, int button, int action, int mods)
@@ -560,22 +444,40 @@ void Controller::OnViewportMouseButton(Window* window, int button, int action, i
         middleMouseHeld = action == GLFW_PRESS;
     if (button == GLFW_MOUSE_BUTTON_LEFT)
     {
+        Viewport* viewport = static_cast<Viewport*>(window);
         if (action == GLFW_PRESS)
         {
             // TODO: Selection action should be combined with move action, ie, undo undoes the selection and the movement
-            glm::vec2 cursorPos = m_viewport->CursorPos();
-            shapeUnderCursor = GetShapeAtScreenPos(cursorPos);
+            glm::vec2 cursorPos = viewport->CursorPos();
+            shapeUnderCursor = viewport->GetShapeAtScreenPos(cursorPos);
             if (shapeUnderCursor && !shapeUnderCursor->isSelected)
                 SelectShape(shapeUnderCursor, mods & (GLFW_MOD_SHIFT | GLFW_MOD_CONTROL));
             // If nothing was immediately selected/being modified, start a drag select
             else if (!shapeUnderCursor)
-                StartDragSelection(cursorPos.x, cursorPos.y);
+            {
+                viewport->StartDragSelection(
+                    std::make_shared<RectOverlay>(
+                        m_resources->GetMesh(Resources::MeshType::Quad2),
+                        m_resources->GetShader(Resources::ShaderType::ScreenRect),
+                        glm::vec4(SELECTION_COLOR, OVERLAY_OPACITY)
+                    ),
+                    cursorPos.x,
+                    cursorPos.y
+                );
+            }
         }
         else if (action == GLFW_RELEASE)
         {
             shapeUnderCursor = nullptr;
-            if (IsDragSelecting())
-                FinishDragSelection(mods & GLFW_MOD_SHIFT);
+            if (viewport->IsDragSelecting())
+            {
+                auto shapesInBounds = viewport->ShapesInScreenRect(viewport->DragSelectionRect());
+                if (shapesInBounds.size() > 0)
+                    SelectShapes(shapesInBounds, mods & GLFW_MOD_SHIFT);
+                else if (HasSelectedShapes())
+                    ClearSelection();
+                viewport->FinishDragSelection();
+            }
         }
         leftMouseHeld = action == GLFW_PRESS;
     }
@@ -590,7 +492,10 @@ void Controller::OnViewportMouseScroll(Window* window, double xoffset, double yo
 void Controller::OnViewportKey(Window* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-        m_viewport->SetFullscreen(!m_viewport->IsFullscreen());
+    {
+        Viewport* viewport = static_cast<Viewport*>(window);
+        viewport->SetFullscreen(!viewport->IsFullscreen());
+    }
     if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && HasSelectedShapes())
     {
         for (std::shared_ptr<Shape2D> shape : SelectedShapes())
@@ -622,7 +527,8 @@ void Controller::OnViewportKey(Window* window, int key, int scancode, int action
 
 void Controller::OnViewportSizeChanged(Window* window, int width, int height)
 {
-    m_viewport->RefreshCamera();
+    Viewport* viewport = static_cast<Viewport*>(window);
+    viewport->RefreshCamera();
 }
 
 void Controller::OnUIAddTokenClicked()
@@ -632,7 +538,7 @@ void Controller::OnUIAddTokenClicked()
         m_resources->GetTexture(Resources::TextureType::Default)
     );
     // Centers it on the camera view
-    token->GetModel()->SetPos(glm::vec2(m_viewport->GetCamera()->Position.x, m_viewport->GetCamera()->Position.y));
+    token->GetModel()->SetPos(glm::vec2(m_uiWindow->GetCamera()->Position.x, m_uiWindow->GetCamera()->Position.y));
     std::shared_ptr<AddTokensAction> action = std::make_shared<AddTokensAction>(m_scene, token);
     // TODO: Include selection
     PerformAction(action);
@@ -658,7 +564,7 @@ void Controller::OnUIKeyChanged(Window* window, int key, int scancode, int actio
 
 void Controller::OnUICameraIndexChanged(int index)
 {
-    m_viewport->SetCameraIndex(index);
+    m_uiWindow->SetCameraIndex(index);
 }
 
 void Controller::PerformAction(const std::shared_ptr<Action>& action)
@@ -829,7 +735,7 @@ void Controller::OnPromptResponse(int promptType, bool response)
     {
     case PROMPT_CLOSE:
         if (response)
-            m_viewport->Close();
+            m_uiWindow->Close();
         break;
     
     default:

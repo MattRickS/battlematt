@@ -99,7 +99,7 @@ void Application::Exec()
     glEnable(GL_BLEND);
 
     // Main loop
-    while (!m_viewport->IsClosed())
+    while (!m_uiWindow->IsClosed())
     {
         glfwPollEvents();
     

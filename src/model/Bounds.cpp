@@ -3,6 +3,7 @@
 
 Bounds2D::Bounds2D() {}
 Bounds2D::Bounds2D(glm::vec2 min, glm::vec2 max) : min(min), max(max) {}
+Bounds2D::Bounds2D(float minx, float miny, float maxx, float maxy) : min(minx, miny), max(maxx, maxy) {}
 
 glm::vec2 Bounds2D::Center() const { return min + (max - min) * 0.5f; }
 glm::vec2 Bounds2D::Size() const { return max - min; }
