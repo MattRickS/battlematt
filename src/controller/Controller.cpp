@@ -405,8 +405,10 @@ void Controller::OnViewportMouseMove(Window* window, double xpos, double ypos)
     if (middleMouseHeld)
     {
         viewport->GetCamera()->Pan(viewport->ScreenToWorldOffset(xoffset, yoffset));
-        // TODO: If refreshing a camera that's shared by viewports, both viewports need to refresh
-        viewport->RefreshCamera();
+        // TODO: Do this cleaner
+        // Refreshing both cameras in case it's shared
+        m_uiWindow->RefreshCamera();
+        m_viewport->RefreshCamera();
     }
     else if (leftMouseHeld && shapeUnderCursor)
     {
@@ -487,7 +489,10 @@ void Controller::OnViewportMouseScroll(Window* window, double xoffset, double yo
 {
     Viewport* viewport = static_cast<Viewport*>(window);
     viewport->GetCamera()->Zoom(yoffset);
-    viewport->RefreshCamera();
+    // TODO: Do this cleaner
+    // Refreshing both cameras in case it's shared
+    m_uiWindow->RefreshCamera();
+    m_viewport->RefreshCamera();
 }
 
 void Controller::OnViewportKey(Window* window, int key, int scancode, int action, int mods)
