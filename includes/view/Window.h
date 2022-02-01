@@ -10,16 +10,18 @@
 class Window
 {
 public:
-    Signal<double, double> cursorMoved;
-    Signal<int, int, int> mouseButtonChanged;
-    Signal<double, double> mouseScrolled;
-    Signal<int, int, int, int> keyChanged;
-    Signal<int, int> sizeChanged;
-    Signal<> closeRequested;
+    Signal<Window*, double, double> cursorMoved;
+    Signal<Window*, int, int, int> mouseButtonChanged;
+    Signal<Window*, double, double> mouseScrolled;
+    Signal<Window*, int, int, int, int> keyChanged;
+    Signal<Window*, int, int> sizeChanged;
+    Signal<Window*> closeRequested;
 
     Window(unsigned int width, unsigned int height, const char* name, std::shared_ptr<Window> share = NULL);
     ~Window();
 
+    void Show();
+    void Hide();
     void Focus();
     void Close();
     bool IsClosed();

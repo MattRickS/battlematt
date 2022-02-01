@@ -95,7 +95,7 @@ void Window::Resize(unsigned int width, unsigned int height)
 {
     m_width = width;
     m_height = height;
-    sizeChanged.emit(m_width, m_height);
+    sizeChanged.emit(this, m_width, m_height);
 }
 
 unsigned int Window::Height() { return m_height; }
@@ -123,10 +123,9 @@ void Window::SetFullscreen(bool fullscreen)
     }
 }
 
-void Window::Focus()
-{
-    glfwFocusWindow(window);
-}
+void Window::Show() { glfwShowWindow(window); }
+void Window::Hide() { glfwHideWindow(window); }
+void Window::Focus() { glfwFocusWindow(window); }
 
 glm::vec2 Window::CursorPos()
 {
@@ -174,17 +173,18 @@ bool Window::HasKeyPressed(int key) { return glfwGetKey(window, key) == GLFW_PRE
 // =============================================================================
 // Callbacks
 
-void Window::OnMouseMoved(double xpos, double ypos) { cursorMoved.emit(xpos, ypos); }
-void Window::OnMouseButtonChanged(int button, int action, int mods) { mouseButtonChanged.emit(button, action, mods); }
-void Window::OnMouseScrolled(double xoffset, double yoffset) { mouseScrolled.emit(xoffset, yoffset); }
-void Window::OnKeyChanged(int key, int scancode, int action, int mods) { keyChanged.emit(key, scancode, action, mods); }
+void Window::OnMouseMoved(double xpos, double ypos) { cursorMoved.emit(this, xpos, ypos); }
+void Window::OnMouseButtonChanged(int button, int action, int mods) { mouseButtonChanged.emit(this, button, action, mods); }
+void Window::OnMouseScrolled(double xoffset, double yoffset) { mouseScrolled.emit(this, xoffset, yoffset); }
+void Window::OnKeyChanged(int key, int scancode, int action, int mods) { keyChanged.emit(this, key, scancode, action, mods); }
 void Window::OnWindowResized(int width, int height)
 {
     Resize(width, height);
-    sizeChanged.emit(width, height);
+    sizeChanged.emit(this, width, height);
 }
 void Window::OnCloseRequested()
 {
+    // Prevent the window from actually closing and propagate the decision to listeners of the signal
     glfwSetWindowShouldClose(window, GLFW_FALSE);
-    closeRequested.emit();
+    closeRequested.emit(this);
 }

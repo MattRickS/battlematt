@@ -26,12 +26,13 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_viewport->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
     m_viewport->closeRequested.connect(this, &Controller::OnCloseRequested);
 
+    m_uiWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
+    m_uiWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
+
     m_uiWindow->saveClicked.connect(this, &Controller::Save);
     m_uiWindow->loadClicked.connect(this, &Controller::Load);
     m_uiWindow->promptResponse.connect(this, &Controller::OnPromptResponse);
     m_uiWindow->shapeSelectionChanged.connect(this, &Controller::SelectShape);
-    m_uiWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
-    m_uiWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
     m_uiWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
     m_uiWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
     m_uiWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
@@ -478,7 +479,7 @@ void Controller::FinishDragSelection(bool additive)
 }
 
 // Input Callbacks
-void Controller::OnViewportMouseMove(double xpos, double ypos)
+void Controller::OnViewportMouseMove(Window* window, double xpos, double ypos)
 {
     if (firstMouse)
     {
@@ -553,7 +554,7 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
         UpdateDragSelection(xpos, ypos);
 }
 
-void Controller::OnViewportMouseButton(int button, int action, int mods)
+void Controller::OnViewportMouseButton(Window* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_MIDDLE)
         middleMouseHeld = action == GLFW_PRESS;
@@ -580,13 +581,13 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
     }
 }
 
-void Controller::OnViewportMouseScroll(double xoffset, double yoffset)
+void Controller::OnViewportMouseScroll(Window* window, double xoffset, double yoffset)
 {
     m_viewport->GetCamera()->Zoom(yoffset);
     m_viewport->RefreshCamera();
 }
 
-void Controller::OnViewportKey(int key, int scancode, int action, int mods)
+void Controller::OnViewportKey(Window* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         m_viewport->SetFullscreen(!m_viewport->IsFullscreen());
@@ -619,7 +620,7 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
     OnKeyChanged(key, scancode, action, mods);
 }
 
-void Controller::OnViewportSizeChanged(int width, int height)
+void Controller::OnViewportSizeChanged(Window* window, int width, int height)
 {
     m_viewport->RefreshCamera();
 }
@@ -650,7 +651,7 @@ void Controller::OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image)
     PerformAction(std::make_shared<RemoveImagesAction>(m_scene, image));
 }
 
-void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
+void Controller::OnUIKeyChanged(Window* window, int key, int scancode, int action, int mods)
 {
     OnKeyChanged(key, scancode, action, mods);
 }
@@ -837,7 +838,7 @@ void Controller::OnPromptResponse(int promptType, bool response)
     }
 }
 
-void Controller::OnCloseRequested()
+void Controller::OnCloseRequested(Window* window)
 {
     m_uiWindow->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
 }
@@ -849,7 +850,7 @@ void Controller::OnKeyChanged(int key, int scancode, int action, int mods)
     if (key == GLFW_KEY_S && mods & GLFW_MOD_CONTROL && action == GLFW_RELEASE && !m_scene->sourceFile.empty())
         Save(m_scene->sourceFile);
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        OnCloseRequested();
+        OnCloseRequested(m_uiWindow.get());
     if (key == GLFW_KEY_Z && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
         Undo();
     if (key == GLFW_KEY_Y && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)

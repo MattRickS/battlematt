@@ -392,5 +392,5 @@ void UIWindow::OnKeyChanged(int key, int scancode, int action, int mods)
 {
     ImGuiIO& io = ImGui::GetIO();
     if (!io.WantCaptureKeyboard)
-        keyChanged.emit(key, scancode, action, mods);
+        keyChanged.emit(this, key, scancode, action, mods);
 }

@@ -54,17 +54,17 @@ public:
     std::shared_ptr<Shape2D> GetShapeAtScreenPos(glm::vec2 screenPos);
 
     // Have to public for the glfw bound callbacks to access
-    void OnViewportMouseMove(double xpos, double ypos);
-    void OnViewportMouseButton(int button, int action, int mods);
-    void OnViewportMouseScroll(double xoffset, double yoffset);
-    void OnViewportKey(int key, int scancode, int action, int mods);
-    void OnViewportSizeChanged(int width, int height);
-    void OnCloseRequested();
+    void OnViewportMouseMove(Window* window, double xpos, double ypos);
+    void OnViewportMouseButton(Window* window, int button, int action, int mods);
+    void OnViewportMouseScroll(Window* window, double xoffset, double yoffset);
+    void OnViewportKey(Window* window, int key, int scancode, int action, int mods);
+    void OnViewportSizeChanged(Window* window, int width, int height);
+    void OnCloseRequested(Window* window);
 
+    void OnUIKeyChanged(Window* window, int key, int scancode, int action, int mods);
     void OnUIAddTokenClicked();
     void OnUIAddImageClicked();
     void OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image);
-    void OnUIKeyChanged(int key, int scancode, int action, int mods);
     void OnUICameraIndexChanged(int index);
     void PerformAction(const std::shared_ptr<Action>& action);
 
