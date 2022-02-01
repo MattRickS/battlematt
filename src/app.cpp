@@ -64,7 +64,6 @@ int main(int numArgs, char* args[])
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         return -1;
     
-    Shader shader2 = Shader("resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
     CameraBuffer buffer2 = CameraBuffer(camera);
     mesh1.GenerateVAO();
 
@@ -86,10 +85,10 @@ int main(int numArgs, char* args[])
         glViewport(0, 0, 640, 480);
         glClear(GL_COLOR_BUFFER_BIT);
         texture1.activate(GL_TEXTURE0);
-        shader2.use();
-        shader2.setInt("diffuse", 0);
-        shader2.setMat4("model", glm::mat4(1.0f));
-        mesh1.Draw(shader2);
+        shader1.use();
+        shader1.setInt("diffuse", 0);
+        shader1.setMat4("model", glm::mat4(1.0f));
+        mesh1.Draw(shader1);
         glfwSwapBuffers(window2);
     }
 
