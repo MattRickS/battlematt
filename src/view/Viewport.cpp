@@ -115,8 +115,6 @@ void Viewport::StartDragSelection(const std::shared_ptr<RectOverlay>& rect, floa
     dragSelectRect = rect;
     // GL uses inverted Y-axis
     dragSelectRect->startCorner = dragSelectRect->endCorner = glm::vec2(xpos, Height() - ypos);
-    // TODO: Don't add to scene, just draw in Draw()
-    m_scene->overlays.push_back(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
 }
 
 void Viewport::UpdateDragSelection(float xpos, float ypos)
@@ -149,7 +147,6 @@ Bounds2D Viewport::DragSelectionRect()
 
 void Viewport::FinishDragSelection()
 {
-    m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
     dragSelectRect.reset();
 }
 
@@ -199,6 +196,8 @@ void Viewport::Draw()
 {
     // TODO: Move drawing logic out of scene/other classes and into this class.
     m_scene->Draw();
+    if (dragSelectRect)
+        dragSelectRect->Draw();
 }
 
 void Viewport::OnWindowResized(int width, int height)
