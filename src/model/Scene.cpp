@@ -100,6 +100,15 @@ void Scene::RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove)
     images.erase(std::remove_if(images.begin(), images.end(), pred), images.end());
 }
 
+void Scene::RemoveCameras(std::vector<std::shared_ptr<Camera>> toRemove)
+{
+    auto pred = [&toRemove](const std::shared_ptr<Camera>& t) ->bool
+    {
+        return std::find(toRemove.begin(), toRemove.end(), t) != toRemove.end();
+    };
+    cameras.erase(std::remove_if(cameras.begin(), cameras.end(), pred), cameras.end());
+}
+
 bool Scene::IsEmpty() { return tokens.empty() && images.empty(); }
 
 Bounds2D Scene::GetBounds()

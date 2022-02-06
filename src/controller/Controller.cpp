@@ -355,7 +355,9 @@ void Controller::CloneCamera()
 {
     auto camera = std::make_shared<Camera>(*m_viewport->GetCamera());
     camera->SetName(camera->GetName() + "Copy");
-    m_scene->AddCamera(camera);
+    PerformAction(std::make_shared<AddCamerasAction>(m_scene, camera));
+    // TODO: How to tie camera selection to the action...?
+    // TODO: Remove camera action
     SetHostCameraIndex(m_scene->cameras.size() - 1);
 }
 

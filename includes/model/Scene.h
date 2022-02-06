@@ -37,6 +37,7 @@ public:
     void RemoveOverlay(std::shared_ptr<Overlay> overlay);
     void RemoveTokens(std::vector<std::shared_ptr<Token>> toRemove);
     void RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove);
+    void RemoveCameras(std::vector<std::shared_ptr<Camera>> toRemove);
     bool IsEmpty();
     Bounds2D GetBounds();
     bool GetImagesLocked();
