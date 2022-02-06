@@ -40,7 +40,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
     m_uiWindow->imageLockChanged.connect(this, &Controller::SetImagesLocked);
     m_uiWindow->tokenLockChanged.connect(this, &Controller::SetTokensLocked);
-    m_uiWindow->cameraIndexChanged.connect(this, &Controller::OnUICameraIndexChanged);
+    m_uiWindow->cameraIndexChanged.connect(this, &Controller::SetHostCameraIndex);
     m_uiWindow->cloneCameraClicked.connect(this, &Controller::CloneCamera);
 
     SetScene(std::make_shared<Scene>(m_resources));
@@ -332,12 +332,6 @@ void Controller::DeleteSelected()
     PerformAction(actionGroup);
 }
 
-void Controller::CloneCamera()
-{
-    auto camera = std::make_shared<Camera>(*m_viewport->GetCamera());
-    m_scene->AddCamera(camera);
-}
-
 // Viewport
 void Controller::Focus()
 {
@@ -352,6 +346,19 @@ void Controller::FocusSelected()
         return;
 
     m_viewport->Focus(Bounds2D::BoundsForShapes(SelectedShapes()));
+}
+
+void Controller::CloneCamera()
+{
+    auto camera = std::make_shared<Camera>(*m_viewport->GetCamera());
+    m_scene->AddCamera(camera);
+    SetHostCameraIndex(m_scene->cameras.size() - 1);
+}
+
+void Controller::SetHostCameraIndex(int index)
+{
+    m_viewport->SetCameraIndex(index);
+    m_uiWindow->SetHostCameraIndex(index);
 }
 
 // Screen Position
@@ -653,12 +660,6 @@ void Controller::OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image)
 void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
 {
     OnKeyChanged(key, scancode, action, mods);
-}
-
-void Controller::OnUICameraIndexChanged(int index)
-{
-    m_viewport->SetCameraIndex(index);
-    m_uiWindow->SetHostCameraIndex(index);
 }
 
 void Controller::PerformAction(const std::shared_ptr<Action>& action)

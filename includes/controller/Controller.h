@@ -45,10 +45,12 @@ public:
     void PasteSelected();
     void DuplicateSelected();
     void DeleteSelected();
-    void CloneCamera();
 
     void Focus();
     void FocusSelected();
+
+    void CloneCamera();
+    void SetHostCameraIndex(int index);
 
     std::vector<std::shared_ptr<Shape2D>> ShapesInScreenRect(float minx, float miny, float maxx, float maxy);
     std::shared_ptr<Shape2D> GetShapeAtScreenPos(glm::vec2 screenPos);
@@ -65,7 +67,6 @@ public:
     void OnUIAddImageClicked();
     void OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image);
     void OnUIKeyChanged(int key, int scancode, int action, int mods);
-    void OnUICameraIndexChanged(int index);
     void PerformAction(const std::shared_ptr<Action>& action);
 
     bool Undo();
