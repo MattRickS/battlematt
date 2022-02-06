@@ -80,6 +80,11 @@ void UIWindow::SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image)
     m_displayPropertiesImage = image;
 }
 
+void UIWindow::SetHostCameraIndex(unsigned int index)
+{
+    m_hostCameraIndex = index;
+}
+
 void UIWindow::Prompt(int promptType, std::string msg)
 {
     m_promptMsg = msg;
@@ -226,8 +231,12 @@ void UIWindow::DrawCameraSection()
         {
             for (unsigned int i = 0; i < m_scene->cameras.size(); i++)
             {
-                if (ImGui::Selectable(("Camera" + std::to_string(i)).c_str(), false))
+                if (ImGui::Selectable(("Camera" + std::to_string(i)).c_str(), i == m_hostCameraIndex))
+                {
+                    // ImGuiSelectableFlags_AllowDoubleClick
+                    // if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                     cameraIndexChanged.emit(i);
+                }
             }
             ImGui::EndListBox();
         }

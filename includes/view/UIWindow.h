@@ -44,6 +44,7 @@ public:
 
     void SetDisplayPropertiesToken(const std::shared_ptr<Token>& token);
     void SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image);
+    void SetHostCameraIndex(unsigned int index);
 
     virtual void OnKeyChanged(int key, int scancode, int action, int mods);
 
@@ -53,6 +54,7 @@ private:
     std::string m_promptMsg = "";
     int m_promptType = 0;
     bool mergeLoad = false;
+    unsigned int m_hostCameraIndex = 0;
 
     std::string tokenNames[NUM_TOKEN_STATUSES] {"Red", "Green", "Blue", "Yellow", "Cyan", "Pink"};
 

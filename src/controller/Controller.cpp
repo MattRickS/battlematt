@@ -658,6 +658,7 @@ void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
 void Controller::OnUICameraIndexChanged(int index)
 {
     m_viewport->SetCameraIndex(index);
+    m_uiWindow->SetHostCameraIndex(index);
 }
 
 void Controller::PerformAction(const std::shared_ptr<Action>& action)
