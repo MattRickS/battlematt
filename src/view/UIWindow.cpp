@@ -231,7 +231,7 @@ void UIWindow::DrawCameraSection()
         {
             for (unsigned int i = 0; i < m_scene->cameras.size(); i++)
             {
-                if (ImGui::Selectable(("Camera" + std::to_string(i)).c_str(), i == m_hostCameraIndex))
+                if (ImGui::Selectable(m_scene->cameras[i]->name.c_str(), i == m_hostCameraIndex))
                 {
                     // ImGuiSelectableFlags_AllowDoubleClick
                     // if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))

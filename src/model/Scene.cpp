@@ -20,12 +20,16 @@ Scene::Scene(std::shared_ptr<Resources> resources) : m_resources(resources)
         m_resources->GetMesh(Resources::MeshType::Quad2),
         m_resources->GetShader(Resources::ShaderType::Grid)
     );
-    cameras.push_back(std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f));
 }
 
 void Scene::AddCamera(std::shared_ptr<Camera> camera)
 {
     cameras.push_back(camera);
+}
+
+void Scene::AddDefaultCamera()
+{
+    cameras.push_back(std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f));
 }
 
 void Scene::AddImage()

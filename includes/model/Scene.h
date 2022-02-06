@@ -27,6 +27,7 @@ public:
 
     Scene(std::shared_ptr<Resources> resources);
     void AddCamera(std::shared_ptr<Camera> camera);
+    void AddDefaultCamera();
     void AddImage();
     void AddImage(std::string path);
     void AddImage(const std::shared_ptr<BGImage>& image);

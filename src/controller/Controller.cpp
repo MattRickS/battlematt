@@ -43,7 +43,9 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->cameraIndexChanged.connect(this, &Controller::SetHostCameraIndex);
     m_uiWindow->cloneCameraClicked.connect(this, &Controller::CloneCamera);
 
-    SetScene(std::make_shared<Scene>(m_resources));
+    auto scene = std::make_shared<Scene>(m_resources);
+    scene->AddDefaultCamera();
+    SetScene(scene);
 }
 
 Controller::~Controller()
@@ -351,6 +353,7 @@ void Controller::FocusSelected()
 void Controller::CloneCamera()
 {
     auto camera = std::make_shared<Camera>(*m_viewport->GetCamera());
+    camera->name += "Copy";
     m_scene->AddCamera(camera);
     SetHostCameraIndex(m_scene->cameras.size() - 1);
 }
