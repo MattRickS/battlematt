@@ -63,6 +63,11 @@ private:
     void DrawGridOptions(const std::shared_ptr<Grid>&);
     void DrawTokenOptions(const std::shared_ptr<Token>& tokens);
 
+    void DrawCameraSection();
+    void DrawGridSection();
+    void DrawImageSection();
+    void DrawTokenSection();
+
     void RespondToPrompt(bool response);
 
 };
