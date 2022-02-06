@@ -53,8 +53,6 @@ public:
     glm::mat4 viewMatrix;
     glm::mat4 invViewMatrix;
 
-    std::string name = "Camera";
-
     Camera(
         glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f),
@@ -72,7 +70,12 @@ public:
     void SetAperture(float haperture);
     void RefreshMatrices();
 
+    void SetName(const std::string name);
+    std::string GetName();
+
 private:
+    std::string m_name = "Camera";
+
     void updateCameraVectors();
     void updateProjectionMatrix();
     void updateViewMatrix();

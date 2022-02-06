@@ -99,6 +99,9 @@ void Camera::RefreshMatrices()
     updateViewMatrix();
 }
 
+void Camera::SetName(const std::string name) { m_name = name; }
+std::string Camera::GetName() { return m_name; }
+
 // calculates the front vector from the Camera's (updated) Euler Angles
 void Camera::updateCameraVectors()
 {

@@ -75,6 +75,7 @@ public:
     void OnTokenPropertyChanged(const std::shared_ptr<Token>& token, TokenProperty property, TokenPropertyValue value);
     void OnImagePropertyChanged(const std::shared_ptr<BGImage>& image, ImageProperty property, ImagePropertyValue value);
     void OnGridPropertyChanged(const std::shared_ptr<Grid>& grid, GridProperty property, GridPropertyValue value);
+    void OnCameraPropertyChanged(const std::shared_ptr<Camera>& camera, CameraProperty propert, CameraPropertyValue value);
 
 private:
     std::shared_ptr<Resources> m_resources = nullptr;

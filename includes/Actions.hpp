@@ -109,6 +109,8 @@ private:
     std::chrono::steady_clock::time_point occurredAt = std::chrono::steady_clock::now();
 };
 
+typedef ModifyMemberAction<Camera, std::string> ModifyCameraString;  // name
+
 typedef ModifyMemberAction<Grid, bool> ModifyGridBool;  // snap
 typedef ModifyMemberAction<Grid, float> ModifyGridFloat;  // size
 typedef ModifyMemberAction<Grid, glm::vec3> ModifyGridVec3;  // colour

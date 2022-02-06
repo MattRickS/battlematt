@@ -35,6 +35,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
     m_uiWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
     m_uiWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
+    m_uiWindow->cameraPropertyChanged.connect(this, &Controller::OnCameraPropertyChanged);
     m_uiWindow->addTokenClicked.connect(this, &Controller::OnUIAddTokenClicked);
     m_uiWindow->addImageClicked.connect(this, &Controller::OnUIAddImageClicked);
     m_uiWindow->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
@@ -353,7 +354,7 @@ void Controller::FocusSelected()
 void Controller::CloneCamera()
 {
     auto camera = std::make_shared<Camera>(*m_viewport->GetCamera());
-    camera->name += "Copy";
+    camera->SetName(camera->GetName() + "Copy");
     m_scene->AddCamera(camera);
     SetHostCameraIndex(m_scene->cameras.size() - 1);
 }
@@ -799,6 +800,24 @@ void Controller::OnGridPropertyChanged(const std::shared_ptr<Grid>& grid, GridPr
         break;
     }
     
+    if (action)
+        PerformAction(action);
+}
+
+void Controller::OnCameraPropertyChanged(const std::shared_ptr<Camera>& camera, CameraProperty property, CameraPropertyValue value)
+{
+    std::shared_ptr<Action> action;
+    switch (property)
+    {
+    case Camera_Name:
+        action = std::make_shared<ModifyCameraString>(camera, &Camera::SetName, camera->GetName(), std::get<std::string>(value));
+        break;
+    
+    default:
+        std::cerr << "Unknown CameraProperty: " << property << std::endl;
+        break;
+    }
+
     if (action)
         PerformAction(action);
 }

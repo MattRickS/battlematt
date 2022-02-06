@@ -28,6 +28,7 @@ public:
     Signal<const std::shared_ptr<Token>&, TokenProperty, TokenPropertyValue> tokenPropertyChanged;
     Signal<const std::shared_ptr<BGImage>&, ImageProperty, ImagePropertyValue> imagePropertyChanged;
     Signal<const std::shared_ptr<Grid>&, GridProperty, GridPropertyValue> gridPropertyChanged;
+    Signal<const std::shared_ptr<Camera>&, CameraProperty, CameraPropertyValue> cameraPropertyChanged;
     Signal<bool> imageLockChanged;
     Signal<bool> tokenLockChanged;
     Signal<int> cameraIndexChanged;

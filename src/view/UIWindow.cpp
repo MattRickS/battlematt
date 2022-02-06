@@ -231,7 +231,7 @@ void UIWindow::DrawCameraSection()
         {
             for (unsigned int i = 0; i < m_scene->cameras.size(); i++)
             {
-                if (ImGui::Selectable(m_scene->cameras[i]->name.c_str(), i == m_hostCameraIndex))
+                if (ImGui::Selectable(m_scene->cameras[i]->GetName().c_str(), i == m_hostCameraIndex))
                 {
                     // ImGuiSelectableFlags_AllowDoubleClick
                     // if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -240,6 +240,10 @@ void UIWindow::DrawCameraSection()
             }
             ImGui::EndListBox();
         }
+
+        std::string name = m_scene->cameras[m_hostCameraIndex]->GetName();
+        if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue))
+            cameraPropertyChanged.emit(m_scene->cameras[m_hostCameraIndex], Camera_Name, name);
 
         if (ImGui::Button("Clone Camera"))
             cloneCameraClicked.emit();
