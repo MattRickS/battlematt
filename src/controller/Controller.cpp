@@ -43,6 +43,7 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->tokenLockChanged.connect(this, &Controller::SetTokensLocked);
     m_uiWindow->cameraSelectionChanged.connect(this, &Controller::SetHostCamera);
     m_uiWindow->cloneCameraClicked.connect(this, &Controller::CloneCamera);
+    m_uiWindow->deleteCameraClicked.connect(this, &Controller::DeleteCamera);
 
     SetScene(std::make_shared<Scene>(m_resources));
 }
@@ -361,6 +362,29 @@ void Controller::CloneCamera()
     std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
     actionGroup->Add(std::make_shared<AddCameraAction>(m_scene, camera));
     actionGroup->Add(std::make_shared<SetViewCameraAction>(m_scene, PRIMARY, m_scene->GetViewCamera(PRIMARY), camera));
+    PerformAction(actionGroup);
+}
+
+void Controller::DeleteCamera()
+{
+    if (m_scene->cameras.size() <= 1)
+    {
+        std::cerr << "Cannot delete last camera" << std::endl;
+        return;
+    }
+
+    auto currentCamera = m_scene->GetViewCamera(PRIMARY);
+
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    actionGroup->Add(std::make_shared<RemoveCameraAction>(m_scene, currentCamera));
+    for (const auto& camera: m_scene->cameras)
+    {
+        if (camera !=  currentCamera)
+        {
+            actionGroup->Add(std::make_shared<SetViewCameraAction>(m_scene, PRIMARY, currentCamera, camera));
+            break;
+        }
+    }
     PerformAction(actionGroup);
 }
 

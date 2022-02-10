@@ -50,6 +50,7 @@ public:
     void FocusSelected();
 
     void CloneCamera();
+    void DeleteCamera();
     void SetHostCamera(const std::shared_ptr<Camera>& camera);
 
     std::vector<std::shared_ptr<Shape2D>> ShapesInScreenRect(float minx, float miny, float maxx, float maxy);
