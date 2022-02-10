@@ -41,12 +41,10 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
     m_uiWindow->imageLockChanged.connect(this, &Controller::SetImagesLocked);
     m_uiWindow->tokenLockChanged.connect(this, &Controller::SetTokensLocked);
-    m_uiWindow->cameraIndexChanged.connect(this, &Controller::SetHostCameraIndex);
+    m_uiWindow->cameraSelectionChanged.connect(this, &Controller::SetHostCamera);
     m_uiWindow->cloneCameraClicked.connect(this, &Controller::CloneCamera);
 
-    auto scene = std::make_shared<Scene>(m_resources);
-    scene->AddDefaultCamera();
-    SetScene(scene);
+    SetScene(std::make_shared<Scene>(m_resources));
 }
 
 Controller::~Controller()
@@ -58,6 +56,10 @@ Controller::~Controller()
 // Scene Management
 void Controller::SetScene(std::shared_ptr<Scene> scene)
 {
+    // A scene must have at least one camera to be rendered
+    if (scene->cameras.empty())
+        scene->AddDefaultCamera();
+
     m_scene = scene;
     m_viewport->SetScene(scene);
     m_uiWindow->SetScene(scene);
@@ -355,16 +357,20 @@ void Controller::CloneCamera()
 {
     auto camera = std::make_shared<Camera>(*m_viewport->GetCamera());
     camera->SetName(camera->GetName() + "Copy");
-    PerformAction(std::make_shared<AddCamerasAction>(m_scene, camera));
-    // TODO: How to tie camera selection to the action...?
-    // TODO: Remove camera action
-    SetHostCameraIndex(m_scene->cameras.size() - 1);
+
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    actionGroup->Add(std::make_shared<AddCameraAction>(m_scene, camera));
+    actionGroup->Add(std::make_shared<SetViewCameraAction>(m_scene, PRIMARY, m_scene->GetViewCamera(PRIMARY), camera));
+    PerformAction(actionGroup);
 }
 
-void Controller::SetHostCameraIndex(int index)
+void Controller::SetHostCamera(const std::shared_ptr<Camera>& camera)
 {
-    m_viewport->SetCameraIndex(index);
-    m_uiWindow->SetHostCameraIndex(index);
+    auto it = std::find(m_scene->cameras.begin(), m_scene->cameras.end(), camera);
+    if (it == m_scene->cameras.end())
+        return;
+
+    PerformAction(std::make_shared<SetViewCameraAction>(m_scene, PRIMARY, m_scene->GetViewCamera(PRIMARY), camera));
 }
 
 // Screen Position

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 
 #include <glutil/Buffers.h>
@@ -38,21 +39,15 @@ void Viewport::SetScene(std::shared_ptr<Scene> scene, int cameraIndex)
     RefreshCamera();
 }
 
-std::shared_ptr<Camera>& Viewport::GetCamera()
+void Viewport::SetCamera(const std::shared_ptr<Camera>& camera)
+{
+    m_camera = camera;
+    RefreshCamera();
+}
+
+const std::shared_ptr<Camera>& Viewport::GetCamera()
 {
     return m_camera;
-}
-
-int Viewport::GetCameraIndex()
-{
-    auto it = std::find(m_scene->cameras.begin(), m_scene->cameras.end(), m_camera);
-    return it - m_scene->cameras.begin();
-}
-
-void Viewport::SetCameraIndex(int index)
-{
-    m_camera = m_scene->cameras[index];
-    RefreshCamera();
 }
 
 void Viewport::RefreshCamera()
@@ -75,6 +70,17 @@ void Viewport::Focus(const Bounds2D& bounds)
 
 void Viewport::Draw()
 {
+    // The current design assumes the viewport can be varied, but is limited to
+    // a single GL context (and therefore a single camera). Hack for now to ensure
+    // the primary camera is always rendered even if undo/redo changes the current
+    // camera. Undo/Redo needs a better way of informing the Renderer the buffer
+    // must be reloaded.
+    if (m_camera != m_scene->GetViewCamera(PRIMARY))
+    {
+        std::cerr << "Camera buffer out of sync with scene, refreshing" << std::endl;
+        m_camera = m_scene->GetViewCamera(PRIMARY);
+        RefreshCamera();
+    }
     // TODO: Move drawing logic out of scene/other classes and into this class.
     m_scene->Draw();
 }

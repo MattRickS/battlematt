@@ -130,6 +130,28 @@ typedef ModifyMemberAction<Token, TokenStatuses> ModifyTokenStatuses;
 
 typedef ModifyMemberAction<Scene, bool> ModifySceneLocks;
 
+class SetViewCameraAction : public Action
+{
+public:
+    SetViewCameraAction(const std::shared_ptr<Scene>& scene, ViewID viewID, const std::shared_ptr<Camera>& oldCamera, const std::shared_ptr<Camera>& newCamera) :
+        m_scene(scene), m_viewID(viewID), m_oldCamera(oldCamera), m_newCamera(newCamera) {}
+
+    virtual void Undo()
+    {
+        m_scene->SetViewCamera(m_viewID, m_oldCamera);
+    }
+    virtual void Redo()
+    {
+        m_scene->SetViewCamera(m_viewID, m_newCamera);
+    }
+
+private:
+    std::shared_ptr<Scene> m_scene;
+    ViewID m_viewID;
+    std::shared_ptr<Camera> m_oldCamera;
+    std::shared_ptr<Camera> m_newCamera;
+};
+
 // Selection
 class SelectShapesAction : public Action
 {
@@ -302,62 +324,42 @@ private:
     std::vector<std::shared_ptr<BGImage>> m_images;
 };
 
-class AddCamerasAction : public Action
+class AddCameraAction : public Action
 {
 public:
-    AddCamerasAction(const std::shared_ptr<Scene>& scene) : m_scene(scene) {}
-    AddCamerasAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Camera>& camera) : m_scene(scene)
-    {
-        m_cameras.push_back(camera);
-    }
-    AddCamerasAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<Camera>> cameras) : m_scene(scene), m_cameras(cameras) {}
-
-    void Add(const std::shared_ptr<Camera>& camera)
-    {
-        m_cameras.push_back(camera);
-    }
+    AddCameraAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Camera>& camera) :
+        m_scene(scene), m_camera(camera) {}
 
     virtual void Undo()
     {
-        m_scene->RemoveCameras(m_cameras);
+        m_scene->RemoveCamera(m_camera);
     }
     virtual void Redo()
     {
-        for (const auto& camera: m_cameras)
-            m_scene->AddCamera(camera);
+        m_scene->AddCamera(m_camera);
     }
 
 private:
     std::shared_ptr<Scene> m_scene;
-    std::vector<std::shared_ptr<Camera>> m_cameras;
+    std::shared_ptr<Camera> m_camera;
 };
 
-class RemoveCamerasAction : public Action
+class RemoveCameraAction : public Action
 {
 public:
-    RemoveCamerasAction(const std::shared_ptr<Scene>& scene) : m_scene(scene) {}
-    RemoveCamerasAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Camera>& camera) : m_scene(scene)
-    {
-        m_cameras.push_back(camera);
-    }
-    RemoveCamerasAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<Camera>> cameras) : m_scene(scene), m_cameras(cameras) {}
-
-    void Add(const std::shared_ptr<Camera>& camera)
-    {
-        m_cameras.push_back(camera);
-    }
+    RemoveCameraAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Camera>& camera) :
+        m_scene(scene), m_camera(camera) {}
 
     virtual void Undo()
     {
-        for (const auto& camera: m_cameras)
-            m_scene->AddCamera(camera);
+        m_scene->AddCamera(m_camera);
     }
     virtual void Redo()
     {
-        m_scene->RemoveCameras(m_cameras);
+        m_scene->RemoveCamera(m_camera);
     }
 
 private:
     std::shared_ptr<Scene> m_scene;
-    std::vector<std::shared_ptr<Camera>> m_cameras;
+    std::shared_ptr<Camera> m_camera;
 };

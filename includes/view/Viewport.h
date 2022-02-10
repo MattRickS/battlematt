@@ -14,9 +14,8 @@ public:
 
     virtual void Draw();
     void SetScene(std::shared_ptr<Scene> scene, int cameraIndex=0);
-    std::shared_ptr<Camera>& GetCamera();
-    int GetCameraIndex();
-    void SetCameraIndex(int index);
+    void SetCamera(const std::shared_ptr<Camera>& camera);
+    const std::shared_ptr<Camera>& GetCamera();
 
     // Orthographic operations (Matrices aren't working correctly if camera position is changed)
     glm::vec2 ScreenToWorldPos(float x, float y);

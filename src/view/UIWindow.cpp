@@ -80,11 +80,6 @@ void UIWindow::SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image)
     m_displayPropertiesImage = image;
 }
 
-void UIWindow::SetHostCameraIndex(unsigned int index)
-{
-    m_hostCameraIndex = index;
-}
-
 void UIWindow::Prompt(int promptType, std::string msg)
 {
     m_promptMsg = msg;
@@ -227,23 +222,24 @@ void UIWindow::DrawCameraSection()
 {
     if (ImGui::CollapsingHeader("Cameras"))
     {
+        auto hostCamera = m_scene->GetViewCamera(PRIMARY);
+
         if (ImGui::BeginListBox("Cameras##List"))
         {
-            for (unsigned int i = 0; i < m_scene->cameras.size(); i++)
+            for (const auto& camera: m_scene->cameras)
             {
-                if (ImGui::Selectable(m_scene->cameras[i]->GetName().c_str(), i == m_hostCameraIndex))
-                {
-                    // ImGuiSelectableFlags_AllowDoubleClick
-                    // if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-                    cameraIndexChanged.emit(i);
-                }
+                if (ImGui::Selectable(camera->GetName().c_str(), camera == hostCamera))
+                    cameraSelectionChanged.emit(camera);
             }
             ImGui::EndListBox();
         }
 
-        std::string name = m_scene->cameras[m_hostCameraIndex]->GetName();
-        if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue))
-            cameraPropertyChanged.emit(m_scene->cameras[m_hostCameraIndex], Camera_Name, name);
+        if (hostCamera)
+        {
+            std::string name = hostCamera->GetName();
+            if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue))
+                cameraPropertyChanged.emit(hostCamera, Camera_Name, name);
+        }
 
         if (ImGui::Button("Clone Camera"))
             cloneCameraClicked.emit();
