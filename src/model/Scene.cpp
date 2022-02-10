@@ -25,8 +25,8 @@ Scene::Scene(std::shared_ptr<Resources> resources) : m_resources(resources)
 void Scene::AddCamera(const std::shared_ptr<Camera>& camera)
 {
     cameras.push_back(camera);
-    if (m_views.empty())
-        m_views.emplace(PRIMARY, camera);
+    if (views.empty())
+        views.emplace(PRIMARY, camera);
 }
 
 void Scene::AddDefaultCamera()
@@ -111,14 +111,14 @@ bool Scene::RemoveCamera(const std::shared_ptr<Camera>& camera)
 
     // When a camera's deleted, if it's being used for a view then point the
     // view to one of the remaining cameras if any exist.
-    for (const auto& it2: m_views)
+    for (const auto& it2: views)
     {
         if (it2.second == camera)
         {
             if (cameras.empty())
-                m_views[it2.first] = nullptr;
+                views[it2.first] = nullptr;
             else
-                m_views[it2.first] = cameras[0];
+                views[it2.first] = cameras[0];
             break;
         }
     }
@@ -133,11 +133,11 @@ void Scene::SetViewCamera(ViewID id, const std::shared_ptr<Camera>& camera)
     {
         AddCamera(camera);
     }
-    m_views[id] = camera;
+    views[id] = camera;
 }
 const std::shared_ptr<Camera>& Scene::GetViewCamera(ViewID id)
 {
-    return m_views[id];
+    return views[id];
 }
 
 bool Scene::IsEmpty() { return tokens.empty() && images.empty(); }

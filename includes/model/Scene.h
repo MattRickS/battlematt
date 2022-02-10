@@ -29,6 +29,7 @@ public:
     std::vector<std::shared_ptr<Overlay>> overlays;
     std::shared_ptr<Grid> grid = nullptr;
     std::vector<std::shared_ptr<Camera>> cameras;
+    std::unordered_map<ViewID, std::shared_ptr<Camera>> views;
     std::string sourceFile;
 
     Scene(std::shared_ptr<Resources> resources);
@@ -57,7 +58,6 @@ public:
 
 private:
     std::shared_ptr<Resources> m_resources;
-    std::unordered_map<ViewID, std::shared_ptr<Camera>> m_views;
     bool m_lockImages = false;
     bool m_lockTokens = false;
     unsigned int m_primaryCamera = -1;

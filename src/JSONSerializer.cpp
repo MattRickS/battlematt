@@ -171,6 +171,18 @@ bool JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scene, nlohman
                   [this, &i, &jcameras](const std::shared_ptr<Camera> camera){ SerializeCamera(camera, jcameras[i++]); });
     json["cameras"] = jcameras;
 
+    nlohmann::json jviews = nlohmann::json::array();
+    i = 0;
+    for (const auto& pair: scene->views)
+    {
+        if (pair.second != nullptr)
+        {
+            auto it = std::find(scene->cameras.begin(), scene->cameras.end(), pair.second);
+            jviews[i++] = {{"id", pair.first}, {"index", it - scene->cameras.begin()}};
+        }
+    }
+    json["views"] = jviews;
+
     nlohmann::json jgrid;
     SerializeGrid(scene->grid, jgrid);
     json["grid"] = jgrid;
@@ -189,6 +201,13 @@ void JSONSerializer::DeserializeScene(nlohmann::json& json, Scene& scene)
     }
     if (json.contains("camera"))
         scene.cameras.push_back(DeserializeCamera(json["camera"]));
+
+    if (json.contains("views"))
+    {
+        nlohmann::json jviews = json["views"];
+        std::for_each(jviews.begin(), jviews.end(),
+                      [this, &scene](nlohmann::json& jview){ scene.SetViewCamera(jview["id"], scene.cameras[jview["index"]]); });
+    }
 
     if (json.contains("grid"))
         scene.grid = DeserializeGrid(json["grid"]);
@@ -265,6 +284,21 @@ nlohmann::json JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scen
         nlohmann::json jgrid;
         SerializeGrid(scene->grid, jgrid);
         json["grid"] = jgrid;
+    }
+
+    if (bool(flags & SerializeFlag::View) || bool(flags & SerializeFlag::All))
+    {
+        nlohmann::json jviews = nlohmann::json::array();
+        uint i = 0;
+        for (const auto& pair: scene->views)
+        {
+            if (pair.second != nullptr)
+            {
+                auto it = std::find(scene->cameras.begin(), scene->cameras.end(), pair.second);
+                jviews[i++] = {{"id", pair.first}, {"index", it - scene->cameras.begin()}};
+            }
+        }
+        json["views"] = jviews;
     }
 
     return json;

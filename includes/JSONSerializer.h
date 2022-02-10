@@ -22,6 +22,7 @@ enum class SerializeFlag
     Image    = 1 << 2,
     Camera   = 1 << 3,
     Grid     = 1 << 4,
+    View     = 1 << 5,
     Selected = 1 << 8
 };
 
