@@ -23,7 +23,7 @@ bool JSONSerializer::SerializeCamera(const std::shared_ptr<Camera>& camera, nloh
 {
     json["pos"] = {camera->Position.x, camera->Position.y, camera->Position.z};
     json["focal"] = camera->Focal;
-    json["name"] = camera->name;
+    json["name"] = camera->GetName();
     return true;
 }
 
@@ -33,7 +33,7 @@ std::shared_ptr<Camera> JSONSerializer::DeserializeCamera(nlohmann::json& json)
         glm::vec3(json["pos"][0], json["pos"][1], json["pos"][2]), glm::vec3(0.0f, 0.0f, -1.0f), true, json["focal"]
     );
     if (json.contains("name"))
-        camera->name = json["name"];
+        camera->SetName(json["name"]);
     return camera;
 }
 
