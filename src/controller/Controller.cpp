@@ -60,6 +60,8 @@ void Controller::SetScene(std::shared_ptr<Scene> scene)
     // A scene must have at least one camera to be rendered
     if (scene->cameras.empty())
         scene->AddDefaultCamera();
+    else if (scene->views.empty())
+        scene->SetViewCamera(PRIMARY, scene->cameras[0]);
 
     m_scene = scene;
     m_viewport->SetScene(scene);
