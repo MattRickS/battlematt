@@ -28,8 +28,12 @@ public:
     Signal<const std::shared_ptr<Token>&, TokenProperty, TokenPropertyValue> tokenPropertyChanged;
     Signal<const std::shared_ptr<BGImage>&, ImageProperty, ImagePropertyValue> imagePropertyChanged;
     Signal<const std::shared_ptr<Grid>&, GridProperty, GridPropertyValue> gridPropertyChanged;
+    Signal<const std::shared_ptr<Camera>&, CameraProperty, CameraPropertyValue> cameraPropertyChanged;
     Signal<bool> imageLockChanged;
     Signal<bool> tokenLockChanged;
+    Signal<const std::shared_ptr<Camera>&> cameraSelectionChanged;
+    Signal<> cloneCameraClicked;
+    Signal<> deleteCameraClicked;
 
     UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share = NULL);
     ~UIWindow();
@@ -59,6 +63,11 @@ private:
     void DrawImageOptions(const std::shared_ptr<BGImage>& image);
     void DrawGridOptions(const std::shared_ptr<Grid>&);
     void DrawTokenOptions(const std::shared_ptr<Token>& tokens);
+
+    void DrawCameraSection();
+    void DrawGridSection();
+    void DrawImageSection();
+    void DrawTokenSection();
 
     void RespondToPrompt(bool response);
 

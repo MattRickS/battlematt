@@ -109,6 +109,8 @@ private:
     std::chrono::steady_clock::time_point occurredAt = std::chrono::steady_clock::now();
 };
 
+typedef ModifyMemberAction<Camera, std::string> ModifyCameraString;  // name
+
 typedef ModifyMemberAction<Grid, bool> ModifyGridBool;  // snap
 typedef ModifyMemberAction<Grid, float> ModifyGridFloat;  // size
 typedef ModifyMemberAction<Grid, glm::vec3> ModifyGridVec3;  // colour
@@ -127,6 +129,28 @@ typedef ModifyMemberAction<Token, std::string> ModifyTokenString;  // name
 typedef ModifyMemberAction<Token, TokenStatuses> ModifyTokenStatuses;
 
 typedef ModifyMemberAction<Scene, bool> ModifySceneLocks;
+
+class SetViewCameraAction : public Action
+{
+public:
+    SetViewCameraAction(const std::shared_ptr<Scene>& scene, ViewID viewID, const std::shared_ptr<Camera>& oldCamera, const std::shared_ptr<Camera>& newCamera) :
+        m_scene(scene), m_viewID(viewID), m_oldCamera(oldCamera), m_newCamera(newCamera) {}
+
+    virtual void Undo()
+    {
+        m_scene->SetViewCamera(m_viewID, m_oldCamera);
+    }
+    virtual void Redo()
+    {
+        m_scene->SetViewCamera(m_viewID, m_newCamera);
+    }
+
+private:
+    std::shared_ptr<Scene> m_scene;
+    ViewID m_viewID;
+    std::shared_ptr<Camera> m_oldCamera;
+    std::shared_ptr<Camera> m_newCamera;
+};
 
 // Selection
 class SelectShapesAction : public Action
@@ -298,4 +322,44 @@ public:
 private:
     std::shared_ptr<Scene> m_scene;
     std::vector<std::shared_ptr<BGImage>> m_images;
+};
+
+class AddCameraAction : public Action
+{
+public:
+    AddCameraAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Camera>& camera) :
+        m_scene(scene), m_camera(camera) {}
+
+    virtual void Undo()
+    {
+        m_scene->RemoveCamera(m_camera);
+    }
+    virtual void Redo()
+    {
+        m_scene->AddCamera(m_camera);
+    }
+
+private:
+    std::shared_ptr<Scene> m_scene;
+    std::shared_ptr<Camera> m_camera;
+};
+
+class RemoveCameraAction : public Action
+{
+public:
+    RemoveCameraAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Camera>& camera) :
+        m_scene(scene), m_camera(camera) {}
+
+    virtual void Undo()
+    {
+        m_scene->AddCamera(m_camera);
+    }
+    virtual void Redo()
+    {
+        m_scene->RemoveCamera(m_camera);
+    }
+
+private:
+    std::shared_ptr<Scene> m_scene;
+    std::shared_ptr<Camera> m_camera;
 };

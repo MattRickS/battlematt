@@ -49,6 +49,10 @@ public:
     void Focus();
     void FocusSelected();
 
+    void CloneCamera();
+    void DeleteCamera();
+    void SetHostCamera(const std::shared_ptr<Camera>& camera);
+
     std::vector<std::shared_ptr<Shape2D>> ShapesInScreenRect(float minx, float miny, float maxx, float maxy);
     std::shared_ptr<Shape2D> GetShapeAtScreenPos(glm::vec2 screenPos);
 
@@ -72,6 +76,7 @@ public:
     void OnTokenPropertyChanged(const std::shared_ptr<Token>& token, TokenProperty property, TokenPropertyValue value);
     void OnImagePropertyChanged(const std::shared_ptr<BGImage>& image, ImageProperty property, ImagePropertyValue value);
     void OnGridPropertyChanged(const std::shared_ptr<Grid>& grid, GridProperty property, GridPropertyValue value);
+    void OnCameraPropertyChanged(const std::shared_ptr<Camera>& camera, CameraProperty property, CameraPropertyValue value);
 
 private:
     std::shared_ptr<Resources> m_resources = nullptr;

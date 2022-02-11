@@ -20,7 +20,18 @@ Scene::Scene(std::shared_ptr<Resources> resources) : m_resources(resources)
         m_resources->GetMesh(Resources::MeshType::Quad2),
         m_resources->GetShader(Resources::ShaderType::Grid)
     );
-    camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f);
+}
+
+void Scene::AddCamera(const std::shared_ptr<Camera>& camera)
+{
+    cameras.push_back(camera);
+    if (views.empty())
+        views.emplace(PRIMARY, camera);
+}
+
+void Scene::AddDefaultCamera()
+{
+    AddCamera(std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), true, 10.0f));
 }
 
 void Scene::AddImage()
@@ -50,8 +61,6 @@ void Scene::AddToken()
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(Resources::TextureType::Default)
     ));
-    // Centers it on the camera view
-    tokens.back()->GetModel()->SetPos(glm::vec2(camera->Position.x, camera->Position.y));
 }
 
 void Scene::AddToken(std::string path)
@@ -60,8 +69,6 @@ void Scene::AddToken(std::string path)
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(path)
     ));
-    // Centers it on the camera view
-    tokens.back()->GetModel()->SetPos(glm::vec2(camera->Position.x, camera->Position.y));
 }
 
 void Scene::AddToken(const std::shared_ptr<Token>& token)
@@ -93,6 +100,44 @@ void Scene::RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove)
         return std::find(toRemove.begin(), toRemove.end(), t) != toRemove.end();
     };
     images.erase(std::remove_if(images.begin(), images.end(), pred), images.end());
+}
+
+bool Scene::RemoveCamera(const std::shared_ptr<Camera>& camera)
+{
+    auto it = std::find(cameras.begin(), cameras.end(), camera);
+    if (it == cameras.end())
+        return false;
+    cameras.erase(it);
+
+    // When a camera's deleted, if it's being used for a view then point the
+    // view to one of the remaining cameras if any exist.
+    for (const auto& it2: views)
+    {
+        if (it2.second == camera)
+        {
+            if (cameras.empty())
+                views[it2.first] = nullptr;
+            else
+                views[it2.first] = cameras[0];
+            break;
+        }
+    }
+
+    return true;
+}
+
+void Scene::SetViewCamera(ViewID id, const std::shared_ptr<Camera>& camera)
+{
+    auto it = std::find(cameras.begin(), cameras.end(), camera);
+    if (it == cameras.end())
+    {
+        AddCamera(camera);
+    }
+    views[id] = camera;
+}
+const std::shared_ptr<Camera>& Scene::GetViewCamera(ViewID id)
+{
+    return views[id];
 }
 
 bool Scene::IsEmpty() { return tokens.empty() && images.empty(); }

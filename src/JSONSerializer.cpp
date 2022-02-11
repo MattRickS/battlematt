@@ -23,14 +23,18 @@ bool JSONSerializer::SerializeCamera(const std::shared_ptr<Camera>& camera, nloh
 {
     json["pos"] = {camera->Position.x, camera->Position.y, camera->Position.z};
     json["focal"] = camera->Focal;
+    json["name"] = camera->GetName();
     return true;
 }
 
 std::shared_ptr<Camera> JSONSerializer::DeserializeCamera(nlohmann::json& json)
 {
-    return std::make_shared<Camera>(
+    auto camera = std::make_shared<Camera>(
         glm::vec3(json["pos"][0], json["pos"][1], json["pos"][2]), glm::vec3(0.0f, 0.0f, -1.0f), true, json["focal"]
     );
+    if (json.contains("name"))
+        camera->SetName(json["name"]);
+    return camera;
 }
 
 // Grid
@@ -161,9 +165,23 @@ bool JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scene, nlohman
     json["tokens"] = SerializeTokens(scene->tokens);
     json["tokensLocked"] = scene->GetTokensLocked();
 
-    nlohmann::json jcamera;
-    SerializeCamera(scene->camera, jcamera);
-    json["camera"] = jcamera;
+    nlohmann::json jcameras = nlohmann::json::array();
+    uint i = 0;
+    std::for_each(scene->cameras.begin(), scene->cameras.end(),
+                  [this, &i, &jcameras](const std::shared_ptr<Camera> camera){ SerializeCamera(camera, jcameras[i++]); });
+    json["cameras"] = jcameras;
+
+    nlohmann::json jviews = nlohmann::json::array();
+    i = 0;
+    for (const auto& pair: scene->views)
+    {
+        if (pair.second != nullptr)
+        {
+            auto it = std::find(scene->cameras.begin(), scene->cameras.end(), pair.second);
+            jviews[i++] = {{"id", pair.first}, {"index", it - scene->cameras.begin()}};
+        }
+    }
+    json["views"] = jviews;
 
     nlohmann::json jgrid;
     SerializeGrid(scene->grid, jgrid);
@@ -174,9 +192,23 @@ bool JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scene, nlohman
 
 void JSONSerializer::DeserializeScene(nlohmann::json& json, Scene& scene)
 {
+    if (json.contains("cameras"))
+    {
+        nlohmann::json jcameras = json["cameras"];
+        scene.images.reserve(jcameras.size());
+        std::for_each(jcameras.begin(), jcameras.end(),
+                      [this, &scene](nlohmann::json& jcamera){ scene.cameras.push_back(DeserializeCamera(jcamera)); });
+    }
     if (json.contains("camera"))
-        scene.camera = DeserializeCamera(json["camera"]);
-    
+        scene.cameras.push_back(DeserializeCamera(json["camera"]));
+
+    if (json.contains("views"))
+    {
+        nlohmann::json jviews = json["views"];
+        std::for_each(jviews.begin(), jviews.end(),
+                      [this, &scene](nlohmann::json& jview){ scene.SetViewCamera(jview["id"], scene.cameras[jview["index"]]); });
+    }
+
     if (json.contains("grid"))
         scene.grid = DeserializeGrid(json["grid"]);
 
@@ -240,9 +272,11 @@ nlohmann::json JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scen
 
     if (bool(flags & SerializeFlag::Camera) || bool(flags & SerializeFlag::All))
     {
-        nlohmann::json jcamera;
-        SerializeCamera(scene->camera, jcamera);
-        json["camera"] = jcamera;
+        nlohmann::json jcameras = nlohmann::json::array();
+        uint i = 0;
+        std::for_each(scene->cameras.begin(), scene->cameras.end(),
+                    [this, &i, &jcameras](const std::shared_ptr<Camera> camera){ SerializeCamera(camera, jcameras[i++]); });
+        json["cameras"] = jcameras;
     }
 
     if (bool(flags & SerializeFlag::Grid) || bool(flags & SerializeFlag::All))
@@ -250,6 +284,21 @@ nlohmann::json JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scen
         nlohmann::json jgrid;
         SerializeGrid(scene->grid, jgrid);
         json["grid"] = jgrid;
+    }
+
+    if (bool(flags & SerializeFlag::View) || bool(flags & SerializeFlag::All))
+    {
+        nlohmann::json jviews = nlohmann::json::array();
+        uint i = 0;
+        for (const auto& pair: scene->views)
+        {
+            if (pair.second != nullptr)
+            {
+                auto it = std::find(scene->cameras.begin(), scene->cameras.end(), pair.second);
+                jviews[i++] = {{"id", pair.first}, {"index", it - scene->cameras.begin()}};
+            }
+        }
+        json["views"] = jviews;
     }
 
     return json;

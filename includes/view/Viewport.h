@@ -13,7 +13,9 @@ public:
     // ~Viewport();
 
     virtual void Draw();
-    void SetScene(std::shared_ptr<Scene> scene);
+    void SetScene(std::shared_ptr<Scene> scene, int cameraIndex=0);
+    void SetCamera(const std::shared_ptr<Camera>& camera);
+    const std::shared_ptr<Camera>& GetCamera();
 
     // Orthographic operations (Matrices aren't working correctly if camera position is changed)
     glm::vec2 ScreenToWorldPos(float x, float y);
@@ -25,5 +27,6 @@ public:
     virtual void OnWindowResized(int width, int height);
 private:
     std::shared_ptr<Scene> m_scene = nullptr;
+    std::shared_ptr<Camera> m_camera = nullptr;
     std::shared_ptr<CameraBuffer> m_cameraBuffer = nullptr;
 };

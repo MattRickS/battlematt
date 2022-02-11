@@ -35,11 +35,15 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_uiWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
     m_uiWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
     m_uiWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
+    m_uiWindow->cameraPropertyChanged.connect(this, &Controller::OnCameraPropertyChanged);
     m_uiWindow->addTokenClicked.connect(this, &Controller::OnUIAddTokenClicked);
     m_uiWindow->addImageClicked.connect(this, &Controller::OnUIAddImageClicked);
     m_uiWindow->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
     m_uiWindow->imageLockChanged.connect(this, &Controller::SetImagesLocked);
     m_uiWindow->tokenLockChanged.connect(this, &Controller::SetTokensLocked);
+    m_uiWindow->cameraSelectionChanged.connect(this, &Controller::SetHostCamera);
+    m_uiWindow->cloneCameraClicked.connect(this, &Controller::CloneCamera);
+    m_uiWindow->deleteCameraClicked.connect(this, &Controller::DeleteCamera);
 
     SetScene(std::make_shared<Scene>(m_resources));
 }
@@ -53,6 +57,12 @@ Controller::~Controller()
 // Scene Management
 void Controller::SetScene(std::shared_ptr<Scene> scene)
 {
+    // A scene must have at least one camera to be rendered
+    if (scene->cameras.empty())
+        scene->AddDefaultCamera();
+    else if (scene->views.empty())
+        scene->SetViewCamera(PRIMARY, scene->cameras[0]);
+
     m_scene = scene;
     m_viewport->SetScene(scene);
     m_uiWindow->SetScene(scene);
@@ -346,6 +356,49 @@ void Controller::FocusSelected()
     m_viewport->Focus(Bounds2D::BoundsForShapes(SelectedShapes()));
 }
 
+void Controller::CloneCamera()
+{
+    auto camera = std::make_shared<Camera>(*m_viewport->GetCamera());
+    camera->SetName(camera->GetName() + "Copy");
+
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    actionGroup->Add(std::make_shared<AddCameraAction>(m_scene, camera));
+    actionGroup->Add(std::make_shared<SetViewCameraAction>(m_scene, PRIMARY, m_scene->GetViewCamera(PRIMARY), camera));
+    PerformAction(actionGroup);
+}
+
+void Controller::DeleteCamera()
+{
+    if (m_scene->cameras.size() <= 1)
+    {
+        std::cerr << "Cannot delete last camera" << std::endl;
+        return;
+    }
+
+    auto currentCamera = m_scene->GetViewCamera(PRIMARY);
+
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    actionGroup->Add(std::make_shared<RemoveCameraAction>(m_scene, currentCamera));
+    for (const auto& camera: m_scene->cameras)
+    {
+        if (camera !=  currentCamera)
+        {
+            actionGroup->Add(std::make_shared<SetViewCameraAction>(m_scene, PRIMARY, currentCamera, camera));
+            break;
+        }
+    }
+    PerformAction(actionGroup);
+}
+
+void Controller::SetHostCamera(const std::shared_ptr<Camera>& camera)
+{
+    auto it = std::find(m_scene->cameras.begin(), m_scene->cameras.end(), camera);
+    if (it == m_scene->cameras.end())
+        return;
+
+    PerformAction(std::make_shared<SetViewCameraAction>(m_scene, PRIMARY, m_scene->GetViewCamera(PRIMARY), camera));
+}
+
 // Screen Position
 std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx, float miny, float maxx, float maxy)
 {
@@ -512,7 +565,7 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
 
     if (middleMouseHeld)
     {
-        m_scene->camera->Pan(m_viewport->ScreenToWorldOffset(xoffset, yoffset));
+        m_viewport->GetCamera()->Pan(m_viewport->ScreenToWorldOffset(xoffset, yoffset));
         m_viewport->RefreshCamera();
     }
     else if (leftMouseHeld && shapeUnderCursor)
@@ -574,7 +627,7 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
 
 void Controller::OnViewportMouseScroll(double xoffset, double yoffset)
 {
-    m_scene->camera->Zoom(yoffset);
+    m_viewport->GetCamera()->Zoom(yoffset);
     m_viewport->RefreshCamera();
 }
 
@@ -623,7 +676,7 @@ void Controller::OnUIAddTokenClicked()
         m_resources->GetTexture(Resources::TextureType::Default)
     );
     // Centers it on the camera view
-    token->GetModel()->SetPos(glm::vec2(m_scene->camera->Position.x, m_scene->camera->Position.y));
+    token->GetModel()->SetPos(glm::vec2(m_viewport->GetCamera()->Position.x, m_viewport->GetCamera()->Position.y));
     std::shared_ptr<AddTokensAction> action = std::make_shared<AddTokensAction>(m_scene, token);
     // TODO: Include selection
     PerformAction(action);
@@ -781,6 +834,24 @@ void Controller::OnGridPropertyChanged(const std::shared_ptr<Grid>& grid, GridPr
         break;
     }
     
+    if (action)
+        PerformAction(action);
+}
+
+void Controller::OnCameraPropertyChanged(const std::shared_ptr<Camera>& camera, CameraProperty property, CameraPropertyValue value)
+{
+    std::shared_ptr<Action> action;
+    switch (property)
+    {
+    case Camera_Name:
+        action = std::make_shared<ModifyCameraString>(camera, &Camera::SetName, camera->GetName(), std::get<std::string>(value));
+        break;
+    
+    default:
+        std::cerr << "Unknown CameraProperty: " << property << std::endl;
+        break;
+    }
+
     if (action)
         PerformAction(action);
 }
