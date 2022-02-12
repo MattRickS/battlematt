@@ -11,7 +11,7 @@
 class Application
 {
 public:
-    const char* glsl_version = "#version 330";
+    const char* glsl_version = "#version 460";
     std::shared_ptr<Controller> controller = nullptr;
 
     Application();

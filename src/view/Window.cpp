@@ -53,8 +53,8 @@ Window::Window(unsigned int width, unsigned int height, const char* name, std::s
     if (window == NULL)
         return;
     
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
 
 #if defined(__APPLE__)
@@ -62,6 +62,8 @@ Window::Window(unsigned int width, unsigned int height, const char* name, std::s
 #endif
 
     glfwMakeContextCurrent(window);
+    // TODO: Should only be enabled on host, otherwise the monitor rate will be
+    //       divided by the number of windows
     glfwSwapInterval(1); // Enable vsync
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -87,6 +89,11 @@ Window::~Window()
     DisconnectSignals();
     if (window)
         glfwDestroyWindow(window);
+}
+
+void Window::Use()
+{
+    glfwMakeContextCurrent(window);
 }
 
 bool Window::IsInitialised() { return bool(window); }

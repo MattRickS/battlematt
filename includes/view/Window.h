@@ -20,6 +20,8 @@ public:
     Window(unsigned int width, unsigned int height, const char* name, std::shared_ptr<Window> share = NULL);
     ~Window();
 
+    void Use();
+
     void Focus();
     void Close();
     bool IsClosed();
