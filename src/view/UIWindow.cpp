@@ -336,22 +336,22 @@ void UIWindow::DrawTokenSection()
 
 void UIWindow::Draw()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    // glClear(GL_COLOR_BUFFER_BIT);
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(viewport->Pos);
-    ImGui::SetNextWindowSize(viewport->Size);
+    // static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
+    // const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    // ImGui::SetNextWindowPos(viewport->Pos);
+    // ImGui::SetNextWindowSize(viewport->Size);
 
     // UI window
     static bool p_open = NULL;
     {
-        ImGui::Begin("Mapmaker UI", &p_open, flags);
+        ImGui::Begin("Mapmaker UI", &p_open);  //, flags);
 
         ImGui::ColorEdit3("Background Color", (float*)&m_scene->bgColor);
 

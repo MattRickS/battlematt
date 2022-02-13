@@ -147,6 +147,7 @@ void Application::Exec()
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glViewport(0, 0, width, height);
         glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        m_uiWindow->Draw();
         glfwSwapBuffers(m_uiWindow->window);
 
         // Lazy hack to limit frame rate for now
