@@ -48,8 +48,8 @@ public:
     virtual void OnWindowResized(int width, int height);
     virtual void OnCloseRequested();
 
-protected:
     GLFWwindow* window;
+protected:
     GLFWmonitor* monitor = nullptr;
     unsigned int m_width, m_height;
     int m_lastPos[2], m_lastSize[2];

@@ -15,6 +15,7 @@ SharedRenderBuffer::~SharedRenderBuffer()
 
 bool SharedRenderBuffer::Add(const std::shared_ptr<Window>& window, BufferType type)
 {
+    // TODO: Check if already present
     window->Use();
     GLuint FBO;
     glGenFramebuffers(1, &FBO);
