@@ -123,6 +123,7 @@ void Application::Exec()
     {
         glfwPollEvents();
 
+        m_viewport->m_scene->SetViewCamera(PRIMARY, m_viewport->m_scene->cameras[0]);
         m_viewport->Use();
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);  // default framebuffer
         glViewport(0, 0, width, height);
@@ -140,6 +141,7 @@ void Application::Exec()
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, offScreenFrameBuffer);
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
+        m_viewport->m_scene->SetViewCamera(PRIMARY, m_viewport->m_scene->cameras[1]);
         m_viewport->Draw();
 
         m_uiWindow->Use();
