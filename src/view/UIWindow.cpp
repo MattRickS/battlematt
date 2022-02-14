@@ -27,8 +27,7 @@ namespace ImGui
 const ImVec4 SELECT_COLOR = ImVec4(0.3f, 0.3f, 1.0f, 1.0f);
 
 
-UIWindow::UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share) :
-    Window(width, height, "UI", share), m_resources(resources)
+UIControls::UIControls(const std::shared_ptr<Window>& window) : m_window(window)
 {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -42,7 +41,7 @@ UIWindow::UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Reso
     //ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplGlfw_InitForOpenGL(m_window->window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
     // Load Fonts
@@ -61,35 +60,45 @@ UIWindow::UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Reso
     //IM_ASSERT(font != NULL);
 }
 
-UIWindow::~UIWindow()
+UIControls::~UIControls()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-void UIWindow::SetScene(std::shared_ptr<Scene> scene) { m_scene = scene; }
+void UIControls::SetScene(std::shared_ptr<Scene> scene) { m_scene = scene; }
 
-void UIWindow::SetDisplayPropertiesToken(const std::shared_ptr<Token>& token)
+void UIControls::SetDisplayPropertiesToken(const std::shared_ptr<Token>& token)
 {
     m_displayPropertiesToken = token;
 }
 
-void UIWindow::SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image)
+void UIControls::SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image)
 {
     m_displayPropertiesImage = image;
 }
 
-void UIWindow::Prompt(int promptType, std::string msg)
+void UIControls::Prompt(int promptType, std::string msg)
 {
     m_promptMsg = msg;
     m_promptType = promptType;
-    Focus();
+    m_window->Focus();
 }
 
-bool UIWindow::HasPrompt()
+bool UIControls::HasPrompt()
 {
     return m_promptType != 0;
+}
+
+void UIControls::RespondToPrompt(bool response)
+{
+    // Reset internal prompt type before triggering the callback in case another prompt is sent
+    int promptType = m_promptType;
+    ImGui::CloseCurrentPopup();
+    m_promptType = 0;
+    m_promptMsg = "";
+    promptResponse.emit(promptType, response);
 }
 
 bool FilepathButton(const char* buttonName, const char* dialogName, const char* ext, std::string& path)
@@ -123,7 +132,7 @@ bool FileLine(std::string dialogName, std::string label, std::string& path)
     return false;
 }
 
-void UIWindow::DrawImageOptions(const std::shared_ptr<BGImage>& image)
+void UIControls::DrawImageOptions(const std::shared_ptr<BGImage>& image)
 {
     std::string imagePath = image->GetImage()->filename;
     if (FileLine("ChooseBGImage", "Image", imagePath))
@@ -148,7 +157,7 @@ void UIWindow::DrawImageOptions(const std::shared_ptr<BGImage>& image)
         imagePropertyChanged.emit(image, Image_Rotation, ImagePropertyValue(rotation));
 }
 
-void UIWindow::DrawGridOptions(const std::shared_ptr<Grid>& grid)
+void UIControls::DrawGridOptions(const std::shared_ptr<Grid>& grid)
 {
     float gridSize = grid->GetScale();
     if (ImGui::SliderFloat("Size##Grid", &gridSize, 0.1, 50, "%.3f", ImGuiSliderFlags_Logarithmic))
@@ -163,7 +172,7 @@ void UIWindow::DrawGridOptions(const std::shared_ptr<Grid>& grid)
         gridPropertyChanged.emit(grid, Grid_Snap, GridPropertyValue(snapToGrid));
 }
 
-void UIWindow::DrawTokenOptions(const std::shared_ptr<Token>& token)
+void UIControls::DrawTokenOptions(const std::shared_ptr<Token>& token)
 {
     std::string name = token->GetName();
     if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue))
@@ -218,7 +227,7 @@ void UIWindow::DrawTokenOptions(const std::shared_ptr<Token>& token)
 }
 
 
-void UIWindow::DrawCameraSection()
+void UIControls::DrawCameraSection()
 {
     if (ImGui::CollapsingHeader("Cameras"))
     {
@@ -250,13 +259,13 @@ void UIWindow::DrawCameraSection()
     }
 }
 
-void UIWindow::DrawGridSection()
+void UIControls::DrawGridSection()
 {
     if (ImGui::CollapsingHeader("Grid"))
         DrawGridOptions(m_scene->grid);
 }
 
-void UIWindow::DrawImageSection()
+void UIControls::DrawImageSection()
 {
     if (ImGui::CollapsingHeader("Images"))
     {
@@ -276,7 +285,7 @@ void UIWindow::DrawImageSection()
                     ImGui::PushStyleColor(ImGuiCol_HeaderHovered, SELECT_COLOR);
                 }
                 if (ImGui::Selectable((image->GetImage()->Name() + "##Item" + std::to_string(i++)).c_str(), image->isSelected || isUISelected))
-                    shapeSelectionChanged.emit(static_cast<std::shared_ptr<Shape2D>>(image), HasKeyPressed(GLFW_KEY_LEFT_CONTROL));
+                    shapeSelectionChanged.emit(static_cast<std::shared_ptr<Shape2D>>(image), m_window->HasKeyPressed(GLFW_KEY_LEFT_CONTROL));
 
                 if (isUISelected)
                     ImGui::PopStyleColor(2);
@@ -295,7 +304,7 @@ void UIWindow::DrawImageSection()
 
 }
 
-void UIWindow::DrawTokenSection()
+void UIControls::DrawTokenSection()
 {
     if (ImGui::CollapsingHeader("Token"))
     {
@@ -315,7 +324,7 @@ void UIWindow::DrawTokenSection()
                     ImGui::PushStyleColor(ImGuiCol_HeaderHovered, SELECT_COLOR);
                 }
                 if (ImGui::Selectable((token->GetName() + "##Item" + std::to_string(i++)).c_str(), token->isSelected || isUISelected))
-                    shapeSelectionChanged.emit(static_cast<std::shared_ptr<Shape2D>>(token), HasKeyPressed(GLFW_KEY_LEFT_CONTROL));
+                    shapeSelectionChanged.emit(static_cast<std::shared_ptr<Shape2D>>(token), m_window->HasKeyPressed(GLFW_KEY_LEFT_CONTROL));
 
                 if (isUISelected)
                     ImGui::PopStyleColor(2);
@@ -334,7 +343,7 @@ void UIWindow::DrawTokenSection()
 }
 
 
-void UIWindow::Draw()
+void UIControls::Draw()
 {
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -405,21 +414,4 @@ void UIWindow::Draw()
     // Rendering
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void UIWindow::RespondToPrompt(bool response)
-{
-    // Reset internal prompt type before triggering the callback in case another prompt is sent
-    int promptType = m_promptType;
-    ImGui::CloseCurrentPopup();
-    m_promptType = 0;
-    m_promptMsg = "";
-    promptResponse.emit(promptType, response);
-}
-
-void UIWindow::OnKeyChanged(int key, int scancode, int action, int mods)
-{
-    ImGuiIO& io = ImGui::GetIO();
-    if (!io.WantCaptureKeyboard)
-        keyChanged.emit(key, scancode, action, mods);
 }

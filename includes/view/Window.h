@@ -41,6 +41,8 @@ public:
     void CopyToClipboard(const std::string& text);
     std::string GetClipboard();
 
+    bool HasKeyPressed(int key);
+
     virtual void OnMouseMoved(double xpos, double ypos);
     virtual void OnMouseButtonChanged(int button, int action, int mods);
     virtual void OnMouseScrolled(double xoffset, double yoffset);
@@ -55,5 +57,4 @@ protected:
     int m_lastPos[2], m_lastSize[2];
 
     void DisconnectSignals();
-    bool HasKeyPressed(int key);
 };

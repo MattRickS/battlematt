@@ -18,7 +18,12 @@
 class Controller
 {
 public:
-    Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow);
+    Controller(
+        const std::shared_ptr<Resources>& resources,
+        const std::shared_ptr<Viewport>& presentationWindow,
+        const std::shared_ptr<Viewport>& hostWindow,
+        const std::shared_ptr<UIControls>& uiControls
+    );
     ~Controller();
 
     void Render();
@@ -85,7 +90,8 @@ private:
     std::shared_ptr<Resources> m_resources = nullptr;
     std::shared_ptr<Scene> m_scene = nullptr;
     std::shared_ptr<Viewport> m_presentationWindow = nullptr;
-    std::shared_ptr<UIWindow> m_hostWindow = nullptr;
+    std::shared_ptr<Viewport> m_hostWindow = nullptr;
+    std::shared_ptr<UIControls> m_uiControls = nullptr;
     JSONSerializer m_serializer;
 
     GLuint renderbuffer, hostFramebuffer, presentationFramebuffer;

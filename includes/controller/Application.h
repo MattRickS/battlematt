@@ -28,7 +28,8 @@ private:
 
     std::shared_ptr<Resources> m_resources = nullptr;
     std::shared_ptr<Viewport> m_presentationWindow = nullptr;
-    std::shared_ptr<UIWindow> m_hostWindow = nullptr;
+    std::shared_ptr<Viewport> m_hostWindow = nullptr;
+    std::shared_ptr<UIControls> m_uiControls = nullptr;
 
     void LoadDefaultResources();
 };

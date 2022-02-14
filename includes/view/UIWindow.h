@@ -15,7 +15,7 @@
 #include <view/Window.h>
 
 
-class UIWindow : public Window
+class UIControls
 {
 public:
     Signal<> addImageClicked;
@@ -35,10 +35,10 @@ public:
     Signal<> cloneCameraClicked;
     Signal<> deleteCameraClicked;
 
-    UIWindow(unsigned int width, unsigned int height, std::shared_ptr<Resources> resources, std::shared_ptr<Window> share = NULL);
-    ~UIWindow();
+    UIControls(const std::shared_ptr<Window>& window);
+    ~UIControls();
 
-    virtual void Draw();
+    void Draw();
     void SetScene(std::shared_ptr<Scene> scene);
     void Prompt(int promptType, std::string msg);
     bool HasPrompt();
@@ -46,10 +46,8 @@ public:
     void SetDisplayPropertiesToken(const std::shared_ptr<Token>& token);
     void SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image);
 
-    virtual void OnKeyChanged(int key, int scancode, int action, int mods);
-
 private:
-    std::shared_ptr<Resources> m_resources;
+    const std::shared_ptr<Window>& m_window = nullptr;
     std::shared_ptr<Scene> m_scene = nullptr;
     std::string m_promptMsg = "";
     int m_promptType = 0;

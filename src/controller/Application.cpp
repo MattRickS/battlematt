@@ -32,17 +32,19 @@ Application::Application() : m_resources(std::make_shared<Resources>())
     m_glfw_initialised = true;
 
     // Initialises GL contexts
-    m_hostWindow = std::make_shared<UIWindow>(1280, 720, m_resources);
+    m_hostWindow = std::make_shared<Viewport>(1280, 720);
+    m_uiControls = std::make_shared<UIControls>(static_cast<std::shared_ptr<Window>>(m_hostWindow));
 
     // Resources must be loaded after the GL context is created by the window.
     LoadDefaultResources();
     m_presentationWindow = std::make_shared<Viewport>(1280, 720, static_cast<std::shared_ptr<Window>>(m_hostWindow));
-    controller = std::make_shared<Controller>(m_resources, m_presentationWindow, m_hostWindow);
+    controller = std::make_shared<Controller>(m_resources, m_presentationWindow, m_hostWindow, m_uiControls);
 }
 
 Application::~Application()
 {
     m_presentationWindow.reset();
+    m_uiControls.reset();
     m_hostWindow.reset();
     controller.reset();
     m_resources.reset();

@@ -19,8 +19,13 @@
 #include <controller/Controller.h>
 
 
-Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow) :
-    m_resources(resources), m_presentationWindow(viewport), m_hostWindow(uiWindow), m_serializer(m_resources)
+Controller::Controller(
+    const std::shared_ptr<Resources>& resources,
+    const std::shared_ptr<Viewport>& presentationWindow,
+    const std::shared_ptr<Viewport>& hostWindow,
+    const std::shared_ptr<UIControls>& uiControls
+) :
+    m_resources(resources), m_presentationWindow(presentationWindow), m_hostWindow(hostWindow), m_uiControls(uiControls), m_serializer(m_resources)
 {
     m_presentationWindow->cursorMoved.connect(this, &Controller::OnViewportMouseMove);
     m_presentationWindow->keyChanged.connect(this, &Controller::OnViewportKey);
@@ -29,24 +34,25 @@ Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Vie
     m_presentationWindow->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
     m_presentationWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
 
-    m_hostWindow->saveClicked.connect(this, &Controller::Save);
-    m_hostWindow->loadClicked.connect(this, &Controller::Load);
-    m_hostWindow->promptResponse.connect(this, &Controller::OnPromptResponse);
-    m_hostWindow->shapeSelectionChanged.connect(this, &Controller::SelectShape);
     m_hostWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
     m_hostWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
-    m_hostWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
-    m_hostWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
-    m_hostWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
-    m_hostWindow->cameraPropertyChanged.connect(this, &Controller::OnCameraPropertyChanged);
-    m_hostWindow->addTokenClicked.connect(this, &Controller::OnUIAddTokenClicked);
-    m_hostWindow->addImageClicked.connect(this, &Controller::OnUIAddImageClicked);
-    m_hostWindow->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
-    m_hostWindow->imageLockChanged.connect(this, &Controller::SetImagesLocked);
-    m_hostWindow->tokenLockChanged.connect(this, &Controller::SetTokensLocked);
-    m_hostWindow->cameraSelectionChanged.connect(this, &Controller::SetHostCamera);
-    m_hostWindow->cloneCameraClicked.connect(this, &Controller::CloneCamera);
-    m_hostWindow->deleteCameraClicked.connect(this, &Controller::DeleteCamera);
+
+    m_uiControls->saveClicked.connect(this, &Controller::Save);
+    m_uiControls->loadClicked.connect(this, &Controller::Load);
+    m_uiControls->promptResponse.connect(this, &Controller::OnPromptResponse);
+    m_uiControls->shapeSelectionChanged.connect(this, &Controller::SelectShape);
+    m_uiControls->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
+    m_uiControls->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
+    m_uiControls->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
+    m_uiControls->cameraPropertyChanged.connect(this, &Controller::OnCameraPropertyChanged);
+    m_uiControls->addTokenClicked.connect(this, &Controller::OnUIAddTokenClicked);
+    m_uiControls->addImageClicked.connect(this, &Controller::OnUIAddImageClicked);
+    m_uiControls->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
+    m_uiControls->imageLockChanged.connect(this, &Controller::SetImagesLocked);
+    m_uiControls->tokenLockChanged.connect(this, &Controller::SetTokensLocked);
+    m_uiControls->cameraSelectionChanged.connect(this, &Controller::SetHostCamera);
+    m_uiControls->cloneCameraClicked.connect(this, &Controller::CloneCamera);
+    m_uiControls->deleteCameraClicked.connect(this, &Controller::DeleteCamera);
 
     SetupBuffers();
     SetScene(std::make_shared<Scene>(m_resources));
@@ -75,9 +81,9 @@ void Controller::RenderHost()
     m_cameraBuffer->SetCamera(m_scene->GetViewCamera(HOST_VIEW));
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);  // default framebuffer
     glViewport(0, 0, m_hostWindow->Width(), m_hostWindow->Height());
-    glClear(GL_COLOR_BUFFER_BIT);
+    // glClear(GL_COLOR_BUFFER_BIT);
     m_scene->Draw();
-    m_hostWindow->Draw();
+    m_uiControls->Draw();
     glfwSwapBuffers(m_hostWindow->window);
 }
 
@@ -87,10 +93,10 @@ void Controller::RenderPresentation()
     int height = m_presentationWindow->Height();
 
     glfwMakeContextCurrent(m_hostWindow->window);
+    m_cameraBuffer->SetCamera(m_scene->GetViewCamera(PRESENTATION_VIEW));
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, hostFramebuffer);
     glViewport(0, 0, width, height);
-    glClear(GL_COLOR_BUFFER_BIT);
-    m_cameraBuffer->SetCamera(m_scene->GetViewCamera(PRESENTATION_VIEW));
+    // glClear(GL_COLOR_BUFFER_BIT);
     m_scene->Draw();
 
     glfwMakeContextCurrent(m_presentationWindow->window);
@@ -135,6 +141,7 @@ void Controller::SetScene(std::shared_ptr<Scene> scene)
     m_scene = scene;
     m_presentationWindow->SetScene(scene);
     m_hostWindow->SetScene(scene);
+    m_uiControls->SetScene(scene);
     undoQueue.clear();
     redoQueue.clear();
 }
@@ -322,7 +329,7 @@ void Controller::SelectShape(std::shared_ptr<Shape2D> shape, bool additive)
     auto token = std::dynamic_pointer_cast<Token>(shape);
     if (token)
     {
-        m_hostWindow->SetDisplayPropertiesToken(token);
+        m_uiControls->SetDisplayPropertiesToken(token);
         if (m_scene->GetTokensLocked())
             return;
     }
@@ -330,7 +337,7 @@ void Controller::SelectShape(std::shared_ptr<Shape2D> shape, bool additive)
     auto image = std::dynamic_pointer_cast<BGImage>(shape);
     if (image)
     {
-        m_hostWindow->SetDisplayPropertiesImage(image);
+        m_uiControls->SetDisplayPropertiesImage(image);
         if (m_scene->GetImagesLocked())
             return;
     }
@@ -351,12 +358,12 @@ void Controller::SelectShapes(const std::vector<std::shared_ptr<Shape2D>>& shape
         auto token = std::dynamic_pointer_cast<Token>(shape);
         if (token)
         {
-            m_hostWindow->SetDisplayPropertiesToken(token);
+            m_uiControls->SetDisplayPropertiesToken(token);
         }
         auto image = std::dynamic_pointer_cast<BGImage>(shape);
         if (image)
         {
-            m_hostWindow->SetDisplayPropertiesImage(image);
+            m_uiControls->SetDisplayPropertiesImage(image);
         }
     }
 }
@@ -966,7 +973,7 @@ void Controller::OnPromptResponse(int promptType, bool response)
 
 void Controller::OnCloseRequested()
 {
-    m_hostWindow->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
+    m_uiControls->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
 }
 
 void Controller::OnKeyChanged(int key, int scancode, int action, int mods)
