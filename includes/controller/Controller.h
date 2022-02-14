@@ -61,9 +61,6 @@ public:
     void DeleteCamera();
     void SetHostCamera(const std::shared_ptr<Camera>& camera);
 
-    std::vector<std::shared_ptr<Shape2D>> ShapesInScreenRect(float minx, float miny, float maxx, float maxy);
-    std::shared_ptr<Shape2D> GetShapeAtScreenPos(glm::vec2 screenPos);
-
     // Have to public for the glfw bound callbacks to access
     void OnViewportMouseMove(double xpos, double ypos);
     void OnViewportMouseButton(int button, int action, int mods);
@@ -101,6 +98,9 @@ private:
     void RenderHost();
     void RenderPresentation();
 
+    const std::shared_ptr<Viewport>& ActiveViewport();
+    const std::shared_ptr<Camera>& ActiveCamera();
+
     bool firstMouse = true;
     float lastMouseX, lastMouseY;
     bool middleMouseHeld = false;
@@ -117,6 +117,9 @@ private:
     void StartDragSelection(float xpos, float ypos);
     void UpdateDragSelection(float xpos, float ypos);
     void FinishDragSelection(bool additive);
+
+    std::vector<std::shared_ptr<Shape2D>> ShapesInScreenRect(const std::shared_ptr<Viewport>& viewport, float minx, float miny, float maxx, float maxy);
+    std::shared_ptr<Shape2D> GetShapeAtScreenPos(const std::shared_ptr<Viewport>& viewport, glm::vec2 screenPos);
 
     static const int PROMPT_CLOSE = 1;
     void OnPromptResponse(int promptType, bool response);

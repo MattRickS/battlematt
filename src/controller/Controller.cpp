@@ -34,10 +34,12 @@ Controller::Controller(
     m_presentationWindow->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
     m_presentationWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
 
-    m_hostWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
+    m_hostWindow->cursorMoved.connect(this, &Controller::OnViewportMouseMove);
     m_hostWindow->keyChanged.connect(this, &Controller::OnKeyChanged);
+    m_hostWindow->mouseButtonChanged.connect(this, &Controller::OnViewportMouseButton);
     m_hostWindow->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
     m_hostWindow->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
+    m_hostWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
 
     m_uiControls->saveClicked.connect(this, &Controller::Save);
     m_uiControls->loadClicked.connect(this, &Controller::Load);
@@ -377,7 +379,7 @@ bool Controller::CopySelected()
         return false;
 
     std::string string = m_serializer.SerializeScene(m_scene, SerializeFlag::Image |SerializeFlag::Token | SerializeFlag::Selected).dump();
-    m_presentationWindow->CopyToClipboard(string);
+    ActiveViewport()->CopyToClipboard(string);
     return true;
 }
 
@@ -389,7 +391,7 @@ void Controller::CutSelected()
 
 void Controller::PasteSelected()
 {
-    std::string text = m_presentationWindow->GetClipboard();
+    std::string text = ActiveViewport()->GetClipboard();
     if (text.empty())
         return;
     
@@ -423,7 +425,7 @@ void Controller::Focus()
 {
     if (m_scene->IsEmpty())
         return;
-    m_presentationWindow->Focus(m_scene->GetBounds());
+    ActiveViewport()->Focus(m_scene->GetBounds());
 }
 
 void Controller::FocusSelected()
@@ -431,12 +433,12 @@ void Controller::FocusSelected()
     if (!HasSelectedShapes())
         return;
 
-    m_presentationWindow->Focus(Bounds2D::BoundsForShapes(SelectedShapes()));
+    ActiveViewport()->Focus(Bounds2D::BoundsForShapes(SelectedShapes()));
 }
 
 void Controller::CloneCamera()
 {
-    auto camera = std::make_shared<Camera>(*m_presentationWindow->GetCamera());
+    auto camera = std::make_shared<Camera>(*ActiveCamera());
     camera->SetName(camera->GetName() + "Copy");
 
     std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
@@ -477,11 +479,37 @@ void Controller::SetHostCamera(const std::shared_ptr<Camera>& camera)
     PerformAction(std::make_shared<SetViewCameraAction>(m_scene, HOST_VIEW, m_scene->GetViewCamera(HOST_VIEW), camera));
 }
 
-// Screen Position
-std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx, float miny, float maxx, float maxy)
+const std::shared_ptr<Viewport>& Controller::ActiveViewport()
 {
-    glm::vec2 lo = m_presentationWindow->ScreenToWorldPos(minx, miny);
-    glm::vec2 hi = m_presentationWindow->ScreenToWorldPos(maxx, maxy);
+    if (m_hostWindow->IsFocused())
+        return m_hostWindow;
+    else if (m_presentationWindow->IsFocused())
+        return m_presentationWindow;
+    else
+    {
+        std::cerr << "No active viewport, defaulting to host" << std::endl;
+        return m_hostWindow;
+    }
+}
+
+const std::shared_ptr<Camera>& Controller::ActiveCamera()
+{
+    if (m_hostWindow->IsFocused())
+        return m_scene->GetViewCamera(HOST_VIEW);
+    else if (m_presentationWindow->IsFocused())
+        return m_scene->GetViewCamera(PRESENTATION_VIEW);
+    else
+    {
+        std::cerr << "No active camera, defaulting to host" << std::endl;
+        return m_scene->GetViewCamera(HOST_VIEW);
+    }
+}
+
+// Screen Position
+std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(const std::shared_ptr<Viewport>& viewport, float minx, float miny, float maxx, float maxy)
+{
+    glm::vec2 lo = viewport->ScreenToWorldPos(minx, miny);
+    glm::vec2 hi = viewport->ScreenToWorldPos(maxx, maxy);
 
     std::vector<std::shared_ptr<Shape2D>> shapes;
 
@@ -516,9 +544,9 @@ std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx,
     return shapes;
 }
 
-std::shared_ptr<Shape2D> Controller::GetShapeAtScreenPos(glm::vec2 screenPos)
+std::shared_ptr<Shape2D> Controller::GetShapeAtScreenPos(const std::shared_ptr<Viewport>& viewport, glm::vec2 screenPos)
 {
-    glm::vec2 worldPos = m_presentationWindow->ScreenToWorldPos(screenPos.x, screenPos.y);
+    glm::vec2 worldPos = viewport->ScreenToWorldPos(screenPos.x, screenPos.y);
     // Tokens are drawn from first to last, so iterate in reverse to find the topmost
     if (!m_scene->GetTokensLocked())
     {
@@ -560,21 +588,23 @@ void Controller::StartDragSelection(float xpos, float ypos)
         glm::vec4(SELECTION_COLOR, OVERLAY_OPACITY)
     );
     // GL uses inverted Y-axis
-    dragSelectRect->startCorner = dragSelectRect->endCorner = glm::vec2(xpos, m_presentationWindow->Height() - ypos);
+    dragSelectRect->startCorner = dragSelectRect->endCorner = glm::vec2(xpos, ActiveViewport()->Height() - ypos);
     m_scene->overlays.push_back(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
 }
 
 void Controller::UpdateDragSelection(float xpos, float ypos)
 {
+    const std::shared_ptr<Viewport>& viewport = ActiveViewport();
     // GL uses inverted Y-axis
-    dragSelectRect->endCorner = glm::vec2(xpos, m_presentationWindow->Height() - ypos);
+    dragSelectRect->endCorner = glm::vec2(xpos, viewport->Height() - ypos);
 
     // Y-axis is inverted on rect, use re-invert for calculating world positions
     auto coveredShapes = ShapesInScreenRect(
+        viewport,
         dragSelectRect->MinX(),
-        m_presentationWindow->Height() - dragSelectRect->MinY(),
+        viewport->Height() - dragSelectRect->MinY(),
         dragSelectRect->MaxX(),
-        m_presentationWindow->Height() - dragSelectRect->MaxY()
+        viewport->Height() - dragSelectRect->MaxY()
     );
 
     for (const std::shared_ptr<Shape2D>& shape : coveredShapes)
@@ -583,12 +613,14 @@ void Controller::UpdateDragSelection(float xpos, float ypos)
 
 void Controller::FinishDragSelection(bool additive)
 {
+    const std::shared_ptr<Viewport>& viewport = ActiveViewport();
     // Y-axis is inverted on rect, use re-invert for calculating world positions
     auto shapesInBounds = ShapesInScreenRect(
+        viewport,
         dragSelectRect->MinX(),
-        m_presentationWindow->Height() - dragSelectRect->MinY(),
+        viewport->Height() - dragSelectRect->MinY(),
         dragSelectRect->MaxX(),
-        m_presentationWindow->Height() - dragSelectRect->MaxY()
+        viewport->Height() - dragSelectRect->MaxY()
     );
 
     if (shapesInBounds.size() > 0)
@@ -603,6 +635,7 @@ void Controller::FinishDragSelection(bool additive)
 // Input Callbacks
 void Controller::OnViewportMouseMove(double xpos, double ypos)
 {
+    // TODO: focus change callback that resets the mouse position data
     if (firstMouse)
     {
         lastMouseX = xpos;
@@ -615,7 +648,9 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
     lastMouseX = xpos;
     lastMouseY = ypos;
 
-    glm::vec2 worldPos = m_presentationWindow->ScreenToWorldPos(xpos, ypos);
+    const std::shared_ptr<Viewport>& viewport = ActiveViewport();
+
+    glm::vec2 worldPos = viewport->ScreenToWorldPos(xpos, ypos);
     // TODO: Change this.
     //   Can be optimised to track what's highlighted and explicitly clear it.
     //   Also shouldn't rely on the `lock` options in mouse move
@@ -642,15 +677,12 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
     }
 
     if (middleMouseHeld)
-    {
-        m_presentationWindow->GetCamera()->Pan(m_presentationWindow->ScreenToWorldOffset(xoffset, yoffset));
-        m_presentationWindow->RefreshCamera();
-    }
+        ActiveCamera()->Pan(viewport->ScreenToWorldOffset(xoffset, yoffset));
     else if (leftMouseHeld && shapeUnderCursor)
     {
         if (m_scene->grid->GetSnapEnabled())
         {
-            glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(shapeUnderCursor, m_presentationWindow->ScreenToWorldPos(xpos, ypos));
+            glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(shapeUnderCursor, viewport->ScreenToWorldPos(xpos, ypos));
             glm::vec2 currPos = shapeUnderCursor->GetModel()->GetPos();
             if (newPos != currPos)
             {
@@ -665,7 +697,7 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
         else
         {
             std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
-            glm::vec2 offset = m_presentationWindow->ScreenToWorldOffset(xoffset, yoffset);
+            glm::vec2 offset = viewport->ScreenToWorldOffset(xoffset, yoffset);
             for (std::shared_ptr<Shape2D> shape : SelectedShapes())
                 actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(shape->GetModel(), &Matrix2D::SetPos, shape->GetModel()->GetPos(), shape->GetModel()->GetPos() + offset));
 
@@ -684,9 +716,10 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
     {
         if (action == GLFW_PRESS)
         {
+            const std::shared_ptr<Viewport>& viewport = ActiveViewport();
             // TODO: Selection action should be combined with move action, ie, undo undoes the selection and the movement
-            glm::vec2 cursorPos = m_presentationWindow->CursorPos();
-            shapeUnderCursor = GetShapeAtScreenPos(cursorPos);
+            glm::vec2 cursorPos = viewport->CursorPos();
+            shapeUnderCursor = GetShapeAtScreenPos(viewport, cursorPos);
             if (shapeUnderCursor && !shapeUnderCursor->isSelected)
                 SelectShape(shapeUnderCursor, mods & (GLFW_MOD_SHIFT | GLFW_MOD_CONTROL));
             // If nothing was immediately selected/being modified, start a drag select
@@ -705,18 +738,16 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
 
 void Controller::OnViewportMouseScroll(double xoffset, double yoffset)
 {
-    if (m_hostWindow->IsFocused())
-        m_scene->GetViewCamera(HOST_VIEW)->Zoom(yoffset);
-    else if (m_presentationWindow->IsFocused())
-        m_scene->GetViewCamera(PRESENTATION_VIEW)->Zoom(yoffset);
-    else
-        std::cerr << "Zooming without an active window!?" << std::endl;
+    ActiveCamera()->Zoom(yoffset);
 }
 
 void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-        m_presentationWindow->SetFullscreen(!m_presentationWindow->IsFullscreen());
+    {
+        const auto& viewport = ActiveViewport();
+        viewport->SetFullscreen(!viewport->IsFullscreen());
+    }
     if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && HasSelectedShapes())
     {
         for (std::shared_ptr<Shape2D> shape : SelectedShapes())
@@ -748,15 +779,9 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 
 void Controller::OnViewportSizeChanged(int width, int height)
 {
-    if (m_hostWindow->IsFocused())
-        m_scene->GetViewCamera(HOST_VIEW)->SetAperture((float)width / (float)height);
-    else if (m_presentationWindow->IsFocused())
-    {
-        m_scene->GetViewCamera(PRESENTATION_VIEW)->SetAperture((float)width / (float)height);
+    ActiveCamera()->SetAperture((float)width / (float)height);
+    if (m_presentationWindow->IsFocused())
         glNamedRenderbufferStorage(renderbuffer, GL_RGBA, width, height);
-    }
-    else
-        std::cerr << "Resizing without an active window!?" << std::endl;
 }
 
 void Controller::OnUIAddTokenClicked()
@@ -766,7 +791,8 @@ void Controller::OnUIAddTokenClicked()
         m_resources->GetTexture(Resources::TextureType::Default)
     );
     // Centers it on the camera view
-    token->GetModel()->SetPos(glm::vec2(m_presentationWindow->GetCamera()->Position.x, m_presentationWindow->GetCamera()->Position.y));
+    const auto& camera = ActiveCamera();
+    token->GetModel()->SetPos(glm::vec2(camera->Position.x, camera->Position.y));
     std::shared_ptr<AddTokensAction> action = std::make_shared<AddTokensAction>(m_scene, token);
     // TODO: Include selection
     PerformAction(action);
