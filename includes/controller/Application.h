@@ -6,7 +6,7 @@
 #include <Resources.h>
 #include <controller/Controller.h>
 #include <model/Scene.h>
-#include <view/UIWindow.h>
+#include <view/UIControls.h>
 #include <view/Viewport.h>
 // #include <view/SharedRenderBuffer.h>
 

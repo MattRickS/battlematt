@@ -11,7 +11,7 @@
 #include <model/Scene.h>
 #include <model/Token.h>
 
-#include <view/UIWindow.h>
+#include <view/UIControls.h>
 
 
 namespace ImGui

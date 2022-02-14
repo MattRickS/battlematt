@@ -13,7 +13,7 @@
 #include <model/Overlays.h>
 #include <model/Scene.h>
 #include <model/Token.h>
-#include <view/UIWindow.h>
+#include <view/UIControls.h>
 #include <view/Viewport.h>
 
 #include <controller/Controller.h>

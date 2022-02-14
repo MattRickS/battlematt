@@ -9,7 +9,7 @@
 #include <Resources.h>
 #include <glutil/Texture.h>
 #include <model/Scene.h>
-#include <view/UIWindow.h>
+#include <view/UIControls.h>
 #include <view/Window.h>
 
 #include <controller/Application.h>
