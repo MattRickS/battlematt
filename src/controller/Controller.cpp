@@ -4,6 +4,9 @@
 #include <variant>
 #include <vector>
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include <Constants.h>
 #include <JSONSerializer.h>
 #include <Resources.h>
@@ -17,34 +20,35 @@
 
 
 Controller::Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow) :
-    m_resources(resources), m_viewport(viewport), m_uiWindow(uiWindow), m_serializer(m_resources)
+    m_resources(resources), m_presentationWindow(viewport), m_hostWindow(uiWindow), m_serializer(m_resources)
 {
-    m_viewport->cursorMoved.connect(this, &Controller::OnViewportMouseMove);
-    m_viewport->keyChanged.connect(this, &Controller::OnViewportKey);
-    m_viewport->mouseButtonChanged.connect(this, &Controller::OnViewportMouseButton);
-    m_viewport->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
-    m_viewport->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
-    m_viewport->closeRequested.connect(this, &Controller::OnCloseRequested);
+    m_presentationWindow->cursorMoved.connect(this, &Controller::OnViewportMouseMove);
+    m_presentationWindow->keyChanged.connect(this, &Controller::OnViewportKey);
+    m_presentationWindow->mouseButtonChanged.connect(this, &Controller::OnViewportMouseButton);
+    m_presentationWindow->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
+    m_presentationWindow->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
+    m_presentationWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
 
-    m_uiWindow->saveClicked.connect(this, &Controller::Save);
-    m_uiWindow->loadClicked.connect(this, &Controller::Load);
-    m_uiWindow->promptResponse.connect(this, &Controller::OnPromptResponse);
-    m_uiWindow->shapeSelectionChanged.connect(this, &Controller::SelectShape);
-    m_uiWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
-    m_uiWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
-    m_uiWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
-    m_uiWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
-    m_uiWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
-    m_uiWindow->cameraPropertyChanged.connect(this, &Controller::OnCameraPropertyChanged);
-    m_uiWindow->addTokenClicked.connect(this, &Controller::OnUIAddTokenClicked);
-    m_uiWindow->addImageClicked.connect(this, &Controller::OnUIAddImageClicked);
-    m_uiWindow->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
-    m_uiWindow->imageLockChanged.connect(this, &Controller::SetImagesLocked);
-    m_uiWindow->tokenLockChanged.connect(this, &Controller::SetTokensLocked);
-    m_uiWindow->cameraSelectionChanged.connect(this, &Controller::SetHostCamera);
-    m_uiWindow->cloneCameraClicked.connect(this, &Controller::CloneCamera);
-    m_uiWindow->deleteCameraClicked.connect(this, &Controller::DeleteCamera);
+    m_hostWindow->saveClicked.connect(this, &Controller::Save);
+    m_hostWindow->loadClicked.connect(this, &Controller::Load);
+    m_hostWindow->promptResponse.connect(this, &Controller::OnPromptResponse);
+    m_hostWindow->shapeSelectionChanged.connect(this, &Controller::SelectShape);
+    m_hostWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
+    m_hostWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
+    m_hostWindow->tokenPropertyChanged.connect(this, &Controller::OnTokenPropertyChanged);
+    m_hostWindow->imagePropertyChanged.connect(this, &Controller::OnImagePropertyChanged);
+    m_hostWindow->gridPropertyChanged.connect(this, &Controller::OnGridPropertyChanged);
+    m_hostWindow->cameraPropertyChanged.connect(this, &Controller::OnCameraPropertyChanged);
+    m_hostWindow->addTokenClicked.connect(this, &Controller::OnUIAddTokenClicked);
+    m_hostWindow->addImageClicked.connect(this, &Controller::OnUIAddImageClicked);
+    m_hostWindow->removeImageClicked.connect(this, &Controller::OnUIRemoveImageClicked);
+    m_hostWindow->imageLockChanged.connect(this, &Controller::SetImagesLocked);
+    m_hostWindow->tokenLockChanged.connect(this, &Controller::SetTokensLocked);
+    m_hostWindow->cameraSelectionChanged.connect(this, &Controller::SetHostCamera);
+    m_hostWindow->cloneCameraClicked.connect(this, &Controller::CloneCamera);
+    m_hostWindow->deleteCameraClicked.connect(this, &Controller::DeleteCamera);
 
+    SetupBuffers();
     SetScene(std::make_shared<Scene>(m_resources));
 }
 
@@ -54,6 +58,70 @@ Controller::~Controller()
     redoQueue.clear();
 }
 
+// Rendering
+
+void Controller::Render()
+{
+    RenderHost();
+    if (isPresentationActive)
+    {
+        RenderPresentation();
+    }
+}
+
+void Controller::RenderHost()
+{
+    glfwMakeContextCurrent(m_hostWindow->window);
+    m_cameraBuffer->SetCamera(m_scene->GetViewCamera(HOST_VIEW));
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);  // default framebuffer
+    glViewport(0, 0, m_hostWindow->Width(), m_hostWindow->Height());
+    glClear(GL_COLOR_BUFFER_BIT);
+    m_scene->Draw();
+    glfwSwapBuffers(m_hostWindow->window);
+}
+
+void Controller::RenderPresentation()
+{
+    int width = m_presentationWindow->Width();
+    int height = m_presentationWindow->Height();
+
+    glfwMakeContextCurrent(m_hostWindow->window);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, hostFramebuffer);
+    glViewport(0, 0, width, height);
+    glClear(GL_COLOR_BUFFER_BIT);
+    m_cameraBuffer->SetCamera(m_scene->GetViewCamera(PRESENTATION_VIEW));
+    m_scene->Draw();
+
+    glfwMakeContextCurrent(m_presentationWindow->window);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, presentationFramebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glViewport(0, 0, width, height);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glfwSwapBuffers(m_presentationWindow->window);
+}
+
+void Controller::SetupBuffers()
+{
+    glfwMakeContextCurrent(m_hostWindow->window);
+
+    m_cameraBuffer = std::make_shared<CameraBuffer>();
+
+    glCreateRenderbuffers(1, &renderbuffer);
+    glNamedRenderbufferStorage(renderbuffer, GL_RGBA, m_presentationWindow->Width(), m_presentationWindow->Height());
+
+    glGenFramebuffers(1, &hostFramebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, hostFramebuffer);
+    glNamedFramebufferRenderbuffer(hostFramebuffer, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer);
+
+    glfwMakeContextCurrent(m_presentationWindow->window);
+    glGenFramebuffers(1, &presentationFramebuffer);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, presentationFramebuffer);
+    glEnable(GL_RENDERBUFFER);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+    glNamedFramebufferRenderbuffer(presentationFramebuffer, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer);
+
+}
+
 // Scene Management
 void Controller::SetScene(std::shared_ptr<Scene> scene)
 {
@@ -61,11 +129,11 @@ void Controller::SetScene(std::shared_ptr<Scene> scene)
     if (scene->cameras.empty())
         scene->AddDefaultCamera();
     else if (scene->views.empty())
-        scene->SetViewCamera(PRIMARY, scene->cameras[0]);
+        scene->SetViewCamera(HOST_VIEW, scene->cameras[0]);
 
     m_scene = scene;
-    m_viewport->SetScene(scene);
-    m_uiWindow->SetScene(scene);
+    m_presentationWindow->SetScene(scene);
+    m_hostWindow->SetScene(scene);
     undoQueue.clear();
     redoQueue.clear();
 }
@@ -253,7 +321,7 @@ void Controller::SelectShape(std::shared_ptr<Shape2D> shape, bool additive)
     auto token = std::dynamic_pointer_cast<Token>(shape);
     if (token)
     {
-        m_uiWindow->SetDisplayPropertiesToken(token);
+        m_hostWindow->SetDisplayPropertiesToken(token);
         if (m_scene->GetTokensLocked())
             return;
     }
@@ -261,7 +329,7 @@ void Controller::SelectShape(std::shared_ptr<Shape2D> shape, bool additive)
     auto image = std::dynamic_pointer_cast<BGImage>(shape);
     if (image)
     {
-        m_uiWindow->SetDisplayPropertiesImage(image);
+        m_hostWindow->SetDisplayPropertiesImage(image);
         if (m_scene->GetImagesLocked())
             return;
     }
@@ -282,12 +350,12 @@ void Controller::SelectShapes(const std::vector<std::shared_ptr<Shape2D>>& shape
         auto token = std::dynamic_pointer_cast<Token>(shape);
         if (token)
         {
-            m_uiWindow->SetDisplayPropertiesToken(token);
+            m_hostWindow->SetDisplayPropertiesToken(token);
         }
         auto image = std::dynamic_pointer_cast<BGImage>(shape);
         if (image)
         {
-            m_uiWindow->SetDisplayPropertiesImage(image);
+            m_hostWindow->SetDisplayPropertiesImage(image);
         }
     }
 }
@@ -299,7 +367,7 @@ bool Controller::CopySelected()
         return false;
 
     std::string string = m_serializer.SerializeScene(m_scene, SerializeFlag::Image |SerializeFlag::Token | SerializeFlag::Selected).dump();
-    m_viewport->CopyToClipboard(string);
+    m_presentationWindow->CopyToClipboard(string);
     return true;
 }
 
@@ -311,7 +379,7 @@ void Controller::CutSelected()
 
 void Controller::PasteSelected()
 {
-    std::string text = m_viewport->GetClipboard();
+    std::string text = m_presentationWindow->GetClipboard();
     if (text.empty())
         return;
     
@@ -345,7 +413,7 @@ void Controller::Focus()
 {
     if (m_scene->IsEmpty())
         return;
-    m_viewport->Focus(m_scene->GetBounds());
+    m_presentationWindow->Focus(m_scene->GetBounds());
 }
 
 void Controller::FocusSelected()
@@ -353,17 +421,17 @@ void Controller::FocusSelected()
     if (!HasSelectedShapes())
         return;
 
-    m_viewport->Focus(Bounds2D::BoundsForShapes(SelectedShapes()));
+    m_presentationWindow->Focus(Bounds2D::BoundsForShapes(SelectedShapes()));
 }
 
 void Controller::CloneCamera()
 {
-    auto camera = std::make_shared<Camera>(*m_viewport->GetCamera());
+    auto camera = std::make_shared<Camera>(*m_presentationWindow->GetCamera());
     camera->SetName(camera->GetName() + "Copy");
 
     std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
     actionGroup->Add(std::make_shared<AddCameraAction>(m_scene, camera));
-    actionGroup->Add(std::make_shared<SetViewCameraAction>(m_scene, PRIMARY, m_scene->GetViewCamera(PRIMARY), camera));
+    actionGroup->Add(std::make_shared<SetViewCameraAction>(m_scene, HOST_VIEW, m_scene->GetViewCamera(HOST_VIEW), camera));
     PerformAction(actionGroup);
 }
 
@@ -375,7 +443,7 @@ void Controller::DeleteCamera()
         return;
     }
 
-    auto currentCamera = m_scene->GetViewCamera(PRIMARY);
+    auto currentCamera = m_scene->GetViewCamera(HOST_VIEW);
 
     std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
     actionGroup->Add(std::make_shared<RemoveCameraAction>(m_scene, currentCamera));
@@ -383,7 +451,7 @@ void Controller::DeleteCamera()
     {
         if (camera !=  currentCamera)
         {
-            actionGroup->Add(std::make_shared<SetViewCameraAction>(m_scene, PRIMARY, currentCamera, camera));
+            actionGroup->Add(std::make_shared<SetViewCameraAction>(m_scene, HOST_VIEW, currentCamera, camera));
             break;
         }
     }
@@ -396,14 +464,14 @@ void Controller::SetHostCamera(const std::shared_ptr<Camera>& camera)
     if (it == m_scene->cameras.end())
         return;
 
-    PerformAction(std::make_shared<SetViewCameraAction>(m_scene, PRIMARY, m_scene->GetViewCamera(PRIMARY), camera));
+    PerformAction(std::make_shared<SetViewCameraAction>(m_scene, HOST_VIEW, m_scene->GetViewCamera(HOST_VIEW), camera));
 }
 
 // Screen Position
 std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx, float miny, float maxx, float maxy)
 {
-    glm::vec2 lo = m_viewport->ScreenToWorldPos(minx, miny);
-    glm::vec2 hi = m_viewport->ScreenToWorldPos(maxx, maxy);
+    glm::vec2 lo = m_presentationWindow->ScreenToWorldPos(minx, miny);
+    glm::vec2 hi = m_presentationWindow->ScreenToWorldPos(maxx, maxy);
 
     std::vector<std::shared_ptr<Shape2D>> shapes;
 
@@ -440,7 +508,7 @@ std::vector<std::shared_ptr<Shape2D>> Controller::ShapesInScreenRect(float minx,
 
 std::shared_ptr<Shape2D> Controller::GetShapeAtScreenPos(glm::vec2 screenPos)
 {
-    glm::vec2 worldPos = m_viewport->ScreenToWorldPos(screenPos.x, screenPos.y);
+    glm::vec2 worldPos = m_presentationWindow->ScreenToWorldPos(screenPos.x, screenPos.y);
     // Tokens are drawn from first to last, so iterate in reverse to find the topmost
     if (!m_scene->GetTokensLocked())
     {
@@ -482,21 +550,21 @@ void Controller::StartDragSelection(float xpos, float ypos)
         glm::vec4(SELECTION_COLOR, OVERLAY_OPACITY)
     );
     // GL uses inverted Y-axis
-    dragSelectRect->startCorner = dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
+    dragSelectRect->startCorner = dragSelectRect->endCorner = glm::vec2(xpos, m_presentationWindow->Height() - ypos);
     m_scene->overlays.push_back(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
 }
 
 void Controller::UpdateDragSelection(float xpos, float ypos)
 {
     // GL uses inverted Y-axis
-    dragSelectRect->endCorner = glm::vec2(xpos, m_viewport->Height() - ypos);
+    dragSelectRect->endCorner = glm::vec2(xpos, m_presentationWindow->Height() - ypos);
 
     // Y-axis is inverted on rect, use re-invert for calculating world positions
     auto coveredShapes = ShapesInScreenRect(
         dragSelectRect->MinX(),
-        m_viewport->Height() - dragSelectRect->MinY(),
+        m_presentationWindow->Height() - dragSelectRect->MinY(),
         dragSelectRect->MaxX(),
-        m_viewport->Height() - dragSelectRect->MaxY()
+        m_presentationWindow->Height() - dragSelectRect->MaxY()
     );
 
     for (const std::shared_ptr<Shape2D>& shape : coveredShapes)
@@ -508,9 +576,9 @@ void Controller::FinishDragSelection(bool additive)
     // Y-axis is inverted on rect, use re-invert for calculating world positions
     auto shapesInBounds = ShapesInScreenRect(
         dragSelectRect->MinX(),
-        m_viewport->Height() - dragSelectRect->MinY(),
+        m_presentationWindow->Height() - dragSelectRect->MinY(),
         dragSelectRect->MaxX(),
-        m_viewport->Height() - dragSelectRect->MaxY()
+        m_presentationWindow->Height() - dragSelectRect->MaxY()
     );
 
     if (shapesInBounds.size() > 0)
@@ -537,7 +605,7 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
     lastMouseX = xpos;
     lastMouseY = ypos;
 
-    glm::vec2 worldPos = m_viewport->ScreenToWorldPos(xpos, ypos);
+    glm::vec2 worldPos = m_presentationWindow->ScreenToWorldPos(xpos, ypos);
     // TODO: Change this.
     //   Can be optimised to track what's highlighted and explicitly clear it.
     //   Also shouldn't rely on the `lock` options in mouse move
@@ -565,14 +633,14 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
 
     if (middleMouseHeld)
     {
-        m_viewport->GetCamera()->Pan(m_viewport->ScreenToWorldOffset(xoffset, yoffset));
-        m_viewport->RefreshCamera();
+        m_presentationWindow->GetCamera()->Pan(m_presentationWindow->ScreenToWorldOffset(xoffset, yoffset));
+        m_presentationWindow->RefreshCamera();
     }
     else if (leftMouseHeld && shapeUnderCursor)
     {
         if (m_scene->grid->GetSnapEnabled())
         {
-            glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(shapeUnderCursor, m_viewport->ScreenToWorldPos(xpos, ypos));
+            glm::vec2 newPos = m_scene->grid->ShapeSnapPosition(shapeUnderCursor, m_presentationWindow->ScreenToWorldPos(xpos, ypos));
             glm::vec2 currPos = shapeUnderCursor->GetModel()->GetPos();
             if (newPos != currPos)
             {
@@ -587,7 +655,7 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
         else
         {
             std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
-            glm::vec2 offset = m_viewport->ScreenToWorldOffset(xoffset, yoffset);
+            glm::vec2 offset = m_presentationWindow->ScreenToWorldOffset(xoffset, yoffset);
             for (std::shared_ptr<Shape2D> shape : SelectedShapes())
                 actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(shape->GetModel(), &Matrix2D::SetPos, shape->GetModel()->GetPos(), shape->GetModel()->GetPos() + offset));
 
@@ -607,7 +675,7 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
         if (action == GLFW_PRESS)
         {
             // TODO: Selection action should be combined with move action, ie, undo undoes the selection and the movement
-            glm::vec2 cursorPos = m_viewport->CursorPos();
+            glm::vec2 cursorPos = m_presentationWindow->CursorPos();
             shapeUnderCursor = GetShapeAtScreenPos(cursorPos);
             if (shapeUnderCursor && !shapeUnderCursor->isSelected)
                 SelectShape(shapeUnderCursor, mods & (GLFW_MOD_SHIFT | GLFW_MOD_CONTROL));
@@ -627,14 +695,14 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
 
 void Controller::OnViewportMouseScroll(double xoffset, double yoffset)
 {
-    m_viewport->GetCamera()->Zoom(yoffset);
-    m_viewport->RefreshCamera();
+    m_presentationWindow->GetCamera()->Zoom(yoffset);
+    m_presentationWindow->RefreshCamera();
 }
 
 void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-        m_viewport->SetFullscreen(!m_viewport->IsFullscreen());
+        m_presentationWindow->SetFullscreen(!m_presentationWindow->IsFullscreen());
     if (key == GLFW_KEY_KP_ADD && action == GLFW_RELEASE && HasSelectedShapes())
     {
         for (std::shared_ptr<Shape2D> shape : SelectedShapes())
@@ -666,7 +734,7 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 
 void Controller::OnViewportSizeChanged(int width, int height)
 {
-    m_viewport->RefreshCamera();
+    m_presentationWindow->RefreshCamera();
 }
 
 void Controller::OnUIAddTokenClicked()
@@ -676,7 +744,7 @@ void Controller::OnUIAddTokenClicked()
         m_resources->GetTexture(Resources::TextureType::Default)
     );
     // Centers it on the camera view
-    token->GetModel()->SetPos(glm::vec2(m_viewport->GetCamera()->Position.x, m_viewport->GetCamera()->Position.y));
+    token->GetModel()->SetPos(glm::vec2(m_presentationWindow->GetCamera()->Position.x, m_presentationWindow->GetCamera()->Position.y));
     std::shared_ptr<AddTokensAction> action = std::make_shared<AddTokensAction>(m_scene, token);
     // TODO: Include selection
     PerformAction(action);
@@ -886,7 +954,7 @@ void Controller::OnPromptResponse(int promptType, bool response)
     {
     case PROMPT_CLOSE:
         if (response)
-            m_viewport->Close();
+            m_presentationWindow->Close();
         break;
     
     default:
@@ -897,7 +965,7 @@ void Controller::OnPromptResponse(int promptType, bool response)
 
 void Controller::OnCloseRequested()
 {
-    m_uiWindow->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
+    m_hostWindow->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
 }
 
 void Controller::OnKeyChanged(int key, int scancode, int action, int mods)

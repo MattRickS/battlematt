@@ -75,10 +75,10 @@ void Viewport::Draw()
     // the primary camera is always rendered even if undo/redo changes the current
     // camera. Undo/Redo needs a better way of informing the Renderer the buffer
     // must be reloaded.
-    if (m_camera != m_scene->GetViewCamera(PRIMARY))
+    if (m_camera != m_scene->GetViewCamera(HOST_VIEW))
     {
         std::cerr << "Camera buffer out of sync with scene, refreshing" << std::endl;
-        m_camera = m_scene->GetViewCamera(PRIMARY);
+        m_camera = m_scene->GetViewCamera(HOST_VIEW);
         RefreshCamera();
     }
     // TODO: Move drawing logic out of scene/other classes and into this class.

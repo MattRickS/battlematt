@@ -6,6 +6,7 @@
 #include <Actions.hpp>
 #include <JSONSerializer.h>
 #include <Resources.h>
+#include <glutil/Buffers.h>
 #include <model/Overlays.h>
 #include <model/Scene.h>
 #include <model/Token.h>
@@ -19,6 +20,8 @@ class Controller
 public:
     Controller(std::shared_ptr<Resources> resources, std::shared_ptr<Viewport> viewport, std::shared_ptr<UIWindow> uiWindow);
     ~Controller();
+
+    void Render();
 
     void SetScene(std::shared_ptr<Scene> scene);
     void Save(std::string path);
@@ -81,9 +84,17 @@ public:
 private:
     std::shared_ptr<Resources> m_resources = nullptr;
     std::shared_ptr<Scene> m_scene = nullptr;
-    std::shared_ptr<Viewport> m_viewport = nullptr;
-    std::shared_ptr<UIWindow> m_uiWindow = nullptr;
+    std::shared_ptr<Viewport> m_presentationWindow = nullptr;
+    std::shared_ptr<UIWindow> m_hostWindow = nullptr;
     JSONSerializer m_serializer;
+
+    GLuint renderbuffer, hostFramebuffer, presentationFramebuffer;
+    std::shared_ptr<CameraBuffer> m_cameraBuffer = nullptr;
+    void SetupBuffers();
+
+    bool isPresentationActive = true;
+    void RenderHost();
+    void RenderPresentation();
 
     bool firstMouse = true;
     float lastMouseX, lastMouseY;

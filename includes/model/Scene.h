@@ -18,7 +18,8 @@
 // A scene will always have a primary view, but may in future have a
 // presentation view and/or per player views.
 typedef unsigned int ViewID;
-const ViewID PRIMARY = 0;
+const ViewID HOST_VIEW = 0;
+const ViewID PRESENTATION_VIEW = 1;
 
 class Scene
 {

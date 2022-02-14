@@ -222,7 +222,7 @@ void UIWindow::DrawCameraSection()
 {
     if (ImGui::CollapsingHeader("Cameras"))
     {
-        auto hostCamera = m_scene->GetViewCamera(PRIMARY);
+        auto hostCamera = m_scene->GetViewCamera(HOST_VIEW);
 
         if (ImGui::BeginListBox("Cameras##List"))
         {

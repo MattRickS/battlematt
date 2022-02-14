@@ -26,7 +26,7 @@ void Scene::AddCamera(const std::shared_ptr<Camera>& camera)
 {
     cameras.push_back(camera);
     if (views.empty())
-        views.emplace(PRIMARY, camera);
+        views.emplace(HOST_VIEW, camera);
 }
 
 void Scene::AddDefaultCamera()
