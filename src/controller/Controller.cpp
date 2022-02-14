@@ -35,7 +35,8 @@ Controller::Controller(
     m_presentationWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
 
     m_hostWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
-    m_hostWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
+    m_hostWindow->keyChanged.connect(this, &Controller::OnKeyChanged);
+    m_hostWindow->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
     m_hostWindow->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
 
     m_uiControls->saveClicked.connect(this, &Controller::Save);
@@ -704,8 +705,12 @@ void Controller::OnViewportMouseButton(int button, int action, int mods)
 
 void Controller::OnViewportMouseScroll(double xoffset, double yoffset)
 {
-    m_presentationWindow->GetCamera()->Zoom(yoffset);
-    m_presentationWindow->RefreshCamera();
+    if (m_hostWindow->IsFocused())
+        m_scene->GetViewCamera(HOST_VIEW)->Zoom(yoffset);
+    else if (m_presentationWindow->IsFocused())
+        m_scene->GetViewCamera(PRESENTATION_VIEW)->Zoom(yoffset);
+    else
+        std::cerr << "Zooming without an active window!?" << std::endl;
 }
 
 void Controller::OnViewportKey(int key, int scancode, int action, int mods)
@@ -744,18 +749,14 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 void Controller::OnViewportSizeChanged(int width, int height)
 {
     if (m_hostWindow->IsFocused())
-    {
         m_scene->GetViewCamera(HOST_VIEW)->SetAperture((float)width / (float)height);
-    }
     else if (m_presentationWindow->IsFocused())
     {
         m_scene->GetViewCamera(PRESENTATION_VIEW)->SetAperture((float)width / (float)height);
         glNamedRenderbufferStorage(renderbuffer, GL_RGBA, width, height);
     }
     else
-    {
-        std::cerr << "Resizing but no active window!?" << std::endl;
-    }
+        std::cerr << "Resizing without an active window!?" << std::endl;
 }
 
 void Controller::OnUIAddTokenClicked()
@@ -782,11 +783,6 @@ void Controller::OnUIAddImageClicked()
 void Controller::OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image)
 {
     PerformAction(std::make_shared<RemoveImagesAction>(m_scene, image));
-}
-
-void Controller::OnUIKeyChanged(int key, int scancode, int action, int mods)
-{
-    OnKeyChanged(key, scancode, action, mods);
 }
 
 void Controller::PerformAction(const std::shared_ptr<Action>& action)
