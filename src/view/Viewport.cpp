@@ -8,8 +8,8 @@
 #include <view/Viewport.h>
 
 
-Viewport::Viewport(unsigned int width, unsigned int height, std::shared_ptr<Window> share) :
-    Window(width, height, "Viewport", share)
+Viewport::Viewport(unsigned int width, unsigned int height, const char* name, std::shared_ptr<Window> share) :
+    Window(width, height, name, share)
 {
     // TODO: This should live on a renderer class...
     m_cameraBuffer = std::make_shared<CameraBuffer>();

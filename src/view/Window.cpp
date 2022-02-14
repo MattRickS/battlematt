@@ -47,7 +47,7 @@ void close_callback(GLFWwindow* window)
 
 // =============================================================================
 
-Window::Window(unsigned int width, unsigned int height, const char* name, std::shared_ptr<Window> share) : m_width(width), m_height(height)
+Window::Window(unsigned int width, unsigned int height, const char* name, std::shared_ptr<Window> share) : m_name(name), m_width(width), m_height(height)
 {
     window = glfwCreateWindow(width, height, name, NULL, share ? share->window : NULL);
     if (window == NULL)
@@ -96,6 +96,11 @@ void Window::Use()
     glfwMakeContextCurrent(window);
 }
 
+std::string Window::Name()
+{
+    return m_name;
+}
+
 bool Window::IsInitialised() { return bool(window); }
 
 void Window::Resize(unsigned int width, unsigned int height)
@@ -133,6 +138,11 @@ void Window::SetFullscreen(bool fullscreen)
 void Window::Focus()
 {
     glfwFocusWindow(window);
+}
+
+bool Window::IsFocused()
+{
+    return glfwGetWindowAttrib(window, GLFW_FOCUSED) == GLFW_TRUE;
 }
 
 glm::vec2 Window::CursorPos()

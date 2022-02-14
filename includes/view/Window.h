@@ -21,8 +21,11 @@ public:
     ~Window();
 
     void Use();
+    std::string Name();
 
     void Focus();
+    bool IsFocused();
+
     void Close();
     bool IsClosed();
     bool IsInitialised();
@@ -52,6 +55,7 @@ public:
 
     GLFWwindow* window;
 protected:
+    std::string m_name;
     GLFWmonitor* monitor = nullptr;
     unsigned int m_width, m_height;
     int m_lastPos[2], m_lastSize[2];

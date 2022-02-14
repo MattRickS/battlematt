@@ -36,6 +36,7 @@ Controller::Controller(
 
     m_hostWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
     m_hostWindow->keyChanged.connect(this, &Controller::OnUIKeyChanged);
+    m_hostWindow->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
 
     m_uiControls->saveClicked.connect(this, &Controller::Save);
     m_uiControls->loadClicked.connect(this, &Controller::Load);
@@ -742,7 +743,19 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 
 void Controller::OnViewportSizeChanged(int width, int height)
 {
-    m_presentationWindow->RefreshCamera();
+    if (m_hostWindow->IsFocused())
+    {
+        m_scene->GetViewCamera(HOST_VIEW)->SetAperture((float)width / (float)height);
+    }
+    else if (m_presentationWindow->IsFocused())
+    {
+        m_scene->GetViewCamera(PRESENTATION_VIEW)->SetAperture((float)width / (float)height);
+        glNamedRenderbufferStorage(renderbuffer, GL_RGBA, width, height);
+    }
+    else
+    {
+        std::cerr << "Resizing but no active window!?" << std::endl;
+    }
 }
 
 void Controller::OnUIAddTokenClicked()
