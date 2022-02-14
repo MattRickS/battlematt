@@ -77,6 +77,7 @@ void Controller::RenderHost()
     glViewport(0, 0, m_hostWindow->Width(), m_hostWindow->Height());
     glClear(GL_COLOR_BUFFER_BIT);
     m_scene->Draw();
+    m_hostWindow->Draw();
     glfwSwapBuffers(m_hostWindow->window);
 }
 
@@ -954,7 +955,7 @@ void Controller::OnPromptResponse(int promptType, bool response)
     {
     case PROMPT_CLOSE:
         if (response)
-            m_presentationWindow->Close();
+            m_hostWindow->Close();
         break;
     
     default:
