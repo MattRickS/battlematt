@@ -47,7 +47,7 @@ public:
     void SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image);
 
 private:
-    const std::shared_ptr<Window>& m_window = nullptr;
+    std::shared_ptr<Window> m_window = nullptr;
     std::shared_ptr<Scene> m_scene = nullptr;
     std::string m_promptMsg = "";
     int m_promptType = 0;
