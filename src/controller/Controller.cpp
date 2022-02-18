@@ -575,12 +575,17 @@ bool Controller::IsDragSelecting()
 void Controller::StartDragSelection(float xpos, float ypos)
 {
     dragSelectRect = std::make_shared<RectOverlay>(
-        m_resources->GetMesh(Resources::MeshType::Quad2),
-        m_resources->GetShader(Resources::ShaderType::ScreenRect),
+        m_resources->GetMesh(Resources::MeshType::Quad),
+        m_resources->GetShader(Resources::ShaderType::Simple),
         glm::vec4(SELECTION_COLOR, OVERLAY_OPACITY)
     );
     // GL uses inverted Y-axis
-    dragSelectRect->startCorner = dragSelectRect->endCorner = glm::vec2(xpos, ActiveViewport()->Height() - ypos);
+    const auto& viewport = ActiveViewport();
+    // TODO: Generate model to match start/end
+    //       half = (end - start) * 0.5
+    //       pos = start + half
+    //       scale = half
+    dragSelectRect->startCorner = dragSelectRect->endCorner = viewport->ScreenToWorldPos(xpos, ActiveViewport()->Height() - ypos);
     m_scene->overlays.push_back(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
 }
 
@@ -588,15 +593,12 @@ void Controller::UpdateDragSelection(float xpos, float ypos)
 {
     const std::shared_ptr<Viewport>& viewport = ActiveViewport();
     // GL uses inverted Y-axis
-    dragSelectRect->endCorner = glm::vec2(xpos, viewport->Height() - ypos);
+    dragSelectRect->endCorner = viewport->ScreenToWorldPos(xpos, viewport->Height() - ypos);
 
     // Y-axis is inverted on rect, use re-invert for calculating world positions
-    auto coveredShapes = ShapesInScreenRect(
-        viewport,
-        dragSelectRect->MinX(),
-        viewport->Height() - dragSelectRect->MinY(),
-        dragSelectRect->MaxX(),
-        viewport->Height() - dragSelectRect->MaxY()
+    auto coveredShapes = m_scene->ShapesInBounds(
+        glm::vec2(dragSelectRect->MinX(), viewport->Height() - dragSelectRect->MinY()),
+        glm::vec2(dragSelectRect->MaxX(), viewport->Height() - dragSelectRect->MaxY())
     );
 
     for (const std::shared_ptr<Shape2D>& shape : coveredShapes)
@@ -607,12 +609,10 @@ void Controller::FinishDragSelection(bool additive)
 {
     const std::shared_ptr<Viewport>& viewport = ActiveViewport();
     // Y-axis is inverted on rect, use re-invert for calculating world positions
-    auto shapesInBounds = ShapesInScreenRect(
-        viewport,
-        dragSelectRect->MinX(),
-        viewport->Height() - dragSelectRect->MinY(),
-        dragSelectRect->MaxX(),
-        viewport->Height() - dragSelectRect->MaxY()
+    //TODO: Not use a screen rect
+    auto shapesInBounds = m_scene->ShapesInBounds(
+        glm::vec2(dragSelectRect->MinX(), viewport->Height() - dragSelectRect->MinY()),
+        glm::vec2(dragSelectRect->MaxX(), viewport->Height() - dragSelectRect->MaxY())
     );
 
     if (shapesInBounds.size() > 0)

@@ -4,6 +4,7 @@
 
 #include <glutil/Mesh.h>
 #include <glutil/Shader.h>
+#include <model/Shape2D.h>
 
 
 class Overlay
@@ -17,12 +18,9 @@ public:
 };
 
 
-class RectOverlay : public Overlay
+class RectOverlay : public Overlay, public Rect
 {
 public:
-    glm::vec2 startCorner;
-    glm::vec2 endCorner;
-
     RectOverlay(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader, glm::vec4 colour=glm::vec4(1));
     virtual void Draw();
     void SetColour(glm::vec4 col);
@@ -30,8 +28,11 @@ public:
     float MaxX();
     float MinY();
     float MaxY();
+    void SetCorners(glm::vec2 pos);
+    void SetEndCorner(glm::vec2 pos);
 
 private:
-    std::shared_ptr<Mesh> m_mesh;
     glm::vec4 m_colour;
+    glm::vec2 startCorner;
+    glm::vec2 endCorner;
 };

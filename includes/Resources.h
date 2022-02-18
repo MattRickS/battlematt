@@ -12,7 +12,7 @@ class Resources
 {
 public:
     enum class MeshType { Quad, Quad2 };
-    enum class ShaderType { Grid, Image, ScreenRect, Status, Token };
+    enum class ShaderType { Grid, Image, ScreenRect, Simple, Status, Token };
     enum class TextureType { Default, Status, XStatus };
 
     Resources() {}

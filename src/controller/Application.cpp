@@ -75,10 +75,11 @@ void Application::LoadDefaultResources()
     m_resources->CreateMesh(Resources::MeshType::Quad2, vertices, indices);
 
     m_resources->CreateShader(Resources::ShaderType::Grid, "resources/shaders/Grid.vs", "resources/shaders/Grid.fs");
-    m_resources->CreateShader(Resources::ShaderType::ScreenRect, "resources/shaders/Grid.vs", "resources/shaders/Rect.fs");
-    m_resources->CreateShader(Resources::ShaderType::Image, "resources/shaders/SimpleTexture.vs", "resources/shaders/SimpleTexture.fs");
-    m_resources->CreateShader(Resources::ShaderType::Status, "resources/shaders/SimpleTexture.vs", "resources/shaders/Status.fs");
-    m_resources->CreateShader(Resources::ShaderType::Token, "resources/shaders/SimpleTexture.vs", "resources/shaders/Token.fs");
+    m_resources->CreateShader(Resources::ShaderType::ScreenRect, "resources/shaders/Grid.vs", "resources/shaders/ScreenRect.fs");
+    m_resources->CreateShader(Resources::ShaderType::Image, "resources/shaders/Simple.vs", "resources/shaders/SimpleTexture.fs");
+    m_resources->CreateShader(Resources::ShaderType::Status, "resources/shaders/Simple.vs", "resources/shaders/Status.fs");
+    m_resources->CreateShader(Resources::ShaderType::Simple, "resources/shaders/Simple.vs", "resources/shaders/SimpleColour.fs");
+    m_resources->CreateShader(Resources::ShaderType::Token, "resources/shaders/Simple.vs", "resources/shaders/Token.fs");
 
     m_resources->CreateTexture(Resources::TextureType::Default, "resources/images/QuestionMark.jpg");
     m_resources->CreateTexture(Resources::TextureType::Status, "resources/images/StatusDot.png");

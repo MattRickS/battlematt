@@ -47,6 +47,7 @@ public:
     bool RemoveCamera(const std::shared_ptr<Camera>& camera);
     bool IsEmpty();
     Bounds2D GetBounds();
+    std::vector<std::shared_ptr<Shape2D>> ShapesInBounds(glm::vec2 lo, glm::vec2 hi);
     bool GetImagesLocked();
     void SetImagesLocked(bool locked);
     bool GetTokensLocked();

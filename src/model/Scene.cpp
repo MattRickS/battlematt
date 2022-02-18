@@ -157,6 +157,41 @@ Bounds2D Scene::GetBounds()
     return Bounds2D::BoundsForShapes(shapes);
 }
 
+std::vector<std::shared_ptr<Shape2D>> Scene::ShapesInBounds(glm::vec2 lo, glm::vec2 hi)
+{
+    std::vector<std::shared_ptr<Shape2D>> shapes;
+
+    if (!GetTokensLocked())
+    {
+        for (const std::shared_ptr<Token>& token: tokens)
+        {
+            float radius = token->GetModel()->GetScalef() * 0.5f;
+            glm::vec2 tokenPos = token->GetModel()->GetPos();
+            if (tokenPos.x + radius > lo.x && tokenPos.x - radius < hi.x
+                && tokenPos.y + radius > lo.y && tokenPos.y - radius < hi.y)
+            {
+                shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
+            }
+        }
+    }
+
+    if (!GetImagesLocked())
+    {
+        for (const std::shared_ptr<BGImage>& image: images)
+        {
+            glm::vec2 scale = image->GetModel()->GetScale() * 0.5f;
+            glm::vec2 imageMin = image->GetModel()->GetPos() - scale;
+            glm::vec2 imageMax = image->GetModel()->GetPos() + scale;
+            if (imageMax.x > lo.x && imageMin.x < hi.x && imageMax.y > lo.y && imageMin.y < hi.y)
+            {
+                shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(image));
+            }
+        }
+    }
+
+    return shapes;
+}
+
 bool Scene::GetImagesLocked() { return m_lockImages; }
 void Scene::SetImagesLocked(bool locked) { m_lockImages = locked; }
 bool Scene::GetTokensLocked() { return m_lockTokens; }

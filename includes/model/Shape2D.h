@@ -31,6 +31,6 @@ public:
     virtual bool Contains(glm::vec2 pt);
     virtual void Draw(Shader& shader);
 
-private:
+protected:
     std::shared_ptr<Mesh> m_mesh;
 };
