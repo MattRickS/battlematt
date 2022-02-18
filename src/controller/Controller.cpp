@@ -494,15 +494,7 @@ const std::shared_ptr<Viewport>& Controller::ActiveViewport()
 
 const std::shared_ptr<Camera>& Controller::ActiveCamera()
 {
-    if (m_hostWindow->IsFocused())
-        return m_scene->GetViewCamera(HOST_VIEW);
-    else if (m_presentationWindow->IsFocused())
-        return m_scene->GetViewCamera(PRESENTATION_VIEW);
-    else
-    {
-        std::cerr << "No active camera, defaulting to host" << std::endl;
-        return m_scene->GetViewCamera(HOST_VIEW);
-    }
+    return ActiveViewport()->GetCamera();
 }
 
 // Screen Position
@@ -677,7 +669,7 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
     }
 
     if (middleMouseHeld)
-        ActiveCamera()->Pan(viewport->ScreenToWorldOffset(xoffset, yoffset));
+        viewport->GetCamera()->Pan(viewport->ScreenToWorldOffset(xoffset, yoffset));
     else if (leftMouseHeld && shapeUnderCursor)
     {
         if (m_scene->grid->GetSnapEnabled())
