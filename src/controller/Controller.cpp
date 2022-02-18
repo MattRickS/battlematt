@@ -575,17 +575,13 @@ bool Controller::IsDragSelecting()
 void Controller::StartDragSelection(float xpos, float ypos)
 {
     dragSelectRect = std::make_shared<RectOverlay>(
-        m_resources->GetMesh(Resources::MeshType::Quad),
+        m_resources->GetMesh(Resources::MeshType::Quad2),
         m_resources->GetShader(Resources::ShaderType::Simple),
         glm::vec4(SELECTION_COLOR, OVERLAY_OPACITY)
     );
     // GL uses inverted Y-axis
     const auto& viewport = ActiveViewport();
-    // TODO: Generate model to match start/end
-    //       half = (end - start) * 0.5
-    //       pos = start + half
-    //       scale = half
-    dragSelectRect->startCorner = dragSelectRect->endCorner = viewport->ScreenToWorldPos(xpos, ActiveViewport()->Height() - ypos);
+    dragSelectRect->SetCorners(viewport->ScreenToWorldPos(xpos, ypos));
     m_scene->overlays.push_back(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
 }
 
@@ -593,12 +589,12 @@ void Controller::UpdateDragSelection(float xpos, float ypos)
 {
     const std::shared_ptr<Viewport>& viewport = ActiveViewport();
     // GL uses inverted Y-axis
-    dragSelectRect->endCorner = viewport->ScreenToWorldPos(xpos, viewport->Height() - ypos);
+    dragSelectRect->SetEndCorner(viewport->ScreenToWorldPos(xpos, ypos));
 
     // Y-axis is inverted on rect, use re-invert for calculating world positions
     auto coveredShapes = m_scene->ShapesInBounds(
-        glm::vec2(dragSelectRect->MinX(), viewport->Height() - dragSelectRect->MinY()),
-        glm::vec2(dragSelectRect->MaxX(), viewport->Height() - dragSelectRect->MaxY())
+        glm::vec2(dragSelectRect->MinX(), dragSelectRect->MinY()),
+        glm::vec2(dragSelectRect->MaxX(), dragSelectRect->MaxY())
     );
 
     for (const std::shared_ptr<Shape2D>& shape : coveredShapes)
@@ -607,12 +603,11 @@ void Controller::UpdateDragSelection(float xpos, float ypos)
 
 void Controller::FinishDragSelection(bool additive)
 {
-    const std::shared_ptr<Viewport>& viewport = ActiveViewport();
     // Y-axis is inverted on rect, use re-invert for calculating world positions
     //TODO: Not use a screen rect
     auto shapesInBounds = m_scene->ShapesInBounds(
-        glm::vec2(dragSelectRect->MinX(), viewport->Height() - dragSelectRect->MinY()),
-        glm::vec2(dragSelectRect->MaxX(), viewport->Height() - dragSelectRect->MaxY())
+        glm::vec2(dragSelectRect->MinX(), dragSelectRect->MinY()),
+        glm::vec2(dragSelectRect->MaxX(), dragSelectRect->MaxY())
     );
 
     if (shapesInBounds.size() > 0)

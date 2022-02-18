@@ -19,8 +19,9 @@ RectOverlay::RectOverlay(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> sha
 void RectOverlay::Draw()
 {
     shader->use();
-    shader->setFloat4("coords", MinX(), MinY(), MaxX(), MaxY());
-    m_mesh->Draw(*shader);
+    // shader->setFloat4("coords", MinX(), MinY(), MaxX(), MaxY());
+    shader->setMat4("model", *m_model->Value());
+    Rect::Draw(*shader);
 }
 
 void RectOverlay::SetColour(glm::vec4 col)
@@ -44,5 +45,8 @@ void RectOverlay::SetCorners(glm::vec2 pos)
 
 void RectOverlay::SetEndCorner(glm::vec2 pos)
 {
-    
+    endCorner = pos;
+    glm::vec2 half = (endCorner - startCorner) * 0.5f;
+    m_model->SetPos(startCorner + half);
+    m_model->SetScale(half);
 }
