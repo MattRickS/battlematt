@@ -7,7 +7,7 @@
 #include <JSONSerializer.h>
 #include <Resources.h>
 #include <glutil/Buffers.h>
-#include <model/Overlays.h>
+#include <model/Shape2D.h>
 #include <model/Scene.h>
 #include <model/Token.h>
 #include <view/Properties.h>
@@ -110,7 +110,7 @@ private:
     std::deque<std::shared_ptr<Action>> undoQueue;
     std::deque<std::shared_ptr<Action>> redoQueue;
 
-    std::shared_ptr<RectOverlay> dragSelectRect = nullptr;
+    std::shared_ptr<Rect> dragSelectRect = nullptr;
     std::shared_ptr<Shape2D> shapeUnderCursor = nullptr;
 
     bool IsDragSelecting();

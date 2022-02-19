@@ -10,7 +10,6 @@
 #include <glutil/Matrix2D.h>
 #include <model/BGImage.h>
 #include <model/Grid.h>
-#include <model/Overlays.h>
 #include <model/Scene.h>
 #include <model/Token.h>
 
@@ -44,7 +43,7 @@ public:
     bool SerializeGrid(const std::shared_ptr<Grid>& grid, nlohmann::json& json);
     bool SerializeImage(const std::shared_ptr<BGImage>& image, nlohmann::json& json);
     bool SerializeMatrix2D(const std::shared_ptr<Matrix2D>& matrix, nlohmann::json& json);
-    // bool SerializeOverlay(const std::shared_ptr<Overlay>& overlay, nlohmann::json& json);
+    // bool SerializeOverlay(const std::shared_ptr<Shape2D>& overlay, nlohmann::json& json);
     bool SerializeScene(const std::shared_ptr<Scene>& scene, nlohmann::json& json);
     bool SerializeToken(const std::shared_ptr<Token>& token, nlohmann::json& json);
 
@@ -58,7 +57,7 @@ public:
     std::shared_ptr<BGImage> DeserializeImage(nlohmann::json& json);
     std::shared_ptr<Matrix2D> DeserializeMatrix2D(nlohmann::json& json);
     std::shared_ptr<Token> DeserializeToken(nlohmann::json& json);
-    // std::shared_ptr<Overlay> DeserializeOverlay(nlohmann::json& json);
+    // std::shared_ptr<Shape2D> DeserializeOverlay(nlohmann::json& json);
     void DeserializeScene(nlohmann::json& json, Scene& scene);
     std::shared_ptr<Scene> DeserializeScene(nlohmann::json& json);
     std::shared_ptr<Scene> DeserializeScene(const std::string& text);

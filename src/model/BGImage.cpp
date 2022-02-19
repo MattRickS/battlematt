@@ -18,13 +18,11 @@ BGImage::BGImage(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture) :
 
 void BGImage::Draw(Shader &shader)
 {
-    shader.setMat4("model", *m_model->Value());
-
-    glm::vec4 colour = m_tintColour;
+    glm::vec4 colour = m_colour;
     if (isSelected)
-        colour = glm::vec4(SELECTION_COLOR, m_tintColour.w);
+        colour = glm::vec4(SELECTION_COLOR, m_colour.w);
     else if (isHighlighted)
-        colour = glm::vec4(HIGHLIGHT_COLOR, m_tintColour.w);
+        colour = glm::vec4(HIGHLIGHT_COLOR, m_colour.w);
     shader.setFloat4("color", colour.x, colour.y, colour.z, colour.w);
 
     if (m_texture && m_texture->IsValid())
@@ -33,7 +31,9 @@ void BGImage::Draw(Shader &shader)
         shader.setInt("diffuse", 0);
         glBindTexture(GL_TEXTURE_2D, m_texture->ID);
     }
-    Rect::Draw(shader);
+    // Calling base method will replace colour
+    shader.setMat4("model", *m_model->Value());
+    m_mesh->Draw(shader);
 }
 
 std::shared_ptr<Texture> BGImage::GetImage()
@@ -55,11 +55,6 @@ void BGImage::SetImage(std::shared_ptr<Texture> texture)
         m_texture = texture;
         m_model->Rebuild();
     }
-}
-
-void BGImage::SetTint(glm::vec4 colour)
-{
-    m_tintColour = colour;
 }
 
 bool BGImage::GetLockRatio() { return m_lockRatio; }

@@ -9,7 +9,6 @@
 #include <glutil/Matrix2D.h>
 #include <model/BGImage.h>
 #include <model/Grid.h>
-#include <model/Overlays.h>
 #include <model/Scene.h>
 #include <model/Token.h>
 

@@ -10,7 +10,6 @@
 #include <Constants.h>
 #include <JSONSerializer.h>
 #include <Resources.h>
-#include <model/Overlays.h>
 #include <model/Scene.h>
 #include <model/Token.h>
 #include <view/UIControls.h>
@@ -72,6 +71,9 @@ Controller::~Controller()
 
 void Controller::Render()
 {
+    // TODO: "Sync views" option should draw a UI bounding box of the presentation
+    // view camera within the host view so they know exactly what is visible even if
+    // their screen sizes are differen.
     RenderHost();
     if (isPresentationActive)
     {
@@ -582,15 +584,14 @@ bool Controller::IsDragSelecting()
 
 void Controller::StartDragSelection(float xpos, float ypos)
 {
-    dragSelectRect = std::make_shared<RectOverlay>(
+    dragSelectRect = std::make_shared<Rect>(
         m_resources->GetMesh(Resources::MeshType::Quad2),
-        m_resources->GetShader(Resources::ShaderType::Simple),
         glm::vec4(SELECTION_COLOR, OVERLAY_OPACITY)
     );
     // GL uses inverted Y-axis
     const auto& viewport = ActiveViewport();
     dragSelectRect->SetCorners(viewport->ScreenToWorldPos(xpos, ypos));
-    m_scene->overlays.push_back(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
+    m_scene->overlays.push_back(static_cast<std::shared_ptr<Shape2D>>(dragSelectRect));
 }
 
 void Controller::UpdateDragSelection(float xpos, float ypos)
@@ -600,10 +601,7 @@ void Controller::UpdateDragSelection(float xpos, float ypos)
     dragSelectRect->SetEndCorner(viewport->ScreenToWorldPos(xpos, ypos));
 
     // Y-axis is inverted on rect, use re-invert for calculating world positions
-    auto coveredShapes = m_scene->ShapesInBounds(
-        glm::vec2(dragSelectRect->MinX(), dragSelectRect->MinY()),
-        glm::vec2(dragSelectRect->MaxX(), dragSelectRect->MaxY())
-    );
+    auto coveredShapes = m_scene->ShapesInBounds(dragSelectRect->Min(), dragSelectRect->Max());
 
     for (const std::shared_ptr<Shape2D>& shape : coveredShapes)
         shape->isHighlighted = true;
@@ -612,17 +610,14 @@ void Controller::UpdateDragSelection(float xpos, float ypos)
 void Controller::FinishDragSelection(bool additive)
 {
     // Y-axis is inverted on rect, use re-invert for calculating world positions
-    auto shapesInBounds = m_scene->ShapesInBounds(
-        glm::vec2(dragSelectRect->MinX(), dragSelectRect->MinY()),
-        glm::vec2(dragSelectRect->MaxX(), dragSelectRect->MaxY())
-    );
+    auto shapesInBounds = m_scene->ShapesInBounds(dragSelectRect->Min(), dragSelectRect->Max());
 
     if (shapesInBounds.size() > 0)
         SelectShapes(shapesInBounds, additive);
     else if (HasSelectedShapes())
         ClearSelection();
 
-    m_scene->RemoveOverlay(static_cast<std::shared_ptr<Overlay>>(dragSelectRect));
+    m_scene->RemoveOverlay(static_cast<std::shared_ptr<Shape2D>>(dragSelectRect));
     dragSelectRect.reset();
 }
 

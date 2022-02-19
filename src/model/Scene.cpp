@@ -9,7 +9,6 @@
 #include <glutil/Shader.h>
 #include <model/BGImage.h>
 #include <model/Grid.h>
-#include <model/Overlays.h>
 #include <model/Token.h>
 #include <model/Scene.h>
 
@@ -76,7 +75,7 @@ void Scene::AddToken(const std::shared_ptr<Token>& token)
     tokens.push_back(token);
 }
 
-void Scene::RemoveOverlay(std::shared_ptr<Overlay> overlay)
+void Scene::RemoveOverlay(std::shared_ptr<Shape2D> overlay)
 {
     auto it = std::find(overlays.begin(), overlays.end(), overlay);
     if (it != overlays.end())
@@ -258,7 +257,7 @@ void Scene::Draw()
         }
     }
 
-    // Overlays have their own shaders
-    for (const std::shared_ptr<Overlay>& overlay : overlays)
-        overlay->Draw();
+    const std::shared_ptr<Shader>& overlayShader = m_resources->GetShader(Resources::ShaderType::Simple);
+    for (const std::shared_ptr<Shape2D>& overlay : overlays)
+        overlay->Draw(*overlayShader);
 }

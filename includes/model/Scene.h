@@ -11,7 +11,6 @@
 #include <model/BGImage.h>
 #include <model/Bounds.h>
 #include <model/Grid.h>
-#include <model/Overlays.h>
 #include <model/Token.h>
 
 // ViewIDs are a lookup for which camera is being used for what purpose
@@ -27,7 +26,7 @@ public:
     glm::vec4 bgColor = glm::vec4(0, 0, 0, 1);
     std::vector<std::shared_ptr<BGImage>> images;
     std::vector<std::shared_ptr<Token>> tokens;
-    std::vector<std::shared_ptr<Overlay>> overlays;
+    std::vector<std::shared_ptr<Shape2D>> overlays;
     std::shared_ptr<Grid> grid = nullptr;
     std::vector<std::shared_ptr<Camera>> cameras;
     std::unordered_map<ViewID, std::shared_ptr<Camera>> views;
@@ -41,7 +40,7 @@ public:
     void AddToken();
     void AddToken(std::string path);
     void AddToken(const std::shared_ptr<Token>& token);
-    void RemoveOverlay(std::shared_ptr<Overlay> overlay);
+    void RemoveOverlay(std::shared_ptr<Shape2D> overlay);
     void RemoveTokens(std::vector<std::shared_ptr<Token>> toRemove);
     void RemoveImages(std::vector<std::shared_ptr<BGImage>> toRemove);
     bool RemoveCamera(const std::shared_ptr<Camera>& camera);
