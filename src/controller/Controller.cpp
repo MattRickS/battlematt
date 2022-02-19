@@ -82,7 +82,9 @@ void Controller::Render()
 void Controller::RenderHost()
 {
     glfwMakeContextCurrent(m_hostWindow->window);
-    m_cameraBuffer->SetCamera(m_scene->GetViewCamera(HOST_VIEW));
+    const auto& camera = m_hostWindow->GetCamera();
+    camera->SetAperture((float)m_hostWindow->Width() / (float)m_hostWindow->Height());
+    m_cameraBuffer->SetCamera(camera);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);  // default framebuffer
     glViewport(0, 0, m_hostWindow->Width(), m_hostWindow->Height());
     // glClear(GL_COLOR_BUFFER_BIT);
@@ -97,7 +99,13 @@ void Controller::RenderPresentation()
     int height = m_presentationWindow->Height();
 
     glfwMakeContextCurrent(m_hostWindow->window);
-    m_cameraBuffer->SetCamera(m_scene->GetViewCamera(PRESENTATION_VIEW));
+
+    // Reset the aperture as if it's using the same camera as the host and is a
+    // differently sized window it will be incorrect
+    const auto& camera = m_presentationWindow->GetCamera();
+    camera->SetAperture((float)m_presentationWindow->Width() / (float)m_presentationWindow->Height());
+    m_cameraBuffer->SetCamera(camera);
+
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, hostFramebuffer);
     glViewport(0, 0, width, height);
     // glClear(GL_COLOR_BUFFER_BIT);
@@ -604,7 +612,6 @@ void Controller::UpdateDragSelection(float xpos, float ypos)
 void Controller::FinishDragSelection(bool additive)
 {
     // Y-axis is inverted on rect, use re-invert for calculating world positions
-    //TODO: Not use a screen rect
     auto shapesInBounds = m_scene->ShapesInBounds(
         glm::vec2(dragSelectRect->MinX(), dragSelectRect->MinY()),
         glm::vec2(dragSelectRect->MaxX(), dragSelectRect->MaxY())
