@@ -51,7 +51,7 @@ public:
     void SetImagesLocked(bool locked);
     bool GetTokensLocked();
     void SetTokensLocked(bool locked);
-    void Draw();
+    void Draw(ShapeVisibility visibility=ShapeVisibility::All);
 
     void AddDefaultCamera();
     void SetViewCamera(ViewID id, const std::shared_ptr<Camera>& camera);

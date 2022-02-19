@@ -8,6 +8,9 @@
 // Shape2D
 std::shared_ptr<Matrix2D> Shape2D::GetModel() { return m_model; }
 void Shape2D::SetModel(const std::shared_ptr<Matrix2D>& matrix) { m_model = matrix; }
+void Shape2D::SetVisibility(ShapeVisibility visibility) { m_visibility = visibility; }
+ShapeVisibility Shape2D::GetVisibility() { return m_visibility; }
+bool Shape2D::IsVisibleTo(ShapeVisibility visibility) { return (visibility & m_visibility) != ShapeVisibility::None; }
 
 // Rect
 Rect::Rect(const std::shared_ptr<Mesh>& mesh, glm::vec4 colour) : m_mesh(mesh), m_colour(colour) {}

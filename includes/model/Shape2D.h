@@ -8,6 +8,22 @@
 #include <glutil/Shader.h>
 
 
+enum class ShapeVisibility
+{
+    None = 0,
+    Host = 1 << 0,
+    Presentation = 1 << 1,
+    All = Host | Presentation
+};
+
+inline ShapeVisibility operator~ (ShapeVisibility a) { return (ShapeVisibility)~(int)a; }
+inline ShapeVisibility operator| (ShapeVisibility a, ShapeVisibility b) { return (ShapeVisibility)((int)a | (int)b); }
+inline ShapeVisibility operator& (ShapeVisibility a, ShapeVisibility b) { return (ShapeVisibility)((int)a & (int)b); }
+inline ShapeVisibility operator^ (ShapeVisibility a, ShapeVisibility b) { return (ShapeVisibility)((int)a ^ (int)b); }
+inline ShapeVisibility& operator|= (ShapeVisibility& a, ShapeVisibility b) { return (ShapeVisibility&)((int&)a |= (int)b); }
+inline ShapeVisibility& operator&= (ShapeVisibility& a, ShapeVisibility b) { return (ShapeVisibility&)((int&)a &= (int)b); }
+inline ShapeVisibility& operator^= (ShapeVisibility& a, ShapeVisibility b) { return (ShapeVisibility&)((int&)a ^= (int)b); }
+
 class Shape2D
 {
 public:
@@ -18,9 +34,13 @@ public:
     void SetModel(const std::shared_ptr<Matrix2D>& matrix);
     virtual bool Contains(glm::vec2 pt) = 0;
     virtual void Draw(Shader& shader) = 0;
+    void SetVisibility(ShapeVisibility visibility);
+    ShapeVisibility GetVisibility();
+    bool IsVisibleTo(ShapeVisibility visibility);
 
 protected:
     std::shared_ptr<Matrix2D> m_model = std::make_shared<Matrix2D>();
+    ShapeVisibility m_visibility = ShapeVisibility::All;
 };
 
 

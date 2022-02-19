@@ -196,8 +196,7 @@ void Scene::SetImagesLocked(bool locked) { m_lockImages = locked; }
 bool Scene::GetTokensLocked() { return m_lockTokens; }
 void Scene::SetTokensLocked(bool locked) { m_lockTokens = locked; }
 
-// TODO: Move to renderer class
-void Scene::Draw()
+void Scene::Draw(ShapeVisibility visibility)
 {
     glClearColor(bgColor.x * bgColor.w, bgColor.y * bgColor.w, bgColor.z * bgColor.w, bgColor.w);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -205,7 +204,10 @@ void Scene::Draw()
     std::shared_ptr<Shader> imageShader = m_resources->GetShader(Resources::ShaderType::Image);
     imageShader->use();
     for (const std::shared_ptr<BGImage>& image: images)
-        image->Draw(*imageShader);
+    {
+        if (image->IsVisibleTo(visibility))
+            image->Draw(*imageShader);
+    }
 
     grid->Draw();
 
@@ -217,6 +219,9 @@ void Scene::Draw()
     tokenShader->use();
     for (const std::shared_ptr<Token>& token : tokens)
     {
+        if (!token->IsVisibleTo(visibility))
+            continue;
+ 
         tokenShader->use();
         token->Draw(*tokenShader);
 
@@ -259,5 +264,8 @@ void Scene::Draw()
 
     const std::shared_ptr<Shader>& overlayShader = m_resources->GetShader(Resources::ShaderType::Simple);
     for (const std::shared_ptr<Shape2D>& overlay : overlays)
-        overlay->Draw(*overlayShader);
+    {
+        if (overlay->IsVisibleTo(visibility))
+            overlay->Draw(*overlayShader);
+    }
 }
