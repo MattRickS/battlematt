@@ -45,6 +45,6 @@ private:
     std::shared_ptr<Mesh> m_mesh;
     std::shared_ptr<Shader> m_shader;
     float m_scale = 1.0f;
-    glm::vec3 m_colour = glm::vec3(0.2);
+    glm::vec3 m_color = glm::vec3(0.2);
     bool m_snap = false;
 };

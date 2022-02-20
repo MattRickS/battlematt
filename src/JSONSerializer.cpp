@@ -60,7 +60,7 @@ bool JSONSerializer::SerializeImage(const std::shared_ptr<BGImage>& image, nlohm
     nlohmann::json matrix;
     SerializeMatrix2D(image->GetModel(), matrix);
     json["matrix2D"] = matrix;
-    json["visibility"] = static_cast<int>(image->GetVisibility());
+    json["visibility"] = image->GetVisibilities().to_ulong();
     return true;
 }
 
@@ -84,7 +84,7 @@ std::shared_ptr<BGImage> JSONSerializer::DeserializeImage(nlohmann::json& json)
     );
     image->SetModel(DeserializeMatrix2D(json["matrix2D"]));
     if (json.contains("visibility"))
-        image->SetVisibility(json["visibility"]);
+        image->SetVisibilities((unsigned int)json["visibility"]);
     return image;
 }
 
@@ -119,7 +119,7 @@ bool JSONSerializer::SerializeToken(const std::shared_ptr<Token>& token, nlohman
     json["statuses"] = token->GetStatuses().to_string();
     json["xstatus"] = token->GetXStatus();
     json["opacity"] = token->GetOpacity();
-    json["visibility"] = static_cast<int>(token->GetVisibility());
+    json["visibility"] = token->GetVisibilities().to_ulong();
 
     return true;
 }
@@ -157,7 +157,7 @@ std::shared_ptr<Token> JSONSerializer::DeserializeToken(nlohmann::json& json)
         token->SetXStatus(json["xstatus"]);
     }
     if (json.contains("visibility"))
-        token->SetVisibility(json["visibility"]);
+        token->SetVisibilities((unsigned int)json["visibility"]);
     return token;
 }
 

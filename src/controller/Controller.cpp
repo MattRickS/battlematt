@@ -871,7 +871,14 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
         for (const auto& selectedToken: SelectedTokens())
             actionGroup->Add(std::make_shared<ModifyTokenFloat>(selectedToken, &Token::SetOpacity, selectedToken->GetOpacity(), std::get<float>(value)));
         break;
-    
+    case Token_Visibility:
+    {
+        ShapeVisibility visibility = std::get<ShapeVisibility>(value);
+        for (const auto& selectedToken: SelectedTokens())
+            actionGroup->Add(std::make_shared<ModifyTokenVisibility>(selectedToken, &Token::ToggleVisibility, visibility, visibility));
+        break;
+    }
+
     default:
         std::cerr << "Unknown TokenProperty: " << property << std::endl;
         actionGroup.reset();
@@ -902,6 +909,12 @@ void Controller::OnImagePropertyChanged(const std::shared_ptr<BGImage>& image, I
     case Image_Scale:
         action = std::make_shared<ModifyMatrix2DVec2>(image->GetModel(), &Matrix2D::SetScale, image->GetModel()->GetScale(), std::get<glm::vec2>(value));
         break;
+    case Image_Visibility:
+    {
+        ShapeVisibility visibility = std::get<ShapeVisibility>(value);
+        action = std::make_shared<ModifyImageVisibility>(image, &BGImage::ToggleVisibility, visibility, visibility);
+        break;
+    }
     
     default:
         std::cerr << "Unknown ImageProperty: " << property << std::endl;

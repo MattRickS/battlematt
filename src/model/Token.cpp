@@ -62,10 +62,10 @@ void Token::Draw(Shader &shader)
         glBindTexture(GL_TEXTURE_2D, m_texture->ID);
     }
 
-    shader.setFloat4("highlightColor", highlight.x, highlight.y, highlight.z, highlight.w);
-    shader.setFloat4("borderColor", m_borderColor.x, m_borderColor.y, m_borderColor.z, m_borderColor.w);
+    shader.setVec4("highlightColor", highlight);
+    shader.setVec4("borderColor", m_borderColor);
+    shader.setVec4("color", m_color);
     shader.setFloat("borderWidth", m_borderWidth);
-    shader.setFloat("opacity", m_opacity);
     Rect::Draw(shader);
 }
 

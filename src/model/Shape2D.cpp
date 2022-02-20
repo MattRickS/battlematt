@@ -8,12 +8,13 @@
 // Shape2D
 std::shared_ptr<Matrix2D> Shape2D::GetModel() { return m_model; }
 void Shape2D::SetModel(const std::shared_ptr<Matrix2D>& matrix) { m_model = matrix; }
-void Shape2D::SetVisibility(ShapeVisibility visibility) { m_visibility = visibility; }
-ShapeVisibility Shape2D::GetVisibility() { return m_visibility; }
-bool Shape2D::IsVisibleTo(ShapeVisibility visibility) { return (visibility & m_visibility) != ShapeVisibility::None; }
+void Shape2D::SetVisibilities(ShapeVisibilities visibilities) { m_visibilities = visibilities; }
+ShapeVisibilities Shape2D::GetVisibilities() { return m_visibilities; }
+bool Shape2D::HasVisibility(ShapeVisibility visibility) { return m_visibilities[(int)visibility]; }
+void Shape2D::ToggleVisibility(ShapeVisibility visibility) { m_visibilities.flip((int)visibility); }
 
 // Rect
-Rect::Rect(const std::shared_ptr<Mesh>& mesh, glm::vec4 colour) : m_mesh(mesh), m_colour(colour) {}
+Rect::Rect(const std::shared_ptr<Mesh>& mesh, glm::vec4 colour) : m_mesh(mesh), m_color(colour) {}
 
 bool Rect::Contains(glm::vec2 pt)
 {
@@ -27,14 +28,14 @@ void Rect::Draw(Shader& shader)
 {
     shader.use();
     shader.setMat4("model", *m_model->Value());
-    shader.setFloat4("colour", m_colour.x, m_colour.y, m_colour.z, m_colour.w);
+    shader.setFloat4("color", m_color.x, m_color.y, m_color.z, m_color.w);
     m_mesh->Draw(shader);
 }
 
 
 void Rect::SetColour(glm::vec4 col)
 {
-    m_colour = col;
+    m_color = col;
 }
 
 glm::vec2 Rect::Min() { return glm::vec2(std::min(startCorner.x, endCorner.x), std::min(startCorner.y, endCorner.y)); }

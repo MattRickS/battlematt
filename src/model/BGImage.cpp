@@ -18,11 +18,11 @@ BGImage::BGImage(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture) :
 
 void BGImage::Draw(Shader &shader)
 {
-    glm::vec4 colour = m_colour;
+    glm::vec4 colour = m_color;
     if (isSelected)
-        colour = glm::vec4(SELECTION_COLOR, m_colour.w);
+        colour = glm::vec4(SELECTION_COLOR, m_color.w);
     else if (isHighlighted)
-        colour = glm::vec4(HIGHLIGHT_COLOR, m_colour.w);
+        colour = glm::vec4(HIGHLIGHT_COLOR, m_color.w);
     shader.setFloat4("color", colour.x, colour.y, colour.z, colour.w);
 
     if (m_texture && m_texture->IsValid())

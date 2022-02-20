@@ -205,7 +205,7 @@ void Scene::Draw(ShapeVisibility visibility)
     imageShader->use();
     for (const std::shared_ptr<BGImage>& image: images)
     {
-        if (image->IsVisibleTo(visibility))
+        if (image->HasVisibility(visibility))
             image->Draw(*imageShader);
     }
 
@@ -219,7 +219,7 @@ void Scene::Draw(ShapeVisibility visibility)
     tokenShader->use();
     for (const std::shared_ptr<Token>& token : tokens)
     {
-        if (!token->IsVisibleTo(visibility))
+        if (!token->HasVisibility(visibility))
             continue;
  
         tokenShader->use();
@@ -265,7 +265,7 @@ void Scene::Draw(ShapeVisibility visibility)
     const std::shared_ptr<Shader>& overlayShader = m_resources->GetShader(Resources::ShaderType::Simple);
     for (const std::shared_ptr<Shape2D>& overlay : overlays)
     {
-        if (overlay->IsVisibleTo(visibility))
+        if (overlay->HasVisibility(visibility))
             overlay->Draw(*overlayShader);
     }
 }

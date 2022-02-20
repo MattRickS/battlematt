@@ -10,7 +10,7 @@ Grid::Grid(std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader) : m_mesh(
 {
     shader->use();
     shader->setFloat("gridScale", m_scale);
-    shader->setFloat3("gridColour", m_colour.x, m_colour.y, m_colour.z);
+    shader->setFloat3("gridColour", m_color.x, m_color.y, m_color.z);
 }
 
 void Grid::Draw()
@@ -30,12 +30,12 @@ float Grid::GetScale() { return m_scale; }
 
 void Grid::SetColour(glm::vec3 colour)
 {
-    m_colour = colour;
+    m_color = colour;
     m_shader->use();
-    m_shader->setFloat3("gridColour", m_colour.x, m_colour.y, m_colour.z);
+    m_shader->setFloat3("gridColour", m_color.x, m_color.y, m_color.z);
 }
 
-glm::vec3 Grid::GetColour() { return m_colour; }
+glm::vec3 Grid::GetColour() { return m_color; }
 
 void Grid::SetSnapEnabled(bool snap) { m_snap = snap; }
 bool Grid::GetSnapEnabled() { return m_snap; }

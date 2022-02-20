@@ -120,6 +120,7 @@ typedef ModifyMemberAction<Matrix2D, float> ModifyMatrix2DFloat;  // rotation
 
 typedef ModifyMemberAction<BGImage, bool> ModifyImageBool;  // lockRatio
 typedef ModifyMemberAction<BGImage, std::shared_ptr<Texture>> ModifyImageTexture;  // image
+typedef ModifyMemberAction<BGImage, ShapeVisibility> ModifyImageVisibility;
 
 typedef ModifyMemberAction<Token, bool> ModifyTokenBool;  // xStatus
 typedef ModifyMemberAction<Token, float> ModifyTokenFloat;  // borderWidth
@@ -127,6 +128,7 @@ typedef ModifyMemberAction<Token, glm::vec4> ModifyTokenVec4;  // borderColour
 typedef ModifyMemberAction<Token, std::shared_ptr<Texture>> ModifyTokenTexture;  // icon
 typedef ModifyMemberAction<Token, std::string> ModifyTokenString;  // name
 typedef ModifyMemberAction<Token, TokenStatuses> ModifyTokenStatuses;
+typedef ModifyMemberAction<Token, ShapeVisibility> ModifyTokenVisibility;
 
 typedef ModifyMemberAction<Scene, bool> ModifySceneLocks;
 

@@ -7,7 +7,7 @@ uniform vec4 borderColor;
 uniform float borderWidth;
 // Highlight Color will have no alpha if not highlighted
 uniform vec4 highlightColor;
-uniform float opacity;
+uniform vec4 color;
 
 float highlightWidth = 0.06;
 float maxBand = 0.25;
@@ -22,20 +22,20 @@ void main()
     float dist = dot(offset, offset);
     if (dist <= borderBand)
     {
-        FragColor = vec4(vec3(texture(diffuse, UV)) * (1 - dist * 3), 1.0) * opacity;
+        FragColor = vec4(vec3(texture(diffuse, UV)) * (1 - dist * 3), 1.0) * color.w;
         if (dist >= borderBand - AAsize)
-            FragColor = mix(FragColor, borderColor, (dist - (borderBand - AAsize)) / AAsize) * opacity;
+            FragColor = mix(FragColor, borderColor, (dist - (borderBand - AAsize)) / AAsize) * color.w;
     }
     else if (dist < highlightBand)
     {
-        FragColor = borderColor * opacity;
+        FragColor = borderColor * color.w;
         if (dist >= highlightBand - AAsize)
-            FragColor = mix(borderColor, highlightColor.w > 0 ? highlightColor : vec4(0), (dist - (highlightBand - AAsize)) / AAsize) * opacity;
+            FragColor = mix(borderColor, highlightColor.w > 0 ? highlightColor : vec4(0), (dist - (highlightBand - AAsize)) / AAsize) * color.w;
     }
     else if (highlightColor.w > 0 && dist < maxBand)
     {
         float alpha = (maxBand - dist) * (1 / highlightWidth);
-        FragColor = vec4(vec3(highlightColor), alpha) * opacity;
+        FragColor = vec4(vec3(highlightColor), alpha) * color.w;
     }
     else
         FragColor = vec4(0);

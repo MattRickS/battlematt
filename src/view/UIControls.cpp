@@ -155,6 +155,10 @@ void UIControls::DrawImageOptions(const std::shared_ptr<BGImage>& image)
     float rotation = matrix2D->GetRotation();
     if (ImGui::SliderFloat("Rotation##Image", &rotation, 0, 360, "%.2f"))
         imagePropertyChanged.emit(image, Image_Rotation, ImagePropertyValue(rotation));
+
+    bool visibleToPresentation = image->HasVisibility(ShapeVisibility::Presentation);
+    if (ImGui::Checkbox("Visible In Presentation View", &visibleToPresentation))
+        imagePropertyChanged.emit(image, Image_Visibility, ImagePropertyValue(ShapeVisibility::Presentation));
 }
 
 void UIControls::DrawGridOptions(const std::shared_ptr<Grid>& grid)
@@ -224,6 +228,10 @@ void UIControls::DrawTokenOptions(const std::shared_ptr<Token>& token)
     float opacity = token->GetOpacity();
     if (ImGui::SliderFloat("Opacity##Token", &opacity, 0.0f, 1.0f, "%.3f"))
         tokenPropertyChanged.emit(token, Token_Opacity, TokenPropertyValue(opacity));
+
+    bool visibleToPresentation = token->HasVisibility(ShapeVisibility::Presentation);
+    if (ImGui::Checkbox("Visible In Presentation View", &visibleToPresentation))
+        tokenPropertyChanged.emit(token, Token_Visibility, TokenPropertyValue(ShapeVisibility::Presentation));
 }
 
 

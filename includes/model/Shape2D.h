@@ -1,4 +1,5 @@
 #pragma once
+#include <bitset>
 #include <memory>
 
 #include <glm/glm.hpp>
@@ -10,19 +11,12 @@
 
 enum class ShapeVisibility
 {
-    None = 0,
-    Host = 1 << 0,
-    Presentation = 1 << 1,
-    All = Host | Presentation
+    Host = 0,
+    Presentation = 1,
+    All = 3
 };
-
-inline ShapeVisibility operator~ (ShapeVisibility a) { return (ShapeVisibility)~(int)a; }
-inline ShapeVisibility operator| (ShapeVisibility a, ShapeVisibility b) { return (ShapeVisibility)((int)a | (int)b); }
-inline ShapeVisibility operator& (ShapeVisibility a, ShapeVisibility b) { return (ShapeVisibility)((int)a & (int)b); }
-inline ShapeVisibility operator^ (ShapeVisibility a, ShapeVisibility b) { return (ShapeVisibility)((int)a ^ (int)b); }
-inline ShapeVisibility& operator|= (ShapeVisibility& a, ShapeVisibility b) { return (ShapeVisibility&)((int&)a |= (int)b); }
-inline ShapeVisibility& operator&= (ShapeVisibility& a, ShapeVisibility b) { return (ShapeVisibility&)((int&)a &= (int)b); }
-inline ShapeVisibility& operator^= (ShapeVisibility& a, ShapeVisibility b) { return (ShapeVisibility&)((int&)a ^= (int)b); }
+const unsigned int NUM_VISIBILITIES = 2;
+typedef std::bitset<NUM_VISIBILITIES> ShapeVisibilities;
 
 class Shape2D
 {
@@ -34,13 +28,14 @@ public:
     void SetModel(const std::shared_ptr<Matrix2D>& matrix);
     virtual bool Contains(glm::vec2 pt) = 0;
     virtual void Draw(Shader& shader) = 0;
-    void SetVisibility(ShapeVisibility visibility);
-    ShapeVisibility GetVisibility();
-    bool IsVisibleTo(ShapeVisibility visibility);
+    void SetVisibilities(ShapeVisibilities visibilities);
+    ShapeVisibilities GetVisibilities();
+    bool HasVisibility(ShapeVisibility visibility);
+    void ToggleVisibility(ShapeVisibility visibility);
 
 protected:
     std::shared_ptr<Matrix2D> m_model = std::make_shared<Matrix2D>();
-    ShapeVisibility m_visibility = ShapeVisibility::All;
+    ShapeVisibilities m_visibilities = ShapeVisibilities((int)ShapeVisibility::All);
 };
 
 
@@ -59,7 +54,7 @@ public:
 
 protected:
     std::shared_ptr<Mesh> m_mesh;
-    glm::vec4 m_colour;
+    glm::vec4 m_color;
     glm::vec2 startCorner;
     glm::vec2 endCorner;
 };
