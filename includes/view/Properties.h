@@ -20,7 +20,7 @@ enum TokenProperty
     Token_Statuses,
     Token_XStatus,
     Token_Opacity,
-    Token_Visibility
+    Token_Visibilities
 };
 
 enum ImageProperty
@@ -45,7 +45,7 @@ enum CameraProperty
     Camera_Name
 };
 
-typedef std::variant<float, bool, TokenStatuses, glm::vec2, glm::vec4, std::string, ShapeVisibility> TokenPropertyValue;
+typedef std::variant<float, bool, TokenStatuses, glm::vec2, glm::vec4, std::string, ShapeVisibilities> TokenPropertyValue;
 typedef std::variant<float, glm::vec2, bool, std::string, ShapeVisibility> ImagePropertyValue;
 typedef std::variant<float, glm::vec3, bool> GridPropertyValue;
 typedef std::variant<std::string> CameraPropertyValue;

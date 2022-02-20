@@ -241,9 +241,13 @@ void UIControls::DrawTokenOptions(const std::shared_ptr<Token>& token)
     if (ImGui::SliderFloat("Opacity##Token", &opacity, 0.0f, 1.0f, "%.3f"))
         tokenPropertyChanged.emit(token, Token_Opacity, TokenPropertyValue(opacity));
 
+    ShapeVisibilities visibilities = token->GetVisibilities();
     bool visibleToPresentation = token->HasVisibility(ShapeVisibility::Presentation);
     if (ImGui::Checkbox("Visible In Presentation View", &visibleToPresentation))
-        tokenPropertyChanged.emit(token, Token_Visibility, TokenPropertyValue(ShapeVisibility::Presentation));
+        visibilities.set((size_t)ShapeVisibility::Presentation, visibleToPresentation);
+
+    if (visibilities != token->GetVisibilities())
+        tokenPropertyChanged.emit(token, Token_Visibilities, TokenPropertyValue(visibilities));
 }
 
 void UIControls::DrawCameraSection()

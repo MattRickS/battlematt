@@ -10,8 +10,8 @@ std::shared_ptr<Matrix2D> Shape2D::GetModel() { return m_model; }
 void Shape2D::SetModel(const std::shared_ptr<Matrix2D>& matrix) { m_model = matrix; }
 void Shape2D::SetVisibilities(ShapeVisibilities visibilities) { m_visibilities = visibilities; }
 ShapeVisibilities Shape2D::GetVisibilities() { return m_visibilities; }
-bool Shape2D::HasVisibility(ShapeVisibility visibility) { return m_visibilities[(int)visibility]; }
-void Shape2D::ToggleVisibility(ShapeVisibility visibility) { m_visibilities.flip((int)visibility); }
+bool Shape2D::HasVisibility(ShapeVisibility visibility) { return m_visibilities[(size_t)visibility]; }
+void Shape2D::ToggleVisibility(ShapeVisibility visibility) { m_visibilities.flip((size_t)visibility); }
 
 // Rect
 Rect::Rect(const std::shared_ptr<Mesh>& mesh, glm::vec4 colour) : m_mesh(mesh), m_color(colour) {}

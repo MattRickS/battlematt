@@ -128,7 +128,7 @@ typedef ModifyMemberAction<Token, glm::vec4> ModifyTokenVec4;  // borderColour
 typedef ModifyMemberAction<Token, std::shared_ptr<Texture>> ModifyTokenTexture;  // icon
 typedef ModifyMemberAction<Token, std::string> ModifyTokenString;  // name
 typedef ModifyMemberAction<Token, TokenStatuses> ModifyTokenStatuses;
-typedef ModifyMemberAction<Token, ShapeVisibility> ModifyTokenVisibility;
+typedef ModifyMemberAction<Token, ShapeVisibilities> ModifyTokenVisibilities;
 
 typedef ModifyMemberAction<Scene, bool> ModifySceneLocks;
 

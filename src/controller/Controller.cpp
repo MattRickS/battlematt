@@ -893,13 +893,10 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
         for (const auto& selectedToken: SelectedTokens())
             actionGroup->Add(std::make_shared<ModifyTokenFloat>(selectedToken, &Token::SetOpacity, selectedToken->GetOpacity(), std::get<float>(value)));
         break;
-    case Token_Visibility:
-    {
-        ShapeVisibility visibility = std::get<ShapeVisibility>(value);
+    case Token_Visibilities:
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenVisibility>(selectedToken, &Token::ToggleVisibility, visibility, visibility));
+            actionGroup->Add(std::make_shared<ModifyTokenVisibilities>(selectedToken, &Token::SetVisibilities, token->GetVisibilities(), std::get<ShapeVisibilities>(value)));
         break;
-    }
 
     default:
         std::cerr << "Unknown TokenProperty: " << property << std::endl;
