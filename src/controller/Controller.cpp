@@ -89,8 +89,7 @@ void Controller::RenderHost()
     m_cameraBuffer->SetCamera(camera);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);  // default framebuffer
     glViewport(0, 0, m_hostWindow->Width(), m_hostWindow->Height());
-    // glClear(GL_COLOR_BUFFER_BIT);
-    m_scene->Draw();
+    m_scene->Draw(ShapeVisibility::Host);
     m_uiControls->Draw();
     glfwSwapBuffers(m_hostWindow->window);
 }
@@ -110,8 +109,7 @@ void Controller::RenderPresentation()
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, hostFramebuffer);
     glViewport(0, 0, width, height);
-    // glClear(GL_COLOR_BUFFER_BIT);
-    m_scene->Draw();
+    m_scene->Draw(ShapeVisibility::Presentation);
 
     glfwMakeContextCurrent(m_presentationWindow->window);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, presentationFramebuffer);
