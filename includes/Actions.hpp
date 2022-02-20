@@ -15,19 +15,27 @@
 class Action
 {
 public:
+    Action(std::string name) : m_name(name) {}
+
     virtual void Undo() = 0;
     virtual void Redo() = 0;
     // Merge tries to combine Actions of the same type.
     virtual bool CanMerge(const std::shared_ptr<Action>& action) { return false; }
     virtual void Merge(const std::shared_ptr<Action>& action) {}
+
+    virtual std::string Name() { return m_name; }
+    void SetName(std::string name) { m_name = name; }
+
+protected:
+    std::string m_name;
 };
 
 
 class ActionGroup: public Action
 {
 public:
-    ActionGroup() {}
-    ActionGroup(std::vector<std::shared_ptr<Action>> actions) : m_actions(actions) {}
+    ActionGroup(std::string name="Unknown") : Action(name) {}
+    ActionGroup(std::string name, std::vector<std::shared_ptr<Action>> actions) : Action(name), m_actions(actions) {}
 
     virtual void Undo()
     {
@@ -66,6 +74,8 @@ public:
             m_actions[i]->Merge(actionGroup->m_actions[i]);
     }
 
+    virtual std::string Name() { return m_name + " (" + std::to_string(m_actions.size()) + " actions)"; }
+
 private:
     std::vector<std::shared_ptr<Action>> m_actions;
 };
@@ -76,8 +86,8 @@ template <typename T, typename argT>
 class ModifyMemberAction: public Action
 {
 public:
-    ModifyMemberAction(const std::shared_ptr<T>& inst, void (T::*func)(argT), argT oldVal, argT newVal) :
-        m_inst(inst), m_func(func), m_oldVal(oldVal), m_newVal(newVal) {}
+    ModifyMemberAction(std::string name, const std::shared_ptr<T>& inst, void (T::*func)(argT), argT oldVal, argT newVal) :
+        Action(name), m_inst(inst), m_func(func), m_oldVal(oldVal), m_newVal(newVal) {}
 
     virtual void Undo()
     {
@@ -136,7 +146,7 @@ class SetViewCameraAction : public Action
 {
 public:
     SetViewCameraAction(const std::shared_ptr<Scene>& scene, ViewID viewID, const std::shared_ptr<Camera>& oldCamera, const std::shared_ptr<Camera>& newCamera) :
-        m_scene(scene), m_viewID(viewID), m_oldCamera(oldCamera), m_newCamera(newCamera) {}
+        Action("SetViewCamera"), m_scene(scene), m_viewID(viewID), m_oldCamera(oldCamera), m_newCamera(newCamera) {}
 
     virtual void Undo()
     {
@@ -158,12 +168,12 @@ private:
 class SelectShapesAction : public Action
 {
 public:
-    SelectShapesAction(std::vector<std::shared_ptr<Shape2D>> selected) : selectedShapes(selected) {}
-    SelectShapesAction(std::vector<std::shared_ptr<Shape2D>> selected, const std::shared_ptr<Shape2D>& token, bool add=false) : selectedShapes(selected), m_additive(add)
+    SelectShapesAction(std::vector<std::shared_ptr<Shape2D>> selected) : Action("SelectShapes"), selectedShapes(selected) {}
+    SelectShapesAction(std::vector<std::shared_ptr<Shape2D>> selected, const std::shared_ptr<Shape2D>& token, bool add=false) : Action("SelectShapes"), selectedShapes(selected), m_additive(add)
     {
         shapesToSelect.push_back(token);
     }
-    SelectShapesAction(std::vector<std::shared_ptr<Shape2D>> selected, std::vector<std::shared_ptr<Shape2D>> toSelect, bool add=false) : selectedShapes(selected), shapesToSelect(toSelect), m_additive(add) {}
+    SelectShapesAction(std::vector<std::shared_ptr<Shape2D>> selected, std::vector<std::shared_ptr<Shape2D>> toSelect, bool add=false) : Action("SelectShapes"), selectedShapes(selected), shapesToSelect(toSelect), m_additive(add) {}
 
     virtual void Undo()
     {
@@ -209,12 +219,12 @@ private:
 class AddTokensAction : public Action
 {
 public:
-    AddTokensAction(const std::shared_ptr<Scene>& scene) : m_scene(scene) {}
-    AddTokensAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Token>& token) : m_scene(scene)
+    AddTokensAction(const std::shared_ptr<Scene>& scene) : Action("AddTokens"), m_scene(scene) {}
+    AddTokensAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Token>& token) : Action("AddTokens"), m_scene(scene)
     {
         m_tokens.push_back(token);
     }
-    AddTokensAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<Token>> tokens) : m_scene(scene), m_tokens(tokens) {}
+    AddTokensAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<Token>> tokens) : Action("AddTokens"), m_scene(scene), m_tokens(tokens) {}
 
     void Add(const std::shared_ptr<Token>& token)
     {
@@ -239,12 +249,12 @@ private:
 class RemoveTokensAction : public Action
 {
 public:
-    RemoveTokensAction(const std::shared_ptr<Scene>& scene) : m_scene(scene) {}
-    RemoveTokensAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Token>& token) : m_scene(scene)
+    RemoveTokensAction(const std::shared_ptr<Scene>& scene) : Action("RemoveTokens"), m_scene(scene) {}
+    RemoveTokensAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Token>& token) : Action("RemoveTokens"), m_scene(scene)
     {
         m_tokens.push_back(token);
     }
-    RemoveTokensAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<Token>> tokens) : m_scene(scene), m_tokens(tokens) {}
+    RemoveTokensAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<Token>> tokens) : Action("RemoveTokens"), m_scene(scene), m_tokens(tokens) {}
 
     void Add(const std::shared_ptr<Token>& token)
     {
@@ -269,12 +279,12 @@ private:
 class AddImagesAction : public Action
 {
 public:
-    AddImagesAction(const std::shared_ptr<Scene>& scene) : m_scene(scene) {}
-    AddImagesAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<BGImage>& image) : m_scene(scene)
+    AddImagesAction(const std::shared_ptr<Scene>& scene) : Action("AddImages"), m_scene(scene) {}
+    AddImagesAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<BGImage>& image) : Action("AddImages"), m_scene(scene)
     {
         m_images.push_back(image);
     }
-    AddImagesAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<BGImage>> images) : m_scene(scene), m_images(images) {}
+    AddImagesAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<BGImage>> images) : Action("AddImages"), m_scene(scene), m_images(images) {}
 
     void Add(const std::shared_ptr<BGImage>& image)
     {
@@ -299,12 +309,12 @@ private:
 class RemoveImagesAction : public Action
 {
 public:
-    RemoveImagesAction(const std::shared_ptr<Scene>& scene) : m_scene(scene) {}
-    RemoveImagesAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<BGImage>& image) : m_scene(scene)
+    RemoveImagesAction(const std::shared_ptr<Scene>& scene) : Action("RemoveImages"), m_scene(scene) {}
+    RemoveImagesAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<BGImage>& image) : Action("RemoveImages"), m_scene(scene)
     {
         m_images.push_back(image);
     }
-    RemoveImagesAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<BGImage>> images) : m_scene(scene), m_images(images) {}
+    RemoveImagesAction(const std::shared_ptr<Scene>& scene, std::vector<std::shared_ptr<BGImage>> images) : Action("RemoveImages"), m_scene(scene), m_images(images) {}
 
     void Add(const std::shared_ptr<BGImage>& image)
     {
@@ -330,7 +340,7 @@ class AddCameraAction : public Action
 {
 public:
     AddCameraAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Camera>& camera) :
-        m_scene(scene), m_camera(camera) {}
+        Action("AddCamera"), m_scene(scene), m_camera(camera) {}
 
     virtual void Undo()
     {
@@ -350,7 +360,7 @@ class RemoveCameraAction : public Action
 {
 public:
     RemoveCameraAction(const std::shared_ptr<Scene>& scene, const std::shared_ptr<Camera>& camera) :
-        m_scene(scene), m_camera(camera) {}
+        Action("RemoveCamera"), m_scene(scene), m_camera(camera) {}
 
     virtual void Undo()
     {

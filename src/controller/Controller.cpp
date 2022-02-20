@@ -200,7 +200,7 @@ void Controller::Load(std::string path, bool merge)
 
 void Controller::Merge(const std::shared_ptr<Scene>& scene)
 {
-    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>("MergeScene");
     std::vector<std::shared_ptr<Shape2D>> shapes;
 
     if (!scene->tokens.empty())
@@ -227,8 +227,8 @@ void Controller::Merge(const std::shared_ptr<Scene>& scene)
 // Locking
 void Controller::SetImagesLocked(bool locked)
 {
-    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
-    actionGroup->Add(std::make_shared<ModifySceneLocks>(m_scene, &Scene::SetImagesLocked, m_scene->GetImagesLocked(), locked));
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>("LockImages");
+    actionGroup->Add(std::make_shared<ModifySceneLocks>("LockImages", m_scene, &Scene::SetImagesLocked, m_scene->GetImagesLocked(), locked));
 
     // Deselect images
     if (HasSelectedImages())
@@ -244,8 +244,8 @@ void Controller::SetImagesLocked(bool locked)
 
 void Controller::SetTokensLocked(bool locked)
 {
-    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
-    actionGroup->Add(std::make_shared<ModifySceneLocks>(m_scene, &Scene::SetTokensLocked, m_scene->GetTokensLocked(), locked));
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>("LockTokens");
+    actionGroup->Add(std::make_shared<ModifySceneLocks>("LockTokens", m_scene, &Scene::SetTokensLocked, m_scene->GetTokensLocked(), locked));
 
     // Deselect tokens
     if (HasSelectedTokens())
@@ -415,7 +415,7 @@ void Controller::DuplicateSelected()
 
 void Controller::DeleteSelected()
 {
-    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>("DeleteSelectedShapes");
 
     auto selectedTokens = SelectedTokens();
     if (!selectedTokens.empty())
@@ -449,7 +449,7 @@ void Controller::CloneCamera()
     auto camera = std::make_shared<Camera>(*ActiveCamera());
     camera->SetName(camera->GetName() + "Copy");
 
-    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>("CloneCamera");
     actionGroup->Add(std::make_shared<AddCameraAction>(m_scene, camera));
     actionGroup->Add(std::make_shared<SetViewCameraAction>(m_scene, HOST_VIEW, m_scene->GetViewCamera(HOST_VIEW), camera));
     PerformAction(actionGroup);
@@ -465,7 +465,7 @@ void Controller::DeleteCamera()
 
     auto currentCamera = m_scene->GetViewCamera(HOST_VIEW);
 
-    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+    std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>("DeleteCamera");
     actionGroup->Add(std::make_shared<RemoveCameraAction>(m_scene, currentCamera));
     for (const auto& camera: m_scene->cameras)
     {
@@ -673,20 +673,20 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
             glm::vec2 currPos = shapeUnderCursor->GetModel()->GetPos();
             if (newPos != currPos)
             {
-                std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+                std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>("MoveShapesWithSnap");
                 glm::vec2 offset = newPos - currPos;
                 for (const std::shared_ptr<Shape2D>& shape : SelectedShapes())
-                    actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(shape->GetModel(), &Matrix2D::SetPos, shape->GetModel()->GetPos(), shape->GetModel()->GetPos() + offset));
+                    actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>("SetShapePosition", shape->GetModel(), &Matrix2D::SetPos, shape->GetModel()->GetPos(), shape->GetModel()->GetPos() + offset));
 
                 PerformAction(actionGroup);
             }
         }
         else
         {
-            std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>();
+            std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>("MoveShapes");
             glm::vec2 offset = viewport->ScreenToWorldOffset(xoffset, yoffset);
             for (std::shared_ptr<Shape2D> shape : SelectedShapes())
-                actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(shape->GetModel(), &Matrix2D::SetPos, shape->GetModel()->GetPos(), shape->GetModel()->GetPos() + offset));
+                actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>("SetShapePosition", shape->GetModel(), &Matrix2D::SetPos, shape->GetModel()->GetPos(), shape->GetModel()->GetPos() + offset));
 
             PerformAction(actionGroup);
         }
@@ -779,9 +779,9 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
         HasSelectedShapes() ? FocusSelected() : Focus();
     if (key == GLFW_KEY_X && action == GLFW_RELEASE && HasSelectedShapes())
     {
-        auto actionGroup = std::make_shared<ActionGroup>();
+        auto actionGroup = std::make_shared<ActionGroup>("SetTokenXStatus");
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenBool>(selectedToken, &Token::SetXStatus, selectedToken->GetXStatus(), !selectedToken->GetXStatus()));
+            actionGroup->Add(std::make_shared<ModifyTokenBool>("SetTokenXStatus", selectedToken, &Token::SetXStatus, selectedToken->GetXStatus(), !selectedToken->GetXStatus()));
         PerformAction(actionGroup);
     }
 }
@@ -827,6 +827,7 @@ void Controller::PerformAction(const std::shared_ptr<Action>& action)
         undoQueue.back()->Merge(action);
     else
     {
+        std::cerr << "Storing Action: " + action->Name() << std::endl;
         undoQueue.push_back(std::move(action));
         if (undoQueue.size() > MAX_UNDO_SIZE)
             undoQueue.pop_front();
@@ -837,27 +838,32 @@ void Controller::PerformAction(const std::shared_ptr<Action>& action)
 void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, TokenProperty property, TokenPropertyValue value)
 {
     auto actionGroup = std::make_shared<ActionGroup>();
+    std::string name;
     switch (property)
     {
     case Token_Name:
+        name = "ModifyTokenName";
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenString>(selectedToken, &Token::SetName, selectedToken->GetName(), std::get<std::string>(value)));
+            actionGroup->Add(std::make_shared<ModifyTokenString>(name, selectedToken, &Token::SetName, selectedToken->GetName(), std::get<std::string>(value)));
         break;
     case Token_Position:
     {
+        name = "ModifyTokenPosition";
         glm::vec2 pos = std::get<glm::vec2>(value);
         if (m_scene->grid->GetSnapEnabled())
             pos = m_scene->grid->ShapeSnapPosition(token, pos);
         glm::vec2 offset = pos - token->GetModel()->GetPos();
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(selectedToken->GetModel(), &Matrix2D::SetPos, selectedToken->GetModel()->GetPos(), selectedToken->GetModel()->GetPos() + offset));
+            actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(name, selectedToken->GetModel(), &Matrix2D::SetPos, selectedToken->GetModel()->GetPos(), selectedToken->GetModel()->GetPos() + offset));
         break;
     }
     case Token_Rotation:
+        name = "ModifyTokenRotation";
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyMatrix2DFloat>(selectedToken->GetModel(), &Matrix2D::SetRotation, selectedToken->GetModel()->GetRotation(), std::get<float>(value)));
+            actionGroup->Add(std::make_shared<ModifyMatrix2DFloat>(name, selectedToken->GetModel(), &Matrix2D::SetRotation, selectedToken->GetModel()->GetRotation(), std::get<float>(value)));
         break;
     case Token_Scale:
+        name = "ModifyTokenScale";
         for (const auto& selectedToken: SelectedTokens())
         {
             glm::vec2 scale = std::get<glm::vec2>(value);
@@ -866,36 +872,43 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
                 ShapeGridSize gridSize = static_cast<ShapeGridSize>(m_scene->grid->GetShapeGridSize(scale.x));
                 scale = glm::vec2(m_scene->grid->SnapGridSize(gridSize));
             }
-            actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(selectedToken->GetModel(), &Matrix2D::SetScale, selectedToken->GetModel()->GetScale(), scale));
+            actionGroup->Add(std::make_shared<ModifyMatrix2DVec2>(name, selectedToken->GetModel(), &Matrix2D::SetScale, selectedToken->GetModel()->GetScale(), scale));
         }
         break;
     case Token_BorderWidth:
+        name = "ModifyTokenBorderWidth";
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenFloat>(selectedToken, &Token::SetBorderWidth, selectedToken->GetBorderWidth(), std::get<float>(value)));
+            actionGroup->Add(std::make_shared<ModifyTokenFloat>(name, selectedToken, &Token::SetBorderWidth, selectedToken->GetBorderWidth(), std::get<float>(value)));
         break;
     case Token_BorderColor:
+        name = "ModifyTokenBorderColor";
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenVec4>(selectedToken, &Token::SetBorderColor, selectedToken->GetBorderColor(), std::get<glm::vec4>(value)));
+            actionGroup->Add(std::make_shared<ModifyTokenVec4>(name, selectedToken, &Token::SetBorderColor, selectedToken->GetBorderColor(), std::get<glm::vec4>(value)));
         break;
     case Token_Texture:
+        name = "ModifyTokenIcon";
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenTexture>(selectedToken, &Token::SetIcon, selectedToken->GetIcon(), m_resources->GetTexture(std::get<std::string>(value))));
+            actionGroup->Add(std::make_shared<ModifyTokenTexture>(name, selectedToken, &Token::SetIcon, selectedToken->GetIcon(), m_resources->GetTexture(std::get<std::string>(value))));
         break;
     case Token_Statuses:
+        name = "ModifyTokenStatuses";
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenStatuses>(selectedToken, &Token::SetStatuses, selectedToken->GetStatuses(), std::get<TokenStatuses>(value)));
+            actionGroup->Add(std::make_shared<ModifyTokenStatuses>(name, selectedToken, &Token::SetStatuses, selectedToken->GetStatuses(), std::get<TokenStatuses>(value)));
         break;
     case Token_XStatus:
+        name = "ModifyTokenXStatus";
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenBool>(selectedToken, &Token::SetXStatus, selectedToken->GetXStatus(), std::get<bool>(value)));
+            actionGroup->Add(std::make_shared<ModifyTokenBool>(name, selectedToken, &Token::SetXStatus, selectedToken->GetXStatus(), std::get<bool>(value)));
         break;
     case Token_Opacity:
+        name = "ModifyTokenOpacity";
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenFloat>(selectedToken, &Token::SetOpacity, selectedToken->GetOpacity(), std::get<float>(value)));
+            actionGroup->Add(std::make_shared<ModifyTokenFloat>(name, selectedToken, &Token::SetOpacity, selectedToken->GetOpacity(), std::get<float>(value)));
         break;
     case Token_Visibilities:
+        name = "ModifyTokenVisibility";
         for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenVisibilities>(selectedToken, &Token::SetVisibilities, token->GetVisibilities(), std::get<ShapeVisibilities>(value)));
+            actionGroup->Add(std::make_shared<ModifyTokenVisibilities>(name, selectedToken, &Token::SetVisibilities, token->GetVisibilities(), std::get<ShapeVisibilities>(value)));
         break;
 
     default:
@@ -905,7 +918,10 @@ void Controller::OnTokenPropertyChanged(const std::shared_ptr<Token>& token, Tok
     }
     
     if (!actionGroup->IsEmpty())
+    {
+        actionGroup->SetName(name);
         PerformAction(actionGroup);
+    }
 }
 
 void Controller::OnImagePropertyChanged(const std::shared_ptr<BGImage>& image, ImageProperty property, ImagePropertyValue value)
@@ -914,22 +930,22 @@ void Controller::OnImagePropertyChanged(const std::shared_ptr<BGImage>& image, I
     switch (property)
     {
     case Image_Texture:
-        action = std::make_shared<ModifyImageTexture>(image, &BGImage::SetImage, image->GetImage(), m_resources->GetTexture(std::get<std::string>(value)));
+        action = std::make_shared<ModifyImageTexture>("ModifyImageTexture", image, &BGImage::SetImage, image->GetImage(), m_resources->GetTexture(std::get<std::string>(value)));
         break;
     case Image_LockRatio:
-        action = std::make_shared<ModifyImageBool>(image, &BGImage::SetLockRatio, image->GetLockRatio(), std::get<bool>(value));
+        action = std::make_shared<ModifyImageBool>("ModifyImageLockRatio", image, &BGImage::SetLockRatio, image->GetLockRatio(), std::get<bool>(value));
         break;
     case Image_Position:
-        action = std::make_shared<ModifyMatrix2DVec2>(image->GetModel(), &Matrix2D::SetPos, image->GetModel()->GetPos(), std::get<glm::vec2>(value));
+        action = std::make_shared<ModifyMatrix2DVec2>("ModifyImagePosition", image->GetModel(), &Matrix2D::SetPos, image->GetModel()->GetPos(), std::get<glm::vec2>(value));
         break;
     case Image_Rotation:
-        action = std::make_shared<ModifyMatrix2DFloat>(image->GetModel(), &Matrix2D::SetRotation, image->GetModel()->GetRotation(), std::get<float>(value));
+        action = std::make_shared<ModifyMatrix2DFloat>("ModifyImageRotation", image->GetModel(), &Matrix2D::SetRotation, image->GetModel()->GetRotation(), std::get<float>(value));
         break;
     case Image_Scale:
-        action = std::make_shared<ModifyMatrix2DVec2>(image->GetModel(), &Matrix2D::SetScale, image->GetModel()->GetScale(), std::get<glm::vec2>(value));
+        action = std::make_shared<ModifyMatrix2DVec2>("ModifyImageScale", image->GetModel(), &Matrix2D::SetScale, image->GetModel()->GetScale(), std::get<glm::vec2>(value));
         break;
     case Image_Visibilities:
-        action = std::make_shared<ModifyImageVisibilities>(image, &BGImage::SetVisibilities, image->GetVisibilities(), std::get<ShapeVisibilities>(value));
+        action = std::make_shared<ModifyImageVisibilities>("ModifyImageVisibility", image, &BGImage::SetVisibilities, image->GetVisibilities(), std::get<ShapeVisibilities>(value));
         break;
     
     default:
@@ -947,13 +963,13 @@ void Controller::OnGridPropertyChanged(const std::shared_ptr<Grid>& grid, GridPr
     switch (property)
     {
     case Grid_Scale:
-        action = std::make_shared<ModifyGridFloat>(grid, &Grid::SetScale, grid->GetScale(), std::get<float>(value));
+        action = std::make_shared<ModifyGridFloat>("ModifyGridScale", grid, &Grid::SetScale, grid->GetScale(), std::get<float>(value));
         break;
     case Grid_Snap:
-        action = std::make_shared<ModifyGridBool>(grid, &Grid::SetSnapEnabled, grid->GetSnapEnabled(), std::get<bool>(value));
+        action = std::make_shared<ModifyGridBool>("ModifyGridSnap", grid, &Grid::SetSnapEnabled, grid->GetSnapEnabled(), std::get<bool>(value));
         break;
     case Grid_Color:
-        action = std::make_shared<ModifyGridVec3>(grid, &Grid::SetColour, grid->GetColour(), std::get<glm::vec3>(value));
+        action = std::make_shared<ModifyGridVec3>("ModifyGridColor", grid, &Grid::SetColour, grid->GetColour(), std::get<glm::vec3>(value));
         break;
     
     default:
@@ -971,7 +987,7 @@ void Controller::OnCameraPropertyChanged(const std::shared_ptr<Camera>& camera, 
     switch (property)
     {
     case Camera_Name:
-        action = std::make_shared<ModifyCameraString>(camera, &Camera::SetName, camera->GetName(), std::get<std::string>(value));
+        action = std::make_shared<ModifyCameraString>("ModifyCameraName", camera, &Camera::SetName, camera->GetName(), std::get<std::string>(value));
         break;
     
     default:
@@ -989,6 +1005,7 @@ bool Controller::Undo()
         return false;
     
     auto action = undoQueue.back();
+    std::cerr << "Undo: " << action->Name() << std::endl;
     action->Undo();
     redoQueue.push_back(action);
     undoQueue.pop_back();
@@ -1001,6 +1018,7 @@ bool Controller::Redo()
         return false;
     
     auto action = redoQueue.back();
+    std::cerr << "Redo: " << action->Name() << std::endl;
     action->Redo();
     undoQueue.push_back(action);
     redoQueue.pop_back();

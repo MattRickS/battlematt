@@ -58,5 +58,4 @@ private:
     float m_borderWidth = 0.15f;
     TokenStatuses m_statuses;
     bool m_xStatus = false;
-    float m_opacity = 1.0f;
 };

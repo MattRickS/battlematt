@@ -22,7 +22,7 @@ Token::Token(const Token& token) : Rect(token)
     m_borderColor = token.m_borderColor;
     m_borderWidth = token.m_borderWidth;
     m_statuses = token.m_statuses;
-    m_opacity = token.m_opacity;
+    m_color = token.m_color;
     m_xStatus = token.m_xStatus;
 }
 
@@ -40,8 +40,8 @@ void Token::SetStatusEnabled(int status, bool enabled) { m_statuses[status] = en
 bool Token::IsStatusEnabled(int status) { return m_statuses[status]; }
 void Token::SetXStatus(bool enabled) { m_xStatus = enabled; }
 bool Token::GetXStatus() { return m_xStatus; }
-void Token::SetOpacity(float opacity) { m_opacity = opacity; }
-float Token::GetOpacity() { return m_opacity; }
+void Token::SetOpacity(float opacity) { m_color.a = opacity; }
+float Token::GetOpacity() { return m_color.a; }
 
 void Token::Draw(Shader &shader)
 {
