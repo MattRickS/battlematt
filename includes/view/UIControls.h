@@ -46,6 +46,9 @@ public:
     void SetDisplayPropertiesToken(const std::shared_ptr<Token>& token);
     void SetDisplayPropertiesImage(const std::shared_ptr<BGImage>& image);
 
+    bool CapturedMouse();
+    bool CapturedKey();
+
 private:
     std::shared_ptr<Window> m_window = nullptr;
     std::shared_ptr<Scene> m_scene = nullptr;

@@ -123,7 +123,4 @@ private:
 
     static const int PROMPT_CLOSE = 1;
     void OnPromptResponse(int promptType, bool response);
-
-    // Shared key change behaviour
-    void OnKeyChanged(int key, int scancode, int action, int mods);
 };

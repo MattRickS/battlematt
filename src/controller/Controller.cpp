@@ -34,7 +34,7 @@ Controller::Controller(
     m_presentationWindow->closeRequested.connect(this, &Controller::OnCloseRequested);
 
     m_hostWindow->cursorMoved.connect(this, &Controller::OnViewportMouseMove);
-    m_hostWindow->keyChanged.connect(this, &Controller::OnKeyChanged);
+    m_hostWindow->keyChanged.connect(this, &Controller::OnViewportKey);
     m_hostWindow->mouseButtonChanged.connect(this, &Controller::OnViewportMouseButton);
     m_hostWindow->mouseScrolled.connect(this, &Controller::OnViewportMouseScroll);
     m_hostWindow->sizeChanged.connect(this, &Controller::OnViewportSizeChanged);
@@ -697,6 +697,8 @@ void Controller::OnViewportMouseMove(double xpos, double ypos)
 
 void Controller::OnViewportMouseButton(int button, int action, int mods)
 {
+    if (m_uiControls->CapturedMouse())
+        return;
     if (button == GLFW_MOUSE_BUTTON_MIDDLE)
         middleMouseHeld = action == GLFW_PRESS;
     if (button == GLFW_MOUSE_BUTTON_LEFT)
@@ -730,6 +732,8 @@ void Controller::OnViewportMouseScroll(double xoffset, double yoffset)
 
 void Controller::OnViewportKey(int key, int scancode, int action, int mods)
 {
+    if (m_uiControls->CapturedKey())
+        return;
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     {
         const auto& viewport = ActiveViewport();
@@ -761,7 +765,25 @@ void Controller::OnViewportKey(int key, int scancode, int action, int mods)
         CutSelected();
     if (key == GLFW_KEY_V && action == GLFW_PRESS && mods & GLFW_MOD_CONTROL)
         PasteSelected();
-    OnKeyChanged(key, scancode, action, mods);
+    if (key == GLFW_KEY_S && action == GLFW_RELEASE)
+        m_scene->grid->SetSnapEnabled(!m_scene->grid->GetSnapEnabled());
+    if (key == GLFW_KEY_S && mods & GLFW_MOD_CONTROL && action == GLFW_RELEASE && !m_scene->sourceFile.empty())
+        Save(m_scene->sourceFile);
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        OnCloseRequested();
+    if (key == GLFW_KEY_Z && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
+        Undo();
+    if (key == GLFW_KEY_Y && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
+        Redo();
+    if (key == GLFW_KEY_F && action == GLFW_RELEASE)
+        HasSelectedShapes() ? FocusSelected() : Focus();
+    if (key == GLFW_KEY_X && action == GLFW_RELEASE && HasSelectedShapes())
+    {
+        auto actionGroup = std::make_shared<ActionGroup>();
+        for (const auto& selectedToken: SelectedTokens())
+            actionGroup->Add(std::make_shared<ModifyTokenBool>(selectedToken, &Token::SetXStatus, selectedToken->GetXStatus(), !selectedToken->GetXStatus()));
+        PerformAction(actionGroup);
+    }
 }
 
 void Controller::OnViewportSizeChanged(int width, int height)
@@ -1009,27 +1031,4 @@ void Controller::OnPromptResponse(int promptType, bool response)
 void Controller::OnCloseRequested()
 {
     m_uiControls->Prompt(PROMPT_CLOSE, "Are you sure you want to quit?");
-}
-
-void Controller::OnKeyChanged(int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_S && action == GLFW_RELEASE)
-        m_scene->grid->SetSnapEnabled(!m_scene->grid->GetSnapEnabled());
-    if (key == GLFW_KEY_S && mods & GLFW_MOD_CONTROL && action == GLFW_RELEASE && !m_scene->sourceFile.empty())
-        Save(m_scene->sourceFile);
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        OnCloseRequested();
-    if (key == GLFW_KEY_Z && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
-        Undo();
-    if (key == GLFW_KEY_Y && action == GLFW_RELEASE && mods & GLFW_MOD_CONTROL)
-        Redo();
-    if (key == GLFW_KEY_F && action == GLFW_RELEASE)
-        HasSelectedShapes() ? FocusSelected() : Focus();
-    if (key == GLFW_KEY_X && action == GLFW_RELEASE && HasSelectedShapes())
-    {
-        auto actionGroup = std::make_shared<ActionGroup>();
-        for (const auto& selectedToken: SelectedTokens())
-            actionGroup->Add(std::make_shared<ModifyTokenBool>(selectedToken, &Token::SetXStatus, selectedToken->GetXStatus(), !selectedToken->GetXStatus()));
-        PerformAction(actionGroup);
-    }
 }

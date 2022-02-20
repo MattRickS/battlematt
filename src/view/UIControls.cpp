@@ -67,6 +67,18 @@ UIControls::~UIControls()
     ImGui::DestroyContext();
 }
 
+bool UIControls::CapturedMouse()
+{
+    auto io = ImGui::GetIO();
+    return io.WantCaptureMouse;
+}
+
+bool UIControls::CapturedKey()
+{
+    auto io = ImGui::GetIO();
+    return io.WantCaptureKeyboard;
+}
+
 void UIControls::SetScene(std::shared_ptr<Scene> scene) { m_scene = scene; }
 
 void UIControls::SetDisplayPropertiesToken(const std::shared_ptr<Token>& token)
@@ -234,7 +246,6 @@ void UIControls::DrawTokenOptions(const std::shared_ptr<Token>& token)
         tokenPropertyChanged.emit(token, Token_Visibility, TokenPropertyValue(ShapeVisibility::Presentation));
 }
 
-
 void UIControls::DrawCameraSection()
 {
     if (ImGui::CollapsingHeader("Cameras"))
@@ -349,7 +360,6 @@ void UIControls::DrawTokenSection()
             m_displayPropertiesToken = nullptr;
     }
 }
-
 
 void UIControls::Draw()
 {
