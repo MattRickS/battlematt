@@ -120,7 +120,7 @@ typedef ModifyMemberAction<Matrix2D, float> ModifyMatrix2DFloat;  // rotation
 
 typedef ModifyMemberAction<BGImage, bool> ModifyImageBool;  // lockRatio
 typedef ModifyMemberAction<BGImage, std::shared_ptr<Texture>> ModifyImageTexture;  // image
-typedef ModifyMemberAction<BGImage, ShapeVisibility> ModifyImageVisibility;
+typedef ModifyMemberAction<BGImage, ShapeVisibilities> ModifyImageVisibilities;
 
 typedef ModifyMemberAction<Token, bool> ModifyTokenBool;  // xStatus
 typedef ModifyMemberAction<Token, float> ModifyTokenFloat;  // borderWidth

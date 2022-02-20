@@ -30,7 +30,7 @@ enum ImageProperty
     Image_Scale,
     Image_Texture,
     Image_LockRatio,
-    Image_Visibility
+    Image_Visibilities
 };
 
 enum GridProperty
@@ -46,6 +46,6 @@ enum CameraProperty
 };
 
 typedef std::variant<float, bool, TokenStatuses, glm::vec2, glm::vec4, std::string, ShapeVisibilities> TokenPropertyValue;
-typedef std::variant<float, glm::vec2, bool, std::string, ShapeVisibility> ImagePropertyValue;
+typedef std::variant<float, glm::vec2, bool, std::string, ShapeVisibilities> ImagePropertyValue;
 typedef std::variant<float, glm::vec3, bool> GridPropertyValue;
 typedef std::variant<std::string> CameraPropertyValue;

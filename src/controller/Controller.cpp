@@ -928,12 +928,9 @@ void Controller::OnImagePropertyChanged(const std::shared_ptr<BGImage>& image, I
     case Image_Scale:
         action = std::make_shared<ModifyMatrix2DVec2>(image->GetModel(), &Matrix2D::SetScale, image->GetModel()->GetScale(), std::get<glm::vec2>(value));
         break;
-    case Image_Visibility:
-    {
-        ShapeVisibility visibility = std::get<ShapeVisibility>(value);
-        action = std::make_shared<ModifyImageVisibility>(image, &BGImage::ToggleVisibility, visibility, visibility);
+    case Image_Visibilities:
+        action = std::make_shared<ModifyImageVisibilities>(image, &BGImage::SetVisibilities, image->GetVisibilities(), std::get<ShapeVisibilities>(value));
         break;
-    }
     
     default:
         std::cerr << "Unknown ImageProperty: " << property << std::endl;

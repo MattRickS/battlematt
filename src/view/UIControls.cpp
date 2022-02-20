@@ -168,9 +168,13 @@ void UIControls::DrawImageOptions(const std::shared_ptr<BGImage>& image)
     if (ImGui::SliderFloat("Rotation##Image", &rotation, 0, 360, "%.2f"))
         imagePropertyChanged.emit(image, Image_Rotation, ImagePropertyValue(rotation));
 
+    ShapeVisibilities visibilities = image->GetVisibilities();
     bool visibleToPresentation = image->HasVisibility(ShapeVisibility::Presentation);
     if (ImGui::Checkbox("Visible In Presentation View", &visibleToPresentation))
-        imagePropertyChanged.emit(image, Image_Visibility, ImagePropertyValue(ShapeVisibility::Presentation));
+        visibilities.set((size_t)ShapeVisibility::Presentation, visibleToPresentation);
+
+    if (visibilities != image->GetVisibilities())
+        imagePropertyChanged.emit(image, Image_Visibilities, ImagePropertyValue(visibilities));
 }
 
 void UIControls::DrawGridOptions(const std::shared_ptr<Grid>& grid)
