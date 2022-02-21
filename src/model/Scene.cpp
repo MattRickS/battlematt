@@ -39,6 +39,7 @@ void Scene::AddImage()
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(Resources::TextureType::Default)
     ));
+    images.back()->SetVisibilities(m_defaultVisibilities);
 }
 
 void Scene::AddImage(std::string path)
@@ -47,6 +48,7 @@ void Scene::AddImage(std::string path)
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(path)
     ));
+    images.back()->SetVisibilities(m_defaultVisibilities);
 }
 
 void Scene::AddImage(const std::shared_ptr<BGImage>& image)
@@ -60,6 +62,7 @@ void Scene::AddToken()
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(Resources::TextureType::Default)
     ));
+    tokens.back()->SetVisibilities(m_defaultVisibilities);
 }
 
 void Scene::AddToken(std::string path)
@@ -68,6 +71,7 @@ void Scene::AddToken(std::string path)
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(path)
     ));
+    tokens.back()->SetVisibilities(m_defaultVisibilities);
 }
 
 void Scene::AddToken(const std::shared_ptr<Token>& token)
@@ -268,4 +272,19 @@ void Scene::Draw(ShapeVisibility visibility)
         if (overlay->HasVisibility(visibility))
             overlay->Draw(*overlayShader);
     }
+}
+
+void Scene::SetDefaultVisibilities(ShapeVisibilities visibilities)
+{
+    m_defaultVisibilities = visibilities;
+}
+
+ShapeVisibilities Scene::GetDefaultVisibilities()
+{
+    return m_defaultVisibilities;
+}
+
+bool Scene::GetDefaultVisibility(ShapeVisibility visibility)
+{
+    return m_defaultVisibilities[(size_t)visibility];
 }

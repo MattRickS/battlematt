@@ -141,6 +141,7 @@ typedef ModifyMemberAction<Token, TokenStatuses> ModifyTokenStatuses;
 typedef ModifyMemberAction<Token, ShapeVisibilities> ModifyTokenVisibilities;
 
 typedef ModifyMemberAction<Scene, bool> ModifySceneLocks;
+typedef ModifyMemberAction<Scene, ShapeVisibilities> ModifySceneVisibilities;
 
 class SetViewCameraAction : public Action
 {

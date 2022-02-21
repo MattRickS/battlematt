@@ -35,6 +35,7 @@ public:
 
     void SetImagesLocked(bool locked);
     void SetTokensLocked(bool locked);
+    void SetDefaultVisibilities(ShapeVisibilities visibilities);
 
     // TODO: Image needs to render selection highlight
     std::vector<std::shared_ptr<Shape2D>> SelectedShapes();
@@ -112,7 +113,6 @@ private:
 
     std::shared_ptr<Rect> dragSelectRect = nullptr;
     std::shared_ptr<Shape2D> shapeUnderCursor = nullptr;
-
     bool IsDragSelecting();
     void StartDragSelection(float xpos, float ypos);
     void UpdateDragSelection(float xpos, float ypos);

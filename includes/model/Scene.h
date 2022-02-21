@@ -57,9 +57,14 @@ public:
     void SetViewCamera(ViewID id, const std::shared_ptr<Camera>& camera);
     const std::shared_ptr<Camera>& GetViewCamera(ViewID id);
 
+    void SetDefaultVisibilities(ShapeVisibilities visibilities);
+    ShapeVisibilities GetDefaultVisibilities();
+    bool GetDefaultVisibility(ShapeVisibility visibility);
+
 private:
     std::shared_ptr<Resources> m_resources;
     bool m_lockImages = false;
     bool m_lockTokens = false;
     unsigned int m_primaryCamera = -1;
+    ShapeVisibilities m_defaultVisibilities = ShapeVisibilities((size_t)ShapeVisibility::All);
 };

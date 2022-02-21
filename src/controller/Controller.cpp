@@ -56,6 +56,7 @@ Controller::Controller(
     m_uiControls->cameraSelectionChanged.connect(this, &Controller::SetHostCamera);
     m_uiControls->cloneCameraClicked.connect(this, &Controller::CloneCamera);
     m_uiControls->deleteCameraClicked.connect(this, &Controller::DeleteCamera);
+    m_uiControls->defaultVisibilitiesChanged.connect(this, &Controller::SetDefaultVisibilities);
 
     SetupBuffers();
     SetScene(std::make_shared<Scene>(m_resources));
@@ -202,19 +203,26 @@ void Controller::Merge(const std::shared_ptr<Scene>& scene)
 {
     std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>("MergeScene");
     std::vector<std::shared_ptr<Shape2D>> shapes;
+    ShapeVisibilities visibilities = m_scene->GetDefaultVisibilities();
 
     if (!scene->tokens.empty())
     {
         actionGroup->Add(std::make_shared<AddTokensAction>(m_scene, scene->tokens));
         for (const auto& token: scene->tokens)
+        {
+            token->SetVisibilities(visibilities);
             shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(token));
+        }
     }
 
     if (!scene->images.empty())
     {
         actionGroup->Add(std::make_shared<AddImagesAction>(m_scene, scene->images));
         for (const auto& image: scene->images)
+        {
+            image->SetVisibilities(visibilities);
             shapes.push_back(static_cast<std::shared_ptr<Shape2D>>(image));
+        }
     }
 
     if (!actionGroup->IsEmpty())
@@ -224,7 +232,7 @@ void Controller::Merge(const std::shared_ptr<Scene>& scene)
     }
 }
 
-// Locking
+// Scene Modifiers
 void Controller::SetImagesLocked(bool locked)
 {
     std::shared_ptr<ActionGroup> actionGroup = std::make_shared<ActionGroup>("LockImages");
@@ -257,6 +265,13 @@ void Controller::SetTokensLocked(bool locked)
         actionGroup->Add(std::make_shared<SelectShapesAction>(selectedShapes, newSelectedShapes));
     }
     PerformAction(actionGroup);
+}
+
+void Controller::SetDefaultVisibilities(ShapeVisibilities visibilities)
+{
+    PerformAction(std::make_shared<ModifySceneVisibilities>(
+        "ModifyDefaultVisibilities", m_scene, &Scene::SetDefaultVisibilities, m_scene->GetDefaultVisibilities(), visibilities
+    ));
 }
 
 // Selection
@@ -799,6 +814,7 @@ void Controller::OnUIAddTokenClicked()
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(Resources::TextureType::Default)
     );
+    token->SetVisibilities(m_scene->GetDefaultVisibilities());
     // Centers it on the camera view
     const auto& camera = ActiveCamera();
     token->GetModel()->SetPos(glm::vec2(camera->Position.x, camera->Position.y));
@@ -809,10 +825,12 @@ void Controller::OnUIAddTokenClicked()
 
 void Controller::OnUIAddImageClicked()
 {
-    PerformAction(std::make_shared<AddImagesAction>(m_scene, std::make_shared<BGImage>(
+    const auto& image = std::make_shared<BGImage>(
         m_resources->GetMesh(Resources::MeshType::Quad),
         m_resources->GetTexture(Resources::TextureType::Default)
-    )));
+    );
+    image->SetVisibilities(m_scene->GetDefaultVisibilities());
+    PerformAction(std::make_shared<AddImagesAction>(m_scene, image));
 }
 
 void Controller::OnUIRemoveImageClicked(const std::shared_ptr<BGImage>& image)

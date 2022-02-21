@@ -34,6 +34,7 @@ public:
     Signal<const std::shared_ptr<Camera>&> cameraSelectionChanged;
     Signal<> cloneCameraClicked;
     Signal<> deleteCameraClicked;
+    Signal<ShapeVisibilities> defaultVisibilitiesChanged;
 
     UIControls(const std::shared_ptr<Window>& window);
     ~UIControls();

@@ -383,6 +383,14 @@ void UIControls::Draw()
 
         ImGui::ColorEdit3("Background Color", (float*)&m_scene->bgColor);
 
+        auto visibilities = m_scene->GetDefaultVisibilities();
+        bool visibleToPresentation = visibilities[(size_t)ShapeVisibility::Presentation];
+        if (ImGui::Checkbox("New Objects Visible to Presentation", &visibleToPresentation))
+            visibilities.set((size_t)ShapeVisibility::Presentation, visibleToPresentation);
+        
+        if (visibilities != m_scene->GetDefaultVisibilities())
+            defaultVisibilitiesChanged.emit(visibilities);
+
         DrawCameraSection();
         DrawGridSection();
         DrawImageSection();
