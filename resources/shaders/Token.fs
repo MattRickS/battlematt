@@ -8,12 +8,19 @@ uniform float borderWidth;
 // Highlight Color will have no alpha if not highlighted
 uniform vec4 highlightColor;
 uniform vec4 color;
+uniform bool useGreyscale = false;
 
 float highlightWidth = 0.06;
 float maxBand = 0.25;
 float highlightBand = maxBand - highlightWidth;
 float borderBand = highlightBand * (1.0 - borderWidth);
 float AAsize = 0.001;
+
+// Rec709
+vec3 greyscale(vec4 col)
+{
+    return vec3(col.r * 0.2126 + col.g * 0.7152 + col.b * 0.0722);
+}
 
 void main()
 {
@@ -36,7 +43,14 @@ void main()
     {
         float alpha = (maxBand - dist) * (1 / highlightWidth);
         FragColor = vec4(vec3(highlightColor), alpha) * color.w;
+        return;
     }
     else
+    {
         FragColor = vec4(0);
+        return;
+    }
+    
+    if (useGreyscale)
+        FragColor.rgb = greyscale(FragColor);
 }

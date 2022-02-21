@@ -66,6 +66,7 @@ void Token::Draw(Shader &shader)
     shader.setVec4("borderColor", m_borderColor);
     shader.setVec4("color", m_color);
     shader.setFloat("borderWidth", m_borderWidth);
+    shader.setBool("useGreyscale", !HasVisibility(ShapeVisibility::Presentation));
     Rect::Draw(shader);
 }
 

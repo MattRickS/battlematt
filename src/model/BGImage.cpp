@@ -33,6 +33,7 @@ void BGImage::Draw(Shader &shader)
     }
     // Calling base method will replace colour
     shader.setMat4("model", *m_model->Value());
+    shader.setBool("useGreyscale", !HasVisibility(ShapeVisibility::Presentation));
     m_mesh->Draw(shader);
 }
 
