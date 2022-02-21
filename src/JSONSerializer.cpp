@@ -164,6 +164,8 @@ std::shared_ptr<Token> JSONSerializer::DeserializeToken(nlohmann::json& json)
 // Scene
 bool JSONSerializer::SerializeScene(const std::shared_ptr<Scene>& scene, nlohmann::json& json)
 {
+    json["defaultVisibility"] = scene->GetDefaultVisibilities().to_ulong();
+
     json["images"] = SerializeImages(scene->images);
     json["imagesLocked"] = scene->GetImagesLocked();
 
@@ -236,6 +238,9 @@ void JSONSerializer::DeserializeScene(nlohmann::json& json, Scene& scene)
     }
     if (json.contains("tokensLocked"))
         scene.SetTokensLocked(json["tokensLocked"]);
+
+    if (json.contains("defaultVisibility"))
+        scene.SetDefaultVisibilities((unsigned int)json["defaultVisibility"]);
 }
 
 std::shared_ptr<Scene> JSONSerializer::DeserializeScene(nlohmann::json& json)
