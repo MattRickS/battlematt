@@ -244,6 +244,10 @@ void UIWindow::DrawCameraSection()
             std::string name = hostCamera->GetName();
             if (ImGui::InputText("Name", &name, ImGuiInputTextFlags_EnterReturnsTrue))
                 cameraPropertyChanged.emit(hostCamera, Camera_Name, name);
+
+            float focalLength = hostCamera->Focal;
+            if (ImGui::SliderFloat("Focal Length", &focalLength, 0, 1))
+                cameraPropertyChanged.emit(hostCamera, Camera_Focal, focalLength);
         }
 
         if (ImGui::Button("Clone Camera"))

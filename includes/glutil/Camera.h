@@ -66,6 +66,7 @@ public:
     void ProcessKeyboard(Camera_Movement direction, float deltaTime);
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
     void Zoom(float yoffset);
+    void SetFocal(float focal);
     void SetAperture(float haperture);
     void RefreshMatrices();
 

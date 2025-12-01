@@ -86,6 +86,12 @@ void Camera::Zoom(float yoffset)
     updateProjectionMatrix();
 }
 
+void Camera::SetFocal(float focal)
+{
+    Focal = focal;
+    updateProjectionMatrix();
+}
+
 void Camera::SetAperture(float haperture)
 {
     hAperture = haperture;

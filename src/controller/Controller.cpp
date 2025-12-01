@@ -841,10 +841,15 @@ void Controller::OnGridPropertyChanged(const std::shared_ptr<Grid>& grid, GridPr
 void Controller::OnCameraPropertyChanged(const std::shared_ptr<Camera>& camera, CameraProperty property, CameraPropertyValue value)
 {
     std::shared_ptr<Action> action;
+    bool refreshCamera = false;
     switch (property)
     {
     case Camera_Name:
         action = std::make_shared<ModifyCameraString>(camera, &Camera::SetName, camera->GetName(), std::get<std::string>(value));
+        break;
+    case Camera_Focal:
+        action = std::make_shared<ModifyCameraFloat>(camera, &Camera::SetFocal, camera->Focal, std::get<float>(value));
+        refreshCamera = true;
         break;
     
     default:
@@ -853,7 +858,12 @@ void Controller::OnCameraPropertyChanged(const std::shared_ptr<Camera>& camera, 
     }
 
     if (action)
+    {
         PerformAction(action);
+        // TODO: This will not work with redo/undo
+        if (refreshCamera)
+            m_viewport->RefreshCamera();
+    }
 }
 
 bool Controller::Undo()

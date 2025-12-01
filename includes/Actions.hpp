@@ -110,6 +110,7 @@ private:
 };
 
 typedef ModifyMemberAction<Camera, std::string> ModifyCameraString;  // name
+typedef ModifyMemberAction<Camera, float> ModifyCameraFloat;  // focal length
 
 typedef ModifyMemberAction<Grid, bool> ModifyGridBool;  // snap
 typedef ModifyMemberAction<Grid, float> ModifyGridFloat;  // size
