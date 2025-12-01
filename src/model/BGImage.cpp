@@ -17,6 +17,9 @@ BGImage::BGImage(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture) :
 
 void BGImage::Draw(Shader &shader)
 {
+    if (!m_visible)
+        return;
+
     shader.setMat4("model", *m_model->Value());
 
     glm::vec4 colour = m_tintColour;

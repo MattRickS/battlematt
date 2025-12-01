@@ -54,6 +54,7 @@ std::shared_ptr<Grid> JSONSerializer::DeserializeGrid(nlohmann::json &json)
 // Image
 bool JSONSerializer::SerializeImage(const std::shared_ptr<BGImage> &image, nlohmann::json &json)
 {
+    json["visible"] = image->IsVisible();
     json["texture"] = image->GetImage()->filename;
     nlohmann::json matrix;
     SerializeMatrix2D(image->GetModel(), matrix);
@@ -84,6 +85,10 @@ std::shared_ptr<BGImage> JSONSerializer::DeserializeImage(nlohmann::json &json)
     if (json.contains("lockRatio"))
     {
         image->SetLockRatio(json["lockRatio"]);
+    }
+    if (json.contains("visible"))
+    {
+        image->SetVisible(json["visible"]);
     }
     return image;
 }

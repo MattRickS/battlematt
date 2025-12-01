@@ -21,9 +21,12 @@ public:
     void SetTint(glm::vec4 colour);
     bool GetLockRatio();
     void SetLockRatio(bool lockRatio);
+    bool IsVisible() { return m_visible; }
+    void SetVisible(bool visible) { m_visible = visible; }
 
 private:
     std::shared_ptr<Texture> m_texture;
     glm::vec4 m_tintColour = glm::vec4(1);
     bool m_lockRatio = false;
+    bool m_visible = true;
 };

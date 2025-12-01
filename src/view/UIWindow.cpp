@@ -126,6 +126,10 @@ void UIWindow::DrawImageOptions(const std::shared_ptr<BGImage> &image)
     if (FileLine("ChooseBGImage", "Image", imagePath))
         imagePropertyChanged.emit(image, Image_Texture, ImagePropertyValue(imagePath));
 
+    bool isVisible = image->IsVisible();
+    if (ImGui::Checkbox("Visible", &isVisible))
+        image->SetVisible(isVisible);
+
     bool lockRatio = image->GetLockRatio();
     if (ImGui::Checkbox("Lock Size Ratio", &lockRatio))
         imagePropertyChanged.emit(image, Image_LockRatio, ImagePropertyValue(lockRatio));
